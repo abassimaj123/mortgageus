@@ -6,6 +6,8 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/extra_payment_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
+import '../../widgets/banner_ad_widget.dart';
+import '../../../core/ads/ad_service.dart';
 
 class ExtraPaymentsScreen extends ConsumerStatefulWidget {
   const ExtraPaymentsScreen({super.key});
@@ -54,6 +56,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
         _result = null;
       }
     });
+    AdService.instance.onCalculation();
   }
 
   @override
@@ -65,7 +68,9 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Extra Payment Calculator')),
-      body: SingleChildScrollView(
+      body: Column(
+        children: [
+          Expanded(child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           // Loan summary
@@ -170,6 +175,9 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
           ],
           const SizedBox(height: 80),
         ]),
+          )),
+          const BannerAdWidget(),
+        ],
       ),
     );
   }

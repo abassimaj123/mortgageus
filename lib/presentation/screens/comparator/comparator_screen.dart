@@ -6,6 +6,7 @@ import '../../../domain/models/mortgage_input.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../domain/models/mortgage_result.dart';
 import '../../providers/mortgage_providers.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 class ComparatorScreen extends ConsumerWidget {
   const ComparatorScreen({super.key});
@@ -46,7 +47,9 @@ class ComparatorScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Loan Comparator')),
-      body: SingleChildScrollView(
+      body: Column(
+        children: [
+          Expanded(child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           // Header info
@@ -86,6 +89,9 @@ class ComparatorScreen extends ConsumerWidget {
             _CompareTable(r30: r30, r15: r15, fmt: fmt, fmtK: fmtK),
           const SizedBox(height: 80),
         ]),
+          )),
+          const BannerAdWidget(),
+        ],
       ),
     );
   }

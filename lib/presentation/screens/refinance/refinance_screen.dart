@@ -4,6 +4,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../domain/models/refinance_result.dart';
+import '../../widgets/banner_ad_widget.dart';
+import '../../../core/ads/ad_service.dart';
 
 class RefinanceScreen extends StatefulWidget {
   const RefinanceScreen({super.key});
@@ -57,6 +59,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
         _result = null;
       }
     });
+    AdService.instance.onCalculation();
   }
 
   @override
@@ -64,7 +67,9 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
     final r = _result;
     return Scaffold(
       appBar: AppBar(title: const Text('Refinance Calculator')),
-      body: SingleChildScrollView(
+      body: Column(
+        children: [
+          Expanded(child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _Section('Current Loan', [
@@ -147,6 +152,9 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
           ],
           const SizedBox(height: 80),
         ]),
+          )),
+          const BannerAdWidget(),
+        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 // ── SharedPreferences key ─────────────────────────────────────────────────────
 const _kViewModeKey = 'amort_view_yearly';
@@ -131,7 +132,10 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Amortization Schedule')),
-      body: CustomScrollView(slivers: [
+      body: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(slivers: [
 
         // ── Summary card ───────────────────────────────────────────────────
         SliverToBoxAdapter(child: _SummaryCard(result: result, fmt: fmt, fmtDate: fmtDate)),
@@ -212,7 +216,11 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
         ],
 
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
-      ]),
+            ]),
+          ),
+          const BannerAdWidget(),
+        ],
+      ),
     );
   }
 }

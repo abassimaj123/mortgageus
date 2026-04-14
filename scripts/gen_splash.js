@@ -51,17 +51,15 @@ function drawIcon(size) {
   ctx.fill();
 
   // Gold $ — sized to visible house body, centered via real glyph metrics
-  const houseTop   = s * t(0.535);
-  const houseBot   = s * t(0.875);
-  const houseH     = houseBot - houseTop;
-  const dollarSize = Math.round(houseH * 0.78);
+  const houseH     = s * t(0.875) - s * t(0.535);
+  const dollarSize = Math.round(houseH * 1.20);
   ctx.fillStyle    = GOLD;
   ctx.font         = `bold ${dollarSize}px Arial, sans-serif`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'alphabetic';
   const m  = ctx.measureText('$');
   const gH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
-  const gY = houseTop + (houseH - gH) / 2 + m.actualBoundingBoxAscent;
+  const gY = s / 2 + m.actualBoundingBoxAscent - gH / 2;
   ctx.fillText('$', s * 0.50, gY);
 
   return c;

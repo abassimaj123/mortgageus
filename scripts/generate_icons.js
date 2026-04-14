@@ -161,16 +161,16 @@ function drawDollar(buf, s, cx, cy, radius) {
 }
 
 // ── House icon renderer ───────────────────────────────────────────────────────
-// Content is scaled to 80% with 10% padding each side.
-// Result: house spans ~69% of the icon (was ~85%) — visible breathing room.
+// Content scaled to 72% with 14% padding each side.
+// House spans ~62% of icon; dollar sign scales proportionally.
 function drawIcon(size, transparent=false) {
   const s = size;
   const buf = transparent
     ? newCanvas(s,s, 0,0,0, 0)
     : newCanvas(s,s, ...NAVY);
 
-  const PAD = 0.10;            // 10% padding each side
-  const SC  = 1 - 2 * PAD;    // 0.80 content scale
+  const PAD = 0.14;            // 14% padding each side
+  const SC  = 1 - 2 * PAD;    // 0.72 content scale
   const t   = (f) => PAD + f * SC; // map [0,1] coord into padded space
 
   if (!transparent) {

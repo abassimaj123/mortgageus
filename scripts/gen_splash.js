@@ -106,8 +106,8 @@ function drawDollar(buf, s, cx, cy, radius) {
 function drawIcon(size) {
   const s   = size;
   const buf = newCanvas(s,s, ...NAVY);
-  const PAD = 0.10;
-  const SC  = 1 - 2 * PAD;
+  const PAD = 0.14;
+  const SC  = 1 - 2 * PAD;    // 0.72
   const t   = (f) => PAD + f * SC;
   fillRect(buf,s,s, 0,s*0.895, s,s, ...RED);
   fillRect(buf,s,s, 0,s*0.875, s,s*0.895, ...WHITE);

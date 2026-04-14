@@ -5,7 +5,7 @@
 // Rules (enforced by AdService):
 //   Banner        → permanent, Calculator screen bottom
 //   Interstitial  → after every 5 calculations, min 5-min cooldown
-//   Rewarded      → "Unlock 60min Premium" + Share/History gate
+//   Rewarded      → "Watch ad → 24h ad-free" bonus UX
 //   NO App Open Ad
 
 class AdConfig {
@@ -34,5 +34,5 @@ class AdConfig {
   // ── Gate settings ─────────────────────────────────────────────────────────
   static const int calcThreshold        = 5;            // interstitial every N calcs
   static const int cooldownMinutes      = 5;            // min between interstitials
-  static const int rewardedDurationMins = 60;           // rewarded unlock duration
+  static const int rewardedDurationHours = 24;          // ad-free window after rewarded ad
 }

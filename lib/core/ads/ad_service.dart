@@ -3,6 +3,9 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'ad_config.dart';
 
 class AdService {
+  static final instance = AdService._();
+  AdService._();
+
   InterstitialAd? _inter;
   RewardedAd?     _rewarded;
 

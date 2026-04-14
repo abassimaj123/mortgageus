@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/ads/ad_service.dart';
 import '../../../domain/models/loan_type.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 class CalculatorScreen extends ConsumerStatefulWidget {
   const CalculatorScreen({super.key});
@@ -43,24 +45,30 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     final notifier   = ref.read(mortgageInputProvider.notifier);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // ── Hero card ─────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _HeroCard(result: result),
-          ),
-          // ── Inputs ────────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      body: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                // ── Hero card ───────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: _HeroCard(result: result),
+                ),
+                // ── Inputs ──────────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                   // Home Price
                   _buildField('Home Price', _homePriceCtrl, prefix: '\$',
                     currency: true,
-                    onChanged: (v) => notifier.updateHomePrice(
-                      double.tryParse(v.replaceAll(',', '')) ?? 0)),
+                    onChanged: (v) {
+                      notifier.updateHomePrice(
+                        double.tryParse(v.replaceAll(',', '')) ?? 0);
+                      AdService.instance.onCalculation();
+                    }),
                   const SizedBox(height: 12),
                   // Down Payment row
                   _DownPaymentRow(
@@ -117,11 +125,15 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                   // Breakdown card
                   if (result != null)
                     _BreakdownCard(result: result, fmt: _fmt, fmtK: _fmtK),
-                  const SizedBox(height: 80),
-                ],
-              ),
+                      const SizedBox(height: 80),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          const BannerAdWidget(),
         ],
       ),
     );

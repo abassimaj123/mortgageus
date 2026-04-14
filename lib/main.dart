@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/crashlytics_service.dart';
+import 'core/ads/ad_service.dart';
+import 'core/services/ad_free_service.dart';
 // Firebase — uncomment after running `flutterfire configure`:
 // import 'package:firebase_core/firebase_core.dart';
 // import 'core/firebase/firebase_options.dart';
@@ -11,6 +13,8 @@ import 'presentation/screens/amortization/amortization_screen.dart';
 import 'presentation/screens/comparator/comparator_screen.dart';
 import 'presentation/screens/extra_payments/extra_payments_screen.dart';
 import 'presentation/screens/refinance/refinance_screen.dart';
+import 'presentation/widgets/reward_ad_sheet.dart';
+import 'presentation/providers/ad_free_provider.dart';
 import 'dart:async';
 
 Future<void> main() async {
@@ -19,6 +23,9 @@ Future<void> main() async {
   // Firebase init — uncomment after adding google-services.json + firebase_options.dart:
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // await CrashlyticsService.instance.init();
+
+  await AdFreeService.instance.init();
+  await AdService.instance.initialize();
 
   // Analytics: log app open
   await AnalyticsService.instance.log('app_open');
@@ -113,7 +120,7 @@ class _SplashWrapperState extends State<_SplashWrapper>
               Text(
                 'Home Loan Calculator',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,
                   decoration: TextDecoration.none,
                   fontFamily: 'Inter',
@@ -144,23 +151,40 @@ class _MainShellState extends State<_MainShell> {
   ];
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: IndexedStack(index: _index, children: _screens),
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: _index,
-      onDestinationSelected: (i) => setState(() => _index = i),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.calculate), label: 'Calculator'),
-        NavigationDestination(
-          icon: Icon(Icons.table_rows), label: 'Schedule'),
-        NavigationDestination(
-          icon: Icon(Icons.compare), label: 'Compare'),
-        NavigationDestination(
-          icon: Icon(Icons.add_circle), label: 'Extra'),
-        NavigationDestination(
-          icon: Icon(Icons.refresh), label: 'Refi'),
-      ],
-    ),
+  Widget build(BuildContext context) => Consumer(
+    builder: (context, ref, _) {
+      final isAdFree = ref.watch(adFreeProvider);
+      return Scaffold(
+        body: IndexedStack(index: _index, children: _screens),
+        floatingActionButton: FloatingActionButton.small(
+          onPressed: () => RewardAdSheet.show(context),
+          backgroundColor: isAdFree
+              ? const Color(0xFFD4A017)
+              : AppTheme.primary.withValues(alpha: 0.85),
+          tooltip: isAdFree ? 'Ad-Free Active' : 'Get ad-free time',
+          child: Icon(
+            isAdFree ? Icons.shield : Icons.shield_outlined,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _index,
+          onDestinationSelected: (i) => setState(() => _index = i),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.calculate), label: 'Calculator'),
+            NavigationDestination(
+              icon: Icon(Icons.table_rows), label: 'Schedule'),
+            NavigationDestination(
+              icon: Icon(Icons.compare), label: 'Compare'),
+            NavigationDestination(
+              icon: Icon(Icons.add_circle), label: 'Extra'),
+            NavigationDestination(
+              icon: Icon(Icons.refresh), label: 'Refi'),
+          ],
+        ),
+      );
+    },
   );
 }

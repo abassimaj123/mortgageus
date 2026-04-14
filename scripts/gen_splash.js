@@ -56,7 +56,7 @@ function drawIcon(size) {
   ctx.font         = `bold ${dollarSize}px Arial, sans-serif`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('$', s * 0.50, s * t(0.68));
+  ctx.fillText('$', s * 0.50, s * (t(0.535) + t(0.875)) / 2);
 
   return c;
 }

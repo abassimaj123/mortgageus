@@ -1,40 +1,27 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
-
-// ── AnalyticsService ──────────────────────────────────────────────────────────
-// Placeholder — wire Firebase Analytics once google-services.json is added.
-// Usage: AnalyticsService.instance.log('event_name', params: {'key': 'value'})
-//
-// To activate:
-//   1. Add firebase_analytics to pubspec.yaml
-//   2. Initialize Firebase in main.dart (see firebase_options.dart)
-//   3. Uncomment FirebaseAnalytics lines below
 
 class AnalyticsService {
   AnalyticsService._();
   static final AnalyticsService instance = AnalyticsService._();
 
-  // final _analytics = FirebaseAnalytics.instance; // uncomment after Firebase setup
+  final _analytics = FirebaseAnalytics.instance;
 
   Future<void> log(String event, {Map<String, Object>? params}) async {
-    if (kDebugMode) {
-      debugPrint('[Analytics] $event ${params ?? ''}');
-    }
-    // await _analytics.logEvent(name: event, parameters: params);
-  }
-
-  Future<void> setUserId(String id) async {
-    // await _analytics.setUserId(id: id);
+    if (kDebugMode) debugPrint('[Analytics] $event ${params ?? ''}');
+    await _analytics.logEvent(name: event, parameters: params);
   }
 
   Future<void> setScreen(String screenName) async {
-    if (kDebugMode) {
-      debugPrint('[Analytics] screen: $screenName');
-    }
-    // await _analytics.logScreenView(screenName: screenName);
+    if (kDebugMode) debugPrint('[Analytics] screen: $screenName');
+    await _analytics.logScreenView(screenName: screenName);
   }
 
-  // Common events
-  Future<void> logCalculation(String type) => log('calculation', params: {'type': type});
-  Future<void> logShare()                  => log('share');
-  Future<void> logAdShown(String adType)   => log('ad_shown', params: {'ad_type': adType});
+  Future<void> logCalculation(String type) =>
+      log('calculation', params: {'type': type});
+
+  Future<void> logAdFreeUnlocked() => log('ad_free_unlocked');
+
+  Future<void> logAdShown(String adType) =>
+      log('ad_shown', params: {'ad_type': adType});
 }

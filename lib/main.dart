@@ -5,9 +5,8 @@ import 'core/services/analytics_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/ads/ad_service.dart';
 import 'core/services/ad_free_service.dart';
-// Firebase — uncomment after running `flutterfire configure`:
-// import 'package:firebase_core/firebase_core.dart';
-// import 'core/firebase/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/firebase/firebase_options.dart';
 import 'presentation/screens/calculator/calculator_screen.dart';
 import 'presentation/screens/amortization/amortization_screen.dart';
 import 'presentation/screens/comparator/comparator_screen.dart';
@@ -20,9 +19,8 @@ import 'dart:async';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase init — uncomment after adding google-services.json + firebase_options.dart:
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // await CrashlyticsService.instance.init();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await CrashlyticsService.instance.init();
 
   await AdFreeService.instance.init();
   await AdService.instance.initialize();

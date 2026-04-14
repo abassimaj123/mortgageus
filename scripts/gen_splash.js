@@ -121,7 +121,7 @@ function drawIcon(size) {
   const dx=s*t(0.50)-dw/2, dy=s*t(0.875)-dh;
   fillRect(buf,s,s, dx,dy, dx+dw,s*t(0.875), ...NAVY);
   fillCircle(buf,s,s, s*t(0.50),dy, dw/2, ...NAVY);
-  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.135*SC);
+  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.108*SC);
   return buf;
 }
 

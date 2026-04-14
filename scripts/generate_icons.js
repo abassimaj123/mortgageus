@@ -207,7 +207,7 @@ function drawIcon(size, transparent=false) {
   }
 
   // Dollar sign overlay
-  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.135*SC);
+  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.108*SC);
 
   return buf;
 }

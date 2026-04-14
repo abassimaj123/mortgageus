@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -19,22 +18,54 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    // ── Release signing ───────────────────────────────────────────────────────
+    // 1. Generate keystore (see docs/CHECKLIST_LAUNCH.md step 1)
+    // 2. Create android/key.properties (already in .gitignore)
+    // android/key.properties format:
+    //   storePassword=YOUR_STORE_PASSWORD
+    //   keyPassword=YOUR_KEY_PASSWORD
+    //   keyAlias=mortgageus
+    //   storeFile=../keystore/mortgageus-release.jks
+    val keystorePropsFile = rootProject.file("key.properties")
+    val keystoreProps = java.util.Properties()
+    if (keystorePropsFile.exists()) {
+        keystoreProps.load(keystorePropsFile.inputStream())
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropsFile.exists()) {
+                keyAlias      = keystoreProps["keyAlias"]      as String
+                keyPassword   = keystoreProps["keyPassword"]   as String
+                storeFile     = file(keystoreProps["storeFile"] as String)
+                storePassword = keystoreProps["storePassword"] as String
+            }
+        }
+    }
+
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.mortgageus.calculator"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 24
-        targetSdk = 34
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk        = 24
+        targetSdk     = 34
+        versionCode   = flutter.versionCode
+        versionName   = flutter.versionName
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        debug {
             signingConfig = signingConfigs.getByName("debug")
+        }
+        release {
+            signingConfig = if (keystorePropsFile.exists())
+                signingConfigs.getByName("release")
+            else
+                signingConfigs.getByName("debug")
+            isMinifyEnabled   = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/analytics_service.dart';
+import 'core/services/crashlytics_service.dart';
+// Firebase — uncomment after running `flutterfire configure`:
+// import 'package:firebase_core/firebase_core.dart';
+// import 'core/firebase/firebase_options.dart';
 import 'presentation/screens/calculator/calculator_screen.dart';
 import 'presentation/screens/amortization/amortization_screen.dart';
 import 'presentation/screens/comparator/comparator_screen.dart';
 import 'presentation/screens/extra_payments/extra_payments_screen.dart';
 import 'presentation/screens/refinance/refinance_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase init — uncomment after adding google-services.json + firebase_options.dart:
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // await CrashlyticsService.instance.init();
+
+  // Analytics: log app open
+  await AnalyticsService.instance.log('app_open');
+
   runApp(const ProviderScope(child: MortgageUSApp()));
 }
 

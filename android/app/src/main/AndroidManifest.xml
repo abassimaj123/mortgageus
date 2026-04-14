@@ -26,10 +26,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- AdMob App ID (test ID — replace before release) -->
+        <!-- AdMob App ID — TODO: Replace with real Android App ID from admob.google.com -->
+        <!-- Real format: ca-app-pub-XXXXXXXXXXXXXXXX~NNNNNNNNNN              -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713"/>
+        <!-- Delay app measurement for GDPR compliance -->
+        <meta-data
+            android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT"
+            android:value="true"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

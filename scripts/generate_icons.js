@@ -161,11 +161,17 @@ function drawDollar(buf, s, cx, cy, radius) {
 }
 
 // ── House icon renderer ───────────────────────────────────────────────────────
+// Content is scaled to 80% with 10% padding each side.
+// Result: house spans ~69% of the icon (was ~85%) — visible breathing room.
 function drawIcon(size, transparent=false) {
   const s = size;
   const buf = transparent
     ? newCanvas(s,s, 0,0,0, 0)
     : newCanvas(s,s, ...NAVY);
+
+  const PAD = 0.10;            // 10% padding each side
+  const SC  = 1 - 2 * PAD;    // 0.80 content scale
+  const t   = (f) => PAD + f * SC; // map [0,1] coord into padded space
 
   if (!transparent) {
     // US accent stripe at bottom (8%)
@@ -175,36 +181,33 @@ function drawIcon(size, transparent=false) {
   }
 
   // House body
-  fillRect(buf,s,s, s*0.22,s*0.50, s*0.78,s*0.875, ...WHITE);
+  fillRect(buf,s,s, s*t(0.22),s*t(0.50), s*t(0.78),s*t(0.875), ...WHITE);
 
   // Roof triangle
   fillTri(buf,s,s,
-    s*0.50, s*0.14,   // apex
-    s*0.07, s*0.535,  // bottom-left
-    s*0.93, s*0.535,  // bottom-right
+    s*t(0.50), s*t(0.14),   // apex
+    s*t(0.07), s*t(0.535),  // bottom-left
+    s*t(0.93), s*t(0.535),  // bottom-right
     ...WHITE);
 
   // Chimney
-  fillRect(buf,s,s, s*0.60,s*0.10, s*0.70,s*0.31, ...WHITE);
+  fillRect(buf,s,s, s*t(0.60),s*t(0.10), s*t(0.70),s*t(0.31), ...WHITE);
 
-  // Left window
-  const wSz=s*0.10, wY=s*0.55;
-  const wallColor = transparent ? [0,0,0,0] : NAVY;
-  if (transparent) {
-    // skip window/door cutouts on transparent (foreground layer)
-  } else {
-    fillRect(buf,s,s, s*0.28,wY, s*0.28+wSz,wY+wSz, ...NAVY);
+  if (!transparent) {
+    const wSz=s*0.10*SC, wY=s*t(0.55);
+    // Left window
+    fillRect(buf,s,s, s*t(0.28),wY, s*t(0.28)+wSz,wY+wSz, ...NAVY);
     // Right window
-    fillRect(buf,s,s, s*0.62,wY, s*0.62+wSz,wY+wSz, ...NAVY);
+    fillRect(buf,s,s, s*t(0.62),wY, s*t(0.62)+wSz,wY+wSz, ...NAVY);
     // Door arch
-    const dw=s*0.15, dh=s*0.225;
-    const dx=s*0.50-dw/2, dy=s*0.875-dh;
-    fillRect(buf,s,s, dx,dy, dx+dw,s*0.875, ...NAVY);
-    fillCircle(buf,s,s, s*0.50,dy, dw/2, ...NAVY);
+    const dw=s*0.15*SC, dh=s*0.225*SC;
+    const dx=s*t(0.50)-dw/2, dy=s*t(0.875)-dh;
+    fillRect(buf,s,s, dx,dy, dx+dw,s*t(0.875), ...NAVY);
+    fillCircle(buf,s,s, s*t(0.50),dy, dw/2, ...NAVY);
   }
 
   // Dollar sign overlay
-  drawDollar(buf, s, s*0.50, s*0.625, s*0.135);
+  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.135*SC);
 
   return buf;
 }
@@ -303,5 +306,10 @@ blit(splash,SW,SH,splIcon,SPLASH_ICON,SPLASH_ICON,
   Math.round((SW-SPLASH_ICON)/2),
   Math.round((SH-SPLASH_ICON)/2));
 writePNG(path.join(ROOT,'assets','images','splash.png'), splash, SW, SH);
+
+// ── 7. Flutter splash icon 192×192 (assets/images/) ─────────────────────────
+console.log('\n[7] Flutter splash asset icon:');
+const splashAsset = resize(master, MSIZE, MSIZE, 192, 192);
+writePNG(path.join(ROOT, 'assets', 'images', 'app_icon.png'), splashAsset, 192, 192);
 
 console.log('\n✅ All icons generated!\n');

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/loan_type.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
@@ -57,6 +58,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                 children: [
                   // Home Price
                   _buildField('Home Price', _homePriceCtrl, prefix: '\$',
+                    currency: true,
                     onChanged: (v) => notifier.updateHomePrice(
                       double.tryParse(v.replaceAll(',', '')) ?? 0)),
                   const SizedBox(height: 12),
@@ -130,11 +132,13 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     TextEditingController ctrl, {
     String? prefix,
     String? suffix,
+    bool currency = false,
     required Function(String) onChanged,
   }) {
     return TextField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: currency ? [CurrencyInputFormatter()] : null,
       decoration: InputDecoration(
         labelText: label,
         prefixText: prefix,
@@ -257,6 +261,7 @@ class _TermSelector extends ConsumerWidget {
                   label: Text('${term}yr'),
                   selected: selected,
                   selectedColor: AppTheme.primary,
+                  showCheckmark: false,
                   labelStyle: TextStyle(
                     color: selected ? Colors.white : null,
                     fontWeight: FontWeight.w600,

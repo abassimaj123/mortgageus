@@ -104,21 +104,24 @@ function drawDollar(buf, s, cx, cy, radius) {
 }
 
 function drawIcon(size) {
-  const s = size;
+  const s   = size;
   const buf = newCanvas(s,s, ...NAVY);
+  const PAD = 0.10;
+  const SC  = 1 - 2 * PAD;
+  const t   = (f) => PAD + f * SC;
   fillRect(buf,s,s, 0,s*0.895, s,s, ...RED);
   fillRect(buf,s,s, 0,s*0.875, s,s*0.895, ...WHITE);
-  fillRect(buf,s,s, s*0.22,s*0.50, s*0.78,s*0.875, ...WHITE);
-  fillTri(buf,s,s, s*0.50,s*0.14, s*0.07,s*0.535, s*0.93,s*0.535, ...WHITE);
-  fillRect(buf,s,s, s*0.60,s*0.10, s*0.70,s*0.31, ...WHITE);
-  const wSz=s*0.10, wY=s*0.55;
-  fillRect(buf,s,s, s*0.28,wY, s*0.28+wSz,wY+wSz, ...NAVY);
-  fillRect(buf,s,s, s*0.62,wY, s*0.62+wSz,wY+wSz, ...NAVY);
-  const dw=s*0.15, dh=s*0.225;
-  const dx=s*0.50-dw/2, dy=s*0.875-dh;
-  fillRect(buf,s,s, dx,dy, dx+dw,s*0.875, ...NAVY);
-  fillCircle(buf,s,s, s*0.50,dy, dw/2, ...NAVY);
-  drawDollar(buf, s, s*0.50, s*0.625, s*0.135);
+  fillRect(buf,s,s, s*t(0.22),s*t(0.50), s*t(0.78),s*t(0.875), ...WHITE);
+  fillTri(buf,s,s, s*t(0.50),s*t(0.14), s*t(0.07),s*t(0.535), s*t(0.93),s*t(0.535), ...WHITE);
+  fillRect(buf,s,s, s*t(0.60),s*t(0.10), s*t(0.70),s*t(0.31), ...WHITE);
+  const wSz=s*0.10*SC, wY=s*t(0.55);
+  fillRect(buf,s,s, s*t(0.28),wY, s*t(0.28)+wSz,wY+wSz, ...NAVY);
+  fillRect(buf,s,s, s*t(0.62),wY, s*t(0.62)+wSz,wY+wSz, ...NAVY);
+  const dw=s*0.15*SC, dh=s*0.225*SC;
+  const dx=s*t(0.50)-dw/2, dy=s*t(0.875)-dh;
+  fillRect(buf,s,s, dx,dy, dx+dw,s*t(0.875), ...NAVY);
+  fillCircle(buf,s,s, s*t(0.50),dy, dw/2, ...NAVY);
+  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.135*SC);
   return buf;
 }
 

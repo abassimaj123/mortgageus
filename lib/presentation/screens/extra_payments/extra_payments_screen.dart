@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/extra_payment_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
@@ -33,10 +34,10 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
   void _calculate(MortgageInputState s) {
     final loan       = s.homePrice - s.downPaymentDollar;
     if (loan <= 0) return;
-    final extraMonthly = double.tryParse(_extraMonthlyCtrl.text) ?? 0;
-    final extraAnnual  = double.tryParse(_extraAnnualCtrl.text)  ?? 0;
-    final lumpSum      = double.tryParse(_lumpSumCtrl.text)      ?? 0;
-    final lumpMonth    = int.tryParse(_lumpMonthCtrl.text)        ?? 0;
+    final extraMonthly = double.tryParse(_extraMonthlyCtrl.text.replaceAll(',', '')) ?? 0;
+    final extraAnnual  = double.tryParse(_extraAnnualCtrl.text.replaceAll(',', ''))  ?? 0;
+    final lumpSum      = double.tryParse(_lumpSumCtrl.text.replaceAll(',', ''))      ?? 0;
+    final lumpMonth    = int.tryParse(_lumpMonthCtrl.text)                            ?? 0;
 
     setState(() {
       try {
@@ -60,7 +61,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
     final inputState = ref.watch(mortgageInputProvider);
     final r          = _result;
     final loan       = inputState.homePrice - inputState.downPaymentDollar;
-    final extraMonthly = double.tryParse(_extraMonthlyCtrl.text) ?? 0;
+    final extraMonthly = double.tryParse(_extraMonthlyCtrl.text.replaceAll(',', '')) ?? 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Extra Payment Calculator')),
@@ -68,30 +69,34 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           // Loan summary
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            color: AppTheme.primary.withOpacity(0.08),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(children: [
-                const Icon(Icons.home, color: AppTheme.primary),
-                const SizedBox(width: 12),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Loan: ${_fmt.format(loan)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text('${inputState.annualRatePct}% for ${inputState.termYears} years',
-                    style: const TextStyle(color: Colors.grey)),
-                ])),
-              ]),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppTheme.primary, width: 1),
+              borderRadius: BorderRadius.circular(12),
             ),
+            child: Row(children: [
+              const Icon(Icons.home, color: AppTheme.primary),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Loan: ${_fmt.format(loan)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  )),
+                Text('${inputState.annualRatePct}% for ${inputState.termYears} years',
+                  style: TextStyle(color: AppTheme.primary.withOpacity(0.7))),
+              ])),
+            ]),
           ),
           const SizedBox(height: 16),
           const Text('Extra Payments',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 12),
-          _field('Extra Monthly Payment', _extraMonthlyCtrl, prefix: '\$'),
-          _field('Extra Annual Payment', _extraAnnualCtrl, prefix: '\$'),
-          _field('Lump Sum Payment', _lumpSumCtrl, prefix: '\$'),
+          _field('Extra Monthly Payment', _extraMonthlyCtrl, prefix: '\$', currency: true),
+          _field('Extra Annual Payment', _extraAnnualCtrl, prefix: '\$', currency: true),
+          _field('Lump Sum Payment', _lumpSumCtrl, prefix: '\$', currency: true),
           _field('Lump Sum in Month #', _lumpMonthCtrl),
           const SizedBox(height: 8),
           SizedBox(
@@ -170,12 +175,13 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
   }
 
   Widget _field(String label, TextEditingController ctrl,
-      {String? prefix, String? suffix}) {
+      {String? prefix, String? suffix, bool currency = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: ctrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: currency ? [CurrencyInputFormatter()] : null,
         decoration: InputDecoration(
           labelText: label,
           prefixText: prefix,

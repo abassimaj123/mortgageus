@@ -7,7 +7,10 @@ void main() {
   testWidgets('App launches and shows MortgageUS', (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: MortgageUSApp()));
     await tester.pump();
-    // App loaded if no exception thrown
     expect(find.byType(MaterialApp), findsOneWidget);
+    // Advance past splash timer (1400ms) and fade animation (400ms)
+    await tester.pump(const Duration(milliseconds: 1400));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
   });
 }

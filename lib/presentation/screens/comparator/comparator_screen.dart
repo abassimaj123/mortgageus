@@ -50,24 +50,28 @@ class ComparatorScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           // Header info
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            color: AppTheme.primary.withOpacity(0.08),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(children: [
-                const Icon(Icons.home, color: AppTheme.primary),
-                const SizedBox(width: 12),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Home: ${fmt.format(s.homePrice)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text('Down: ${fmt.format(s.downPaymentDollar)}'
-                    ' (${s.downPaymentPct.toStringAsFixed(1)}%)'
-                    '  Rate: ${s.annualRatePct}%',
-                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                ])),
-              ]),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppTheme.primary, width: 1),
+              borderRadius: BorderRadius.circular(12),
             ),
+            child: Row(children: [
+              const Icon(Icons.home, color: AppTheme.primary),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Home: ${fmt.format(s.homePrice)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  )),
+                Text('Down: ${fmt.format(s.downPaymentDollar)}'
+                  ' (${s.downPaymentPct.toStringAsFixed(1)}%)'
+                  '  Rate: ${s.annualRatePct}%',
+                  style: TextStyle(color: AppTheme.primary.withOpacity(0.7), fontSize: 12)),
+              ])),
+            ]),
           ),
           const SizedBox(height: 20),
           const Text('Scenario Comparison',

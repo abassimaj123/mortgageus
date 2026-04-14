@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../domain/models/refinance_result.dart';
 
@@ -33,12 +34,12 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
   }
 
   void _calculate() {
-    final balance  = double.tryParse(_balanceCtrl.text) ?? 0;
-    final curRate  = double.tryParse(_curRateCtrl.text) ?? 0;
-    final curYears = int.tryParse(_curYearsCtrl.text)   ?? 25;
-    final newRate  = double.tryParse(_newRateCtrl.text) ?? 0;
-    final newYears = int.tryParse(_newYearsCtrl.text)   ?? 30;
-    final closing  = double.tryParse(_closingCtrl.text) ?? 4000;
+    final balance  = double.tryParse(_balanceCtrl.text.replaceAll(',', ''))  ?? 0;
+    final curRate  = double.tryParse(_curRateCtrl.text)  ?? 0;
+    final curYears = int.tryParse(_curYearsCtrl.text)    ?? 25;
+    final newRate  = double.tryParse(_newRateCtrl.text)  ?? 0;
+    final newYears = int.tryParse(_newYearsCtrl.text)    ?? 30;
+    final closing  = double.tryParse(_closingCtrl.text.replaceAll(',', '')) ?? 4000;
 
     if (balance <= 0 || curYears <= 0 || newYears <= 0) return;
 
@@ -67,7 +68,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _Section('Current Loan', [
-            _field('Current Balance', _balanceCtrl, prefix: '\$'),
+            _field('Current Balance', _balanceCtrl, prefix: '\$', currency: true),
             _field('Current Rate (%)', _curRateCtrl, suffix: '%'),
             _field('Years Remaining', _curYearsCtrl, suffix: 'yrs'),
           ]),
@@ -75,7 +76,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
           _Section('New Loan', [
             _field('New Rate (%)', _newRateCtrl, suffix: '%'),
             _field('New Term', _newYearsCtrl, suffix: 'yrs'),
-            _field('Closing Costs', _closingCtrl, prefix: '\$'),
+            _field('Closing Costs', _closingCtrl, prefix: '\$', currency: true),
           ]),
           const SizedBox(height: 16),
           SizedBox(
@@ -151,12 +152,13 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
   }
 
   Widget _field(String label, TextEditingController ctrl,
-      {String? prefix, String? suffix}) {
+      {String? prefix, String? suffix, bool currency = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: ctrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: currency ? [CurrencyInputFormatter()] : null,
         decoration: InputDecoration(
           labelText: label,
           prefixText: prefix,

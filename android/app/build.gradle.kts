@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -15,7 +17,8 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        @Suppress("DEPRECATION")
+        jvmTarget = "17"
     }
 
     // ── Release signing ───────────────────────────────────────────────────────
@@ -27,7 +30,7 @@ android {
     //   keyAlias=mortgageus
     //   storeFile=../keystore/mortgageus-release.jks
     val keystorePropsFile = rootProject.file("key.properties")
-    val keystoreProps = java.util.Properties()
+    val keystoreProps = Properties()
     if (keystorePropsFile.exists()) {
         keystoreProps.load(keystorePropsFile.inputStream())
     }

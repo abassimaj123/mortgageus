@@ -34,5 +34,5 @@ class AdConfig {
   // ── Gate settings ─────────────────────────────────────────────────────────
   static const int calcThreshold        = 5;            // interstitial every N calcs
   static const int cooldownMinutes      = 5;            // min between interstitials
-  static const int rewardedDurationHours = 24;          // ad-free window after rewarded ad
+  static const int rewardedDurationMinutes = 60;        // ad-free window after rewarded ad
 }

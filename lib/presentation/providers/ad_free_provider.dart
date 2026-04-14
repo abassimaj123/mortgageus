@@ -10,12 +10,12 @@ class AdFreeNotifier extends StateNotifier<bool> {
 
   void refresh() => state = AdFreeService.instance.isActive;
 
-  /// Watch a rewarded ad → unlock 24 h ad-free.
+  /// Watch a rewarded ad → unlock 60 min ad-free.
   /// Returns true if the user earned the reward.
   Future<bool> unlockWithRewardedAd() async {
     final earned = await AdService.instance.showRewarded();
     if (earned) {
-      await AdFreeService.instance.unlockForDuration(const Duration(hours: 24));
+      await AdFreeService.instance.unlockForDuration(const Duration(minutes: 60));
       state = true;
     }
     return earned;

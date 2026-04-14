@@ -73,7 +73,7 @@ class _RewardAdSheetState extends ConsumerState<RewardAdSheet> {
             _StatusChip(label: _formatRemaining(remaining))
           else
             Text(
-              'Watch a short ad to enjoy 24 hours without ads.',
+              'Watch a short ad to enjoy 1 hour without ads.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, height: 1.4),
             ),
@@ -103,7 +103,7 @@ class _RewardAdSheetState extends ConsumerState<RewardAdSheet> {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('24 hours ad-free unlocked!'),
+          content: Text('1 hour ad-free unlocked!'),
           backgroundColor: AppTheme.accentGood,
         ),
       );
@@ -115,10 +115,10 @@ class _RewardAdSheetState extends ConsumerState<RewardAdSheet> {
   }
 
   String _formatRemaining(Duration d) {
-    final h = d.inHours;
-    final m = d.inMinutes.remainder(60);
-    if (h > 0) return 'Ad-free: ${h}h ${m}m remaining';
-    return 'Ad-free: ${m}m remaining';
+    final m = d.inMinutes;
+    final s = d.inSeconds.remainder(60);
+    if (m > 0) return 'Ad-free: ${m}m ${s}s remaining';
+    return 'Ad-free: ${s}s remaining';
   }
 }
 
@@ -213,7 +213,7 @@ class _WatchAdTile extends StatelessWidget {
                       ],
                     ]),
                     const SizedBox(height: 2),
-                    Text('24 hours ad-free — always free',
+                    Text('1 hour ad-free — always free',
                       style: TextStyle(
                         color: Colors.grey.shade600, fontSize: 13)),
                   ],

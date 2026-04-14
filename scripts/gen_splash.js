@@ -100,8 +100,6 @@ function drawDollar(buf, s, cx, cy, _unused) {
   fillCircle(buf, s, s, cx, cy, coinR, gr, gg, gb);
   const sw = Math.max(1.5, coinR * 0.17);
   const aR = coinR * 0.46;
-  // Vertical bar with tick marks
-  fillRect(buf, s, s, cx - sw, cy - coinR * 1.20, cx + sw, cy + coinR * 1.20, wr, wg, wb);
   // Upper C (opens right)
   fillArc(buf, s, s, cx, cy - aR * 0.54, aR - sw * 0.5, aR + sw * 0.5,
     Math.PI * 0.5, Math.PI * 1.5, wr, wg, wb);

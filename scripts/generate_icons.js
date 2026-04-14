@@ -155,9 +155,6 @@ function drawDollar(buf, s, cx, cy, _unused) {
   const sw = Math.max(1.5, coinR * 0.17);  // stroke width
   const aR = coinR * 0.46;                  // arc radius for S-curves
 
-  // White vertical bar (tick marks extend 20% beyond coin edge)
-  fillRect(buf, s, s, cx - sw, cy - coinR * 1.20, cx + sw, cy + coinR * 1.20, wr, wg, wb);
-
   // Upper C — left semicircle (90° → 270°), opens to the right
   fillArc(buf, s, s, cx, cy - aR * 0.54, aR - sw * 0.5, aR + sw * 0.5,
     Math.PI * 0.5, Math.PI * 1.5, wr, wg, wb);

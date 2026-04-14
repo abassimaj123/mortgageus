@@ -76,14 +76,15 @@ function drawIcon(size, transparent = false) {
     ctx.arc(s * t(0.50), dy, dw / 2, Math.PI, 0, true);
     ctx.fill();
 
-    // ── Gold $ — canvas text (crisp at every size) ───────────────────────
-    const dollarSize = Math.round(s * 0.30);
-    ctx.fillStyle   = GOLD;
-    ctx.font        = `bold ${dollarSize}px Arial, sans-serif`;
-    ctx.textAlign   = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('$', s * 0.50, s * t(0.68));
   }
+
+  // ── Gold $ — always drawn (visible on both solid and transparent bg) ───────
+  const dollarSize = Math.round(s * 0.30);
+  ctx.fillStyle    = GOLD;
+  ctx.font         = `bold ${dollarSize}px Arial, sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('$', s * 0.50, s * t(0.68));
 
   return c;
 }

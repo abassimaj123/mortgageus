@@ -93,14 +93,18 @@ function fillArc(buf, w, h, cx,cy, r1,r2, a0,a1, r,g,b,a=255) {
 
 const NAVY=[27,58,107], WHITE=[255,255,255], GOLD=[212,160,23], RED=[178,34,52];
 
-function drawDollar(buf, s, cx, cy, radius) {
-  const [r,g,b] = GOLD;
-  const sw = Math.max(2, radius * 0.24);
-  fillRect(buf,s,s, cx-sw*0.85,cy-radius*1.65, cx+sw*0.85,cy+radius*1.65, r,g,b);
-  const ucx=cx+radius*0.06, ucy=cy-radius*0.72;
-  fillArc(buf,s,s, ucx,ucy, radius*0.48-sw, radius*0.48+sw, Math.PI*0.55, Math.PI*1.95, r,g,b);
-  const lcx=cx-radius*0.06, lcy=cy+radius*0.72;
-  fillArc(buf,s,s, lcx,lcy, radius*0.48-sw, radius*0.48+sw, Math.PI*1.55, Math.PI*2.95, r,g,b);
+function drawDollar(buf, s, cx, cy, _unused) {
+  const coinR = s * 0.155;
+  const [gr,gg,gb] = GOLD;
+  const [wr,wg,wb] = WHITE;
+  fillCircle(buf, s, s, cx, cy, coinR, gr, gg, gb);
+  const sw = Math.max(1.5, coinR * 0.17);
+  const aR = coinR * 0.46;
+  fillRect(buf, s, s, cx - sw, cy - coinR * 1.20, cx + sw, cy + coinR * 1.20, wr, wg, wb);
+  fillArc(buf, s, s, cx, cy - aR * 0.54, aR - sw * 0.5, aR + sw * 0.5,
+    Math.PI * 0.5, Math.PI * 1.5, wr, wg, wb);
+  fillArc(buf, s, s, cx, cy + aR * 0.54, aR - sw * 0.5, aR + sw * 0.5,
+    Math.PI * 1.5, Math.PI * 2.5, wr, wg, wb);
 }
 
 function drawIcon(size) {
@@ -121,7 +125,7 @@ function drawIcon(size) {
   const dx=s*t(0.50)-dw/2, dy=s*t(0.875)-dh;
   fillRect(buf,s,s, dx,dy, dx+dw,s*t(0.875), ...NAVY);
   fillCircle(buf,s,s, s*t(0.50),dy, dw/2, ...NAVY);
-  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.108*SC);
+  drawDollar(buf, s, s*t(0.50), s*t(0.625), 0);
   return buf;
 }
 

@@ -141,23 +141,30 @@ const WHITE = [255,255, 255];
 const GOLD  = [212,160,  23]; // #D4A017
 const RED   = [178, 34,  52]; // US flag red
 
-// ── Dollar sign ───────────────────────────────────────────────────────────────
-function drawDollar(buf, s, cx, cy, radius) {
-  const [r,g,b] = GOLD;
-  const sw = Math.max(2, radius * 0.24);
+// ── Dollar coin ───────────────────────────────────────────────────────────────
+// Gold circle (coin) with a clean white $ inside.
+// coinR is fixed at 15.5% of icon — crisp at every size from 48 → 1024px.
+function drawDollar(buf, s, cx, cy, _unused) {
+  const coinR = s * 0.155;
+  const [gr,gg,gb] = GOLD;
+  const [wr,wg,wb] = WHITE;
 
-  // Vertical bar (extends above and below S)
-  fillRect(buf,s,s, cx-sw*0.85,cy-radius*1.65, cx+sw*0.85,cy+radius*1.65, r,g,b);
+  // Gold coin
+  fillCircle(buf, s, s, cx, cy, coinR, gr, gg, gb);
 
-  // Upper C — opens right (arc ~100° to 440°, i.e. 100°..260° visually)
-  const ucx = cx + radius*0.06, ucy = cy - radius*0.72;
-  fillArc(buf,s,s, ucx,ucy, radius*0.48-sw, radius*0.48+sw,
-    Math.PI*0.55, Math.PI*1.95, r,g,b);
+  const sw = Math.max(1.5, coinR * 0.17);  // stroke width
+  const aR = coinR * 0.46;                  // arc radius for S-curves
 
-  // Lower C — opens left (arc ~280° to 620°)
-  const lcx = cx - radius*0.06, lcy = cy + radius*0.72;
-  fillArc(buf,s,s, lcx,lcy, radius*0.48-sw, radius*0.48+sw,
-    Math.PI*1.55, Math.PI*2.95, r,g,b);
+  // White vertical bar (tick marks extend 20% beyond coin edge)
+  fillRect(buf, s, s, cx - sw, cy - coinR * 1.20, cx + sw, cy + coinR * 1.20, wr, wg, wb);
+
+  // Upper C — left semicircle (90° → 270°), opens to the right
+  fillArc(buf, s, s, cx, cy - aR * 0.54, aR - sw * 0.5, aR + sw * 0.5,
+    Math.PI * 0.5, Math.PI * 1.5, wr, wg, wb);
+
+  // Lower C — right semicircle (270° → 450°), opens to the left
+  fillArc(buf, s, s, cx, cy + aR * 0.54, aR - sw * 0.5, aR + sw * 0.5,
+    Math.PI * 1.5, Math.PI * 2.5, wr, wg, wb);
 }
 
 // ── House icon renderer ───────────────────────────────────────────────────────
@@ -207,7 +214,7 @@ function drawIcon(size, transparent=false) {
   }
 
   // Dollar sign overlay
-  drawDollar(buf, s, s*t(0.50), s*t(0.625), s*0.108*SC);
+  drawDollar(buf, s, s*t(0.50), s*t(0.625), 0);
 
   return buf;
 }

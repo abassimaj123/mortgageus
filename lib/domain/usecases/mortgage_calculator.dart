@@ -61,7 +61,7 @@ class MortgageCalculator {
     double cumInterest    = 0.0;
     double cumPrincipal   = 0.0;
     bool   pmiActive      = (homePrice > 0) &&
-        (loanAmount / homePrice) > MortgageConstants.pmiAutoCancelLtv;
+        (loanAmount / homePrice) > MortgageConstants.pmiLtvThreshold; // activate at >80% LTV
     bool   pmiEverDropped = false;
 
     for (int month = 1; month <= n; month++) {

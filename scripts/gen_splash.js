@@ -50,13 +50,19 @@ function drawIcon(size) {
   ctx.arc(s*t(0.50), dy, dw/2, Math.PI, 0, true);
   ctx.fill();
 
-  // Gold $ text
-  const dollarSize = Math.round(s * 0.30);
+  // Gold $ — sized to visible house body, centered via real glyph metrics
+  const houseTop   = s * t(0.535);
+  const houseBot   = s * t(0.875);
+  const houseH     = houseBot - houseTop;
+  const dollarSize = Math.round(houseH * 0.78);
   ctx.fillStyle    = GOLD;
   ctx.font         = `bold ${dollarSize}px Arial, sans-serif`;
   ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('$', s * 0.50, s * (t(0.50) + t(0.875)) / 2);
+  ctx.textBaseline = 'alphabetic';
+  const m  = ctx.measureText('$');
+  const gH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  const gY = houseTop + (houseH - gH) / 2 + m.actualBoundingBoxAscent;
+  ctx.fillText('$', s * 0.50, gY);
 
   return c;
 }

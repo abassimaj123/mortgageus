@@ -6,8 +6,15 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/extra_payment_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../widgets/banner_ad_widget.dart';
+import '../../../core/ads/ad_footer.dart';
 import '../../../core/ads/ad_service.dart';
+import '../../../core/freemium/paywall_service.dart';
+import '../../../core/services/analytics_service.dart';
+import '../../../main.dart' show isSpanishNotifier;
+import '../../widgets/paywall_soft.dart';
+import '../../widgets/paywall_hard.dart';
+import '../../../l10n/strings_en.dart';
+import '../../../l10n/strings_es.dart';
 
 class ExtraPaymentsScreen extends ConsumerStatefulWidget {
   const ExtraPaymentsScreen({super.key});
@@ -23,6 +30,11 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
 
   ExtraPaymentResult? _result;
   final _fmt  = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -57,6 +69,12 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
       }
     });
     AdService.instance.onCalculation();
+    AnalyticsService.instance.logExtraPaymentSimulated();
+    if (mounted) {
+      final trigger = paywallService.recordAction();
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    }
   }
 
   @override
@@ -66,119 +84,125 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
     final loan       = inputState.homePrice - inputState.downPaymentDollar;
     final extraMonthly = double.tryParse(_extraMonthlyCtrl.text.replaceAll(',', '')) ?? 0;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Extra Payment Calculator')),
-      body: Column(
-        children: [
-          Expanded(child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          // Loan summary
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppTheme.primary, width: 1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(children: [
-              const Icon(Icons.home, color: AppTheme.primary),
-              const SizedBox(width: 12),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Loan: ${_fmt.format(loan)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  )),
-                Text('${inputState.annualRatePct}% for ${inputState.termYears} years',
-                  style: TextStyle(color: AppTheme.primary.withOpacity(0.7))),
-              ])),
-            ]),
-          ),
-          const SizedBox(height: 16),
-          const Text('Extra Payments',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 12),
-          _field('Extra Monthly Payment', _extraMonthlyCtrl, prefix: '\$', currency: true),
-          _field('Extra Annual Payment', _extraAnnualCtrl, prefix: '\$', currency: true),
-          _field('Lump Sum Payment', _lumpSumCtrl, prefix: '\$', currency: true),
-          _field('Lump Sum in Month #', _lumpMonthCtrl),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => _calculate(inputState),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
-              child: const Text('Calculate Savings', style: TextStyle(fontSize: 16)),
-            ),
-          ),
-          // Big CTA
-          if (r != null && extraMonthly > 0) ...[
-            const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.accentGood, Color(0xFF43A047)]),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(children: [
-                const Icon(Icons.savings, color: Colors.white, size: 36),
-                const SizedBox(height: 8),
-                Text(
-                  'You could save ${_fmt.format(r.interestSaved)}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+    return ValueListenableBuilder<bool>(
+      valueListenable: isSpanishNotifier,
+      builder: (context, isEs, _) {
+        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        return Scaffold(
+          appBar: AppBar(title: Text(s.extraTitle)),
+          body: Column(
+            children: [
+              Expanded(child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // Loan summary
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppTheme.primary, width: 1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                Text(
-                  'by paying ${_fmt.format(extraMonthly)} extra/month',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  textAlign: TextAlign.center,
-                ),
-              ]),
-            ),
-          ],
-          if (r != null) ...[
-            const SizedBox(height: 16),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(children: [
-                  _ResultRow('Original Payoff',
-                    '${r.originalPayoffMonths} months'
-                    ' (${r.originalPayoffMonths ~/ 12} yrs)'),
-                  _ResultRow('New Payoff',
-                    '${r.newPayoffMonths} months'
-                    ' (${r.newPayoffMonths ~/ 12} yrs)'),
-                  _ResultRow('Time Saved',
-                    '${r.yearsSaved} yrs ${r.remMonthsSaved} mo',
-                    color: AppTheme.accentGood),
-                  const Divider(height: 24),
-                  _ResultRow('Original Total Interest',
-                    _fmt.format(r.originalTotalInterest)),
-                  _ResultRow('New Total Interest',
-                    _fmt.format(r.newTotalInterest)),
-                  _ResultRow('Interest Saved',
-                    _fmt.format(r.interestSaved),
-                    color: AppTheme.accentGood,
-                    bold: true),
+                child: Row(children: [
+                  const Icon(Icons.home, color: AppTheme.primary),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${s.loan} ${_fmt.format(loan)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      )),
+                    Text('${inputState.annualRatePct}% for ${inputState.termYears} ${s.years}',
+                      style: TextStyle(color: AppTheme.primary.withValues(alpha: 0.7))),
+                  ])),
                 ]),
               ),
-            ),
-          ],
-          const SizedBox(height: 80),
-        ]),
-          )),
-          const BannerAdWidget(),
-        ],
-      ),
+              const SizedBox(height: 16),
+              Text(s.extraSection,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 12),
+              _field(s.extraMonthly, _extraMonthlyCtrl, prefix: '\$', currency: true),
+              _field(s.extraAnnual,  _extraAnnualCtrl,  prefix: '\$', currency: true),
+              _field(s.lumpSum,      _lumpSumCtrl,      prefix: '\$', currency: true),
+              _field(s.lumpSumMonth, _lumpMonthCtrl),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _calculate(inputState),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  child: Text(s.calcSavings, style: const TextStyle(fontSize: 16)),
+                ),
+              ),
+              // Big CTA
+              if (r != null && extraMonthly > 0) ...[
+                const SizedBox(height: 20),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppTheme.accentGood, AppTheme.accentGoodLight]),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(children: [
+                    const Icon(Icons.savings, color: Colors.white, size: 36),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${s.youCouldSave} ${_fmt.format(r.interestSaved)}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      '${s.byPaying} ${_fmt.format(extraMonthly)} ${s.extraPerMonth}',
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      textAlign: TextAlign.center,
+                    ),
+                  ]),
+                ),
+              ],
+              if (r != null) ...[
+                const SizedBox(height: 16),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(children: [
+                      _ResultRow(s.originalPayoff,
+                        '${r.originalPayoffMonths} ${s.months}'
+                        ' (${r.originalPayoffMonths ~/ 12} ${s.years})'),
+                      _ResultRow(s.newPayoff,
+                        '${r.newPayoffMonths} ${s.months}'
+                        ' (${r.newPayoffMonths ~/ 12} ${s.years})'),
+                      _ResultRow(s.timeSaved,
+                        '${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}',
+                        color: AppTheme.accentGood),
+                      const Divider(height: 24),
+                      _ResultRow(s.origTotalInt,
+                        _fmt.format(r.originalTotalInterest)),
+                      _ResultRow(s.newTotalInt,
+                        _fmt.format(r.newTotalInterest)),
+                      _ResultRow(s.interestSavedRow,
+                        _fmt.format(r.interestSaved),
+                        color: AppTheme.accentGood,
+                        bold: true),
+                    ]),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 80),
+            ]),
+              )),
+              const AdFooter(),
+            ],
+          ),
+        );
+      },
     );
   }
 

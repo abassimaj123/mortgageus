@@ -23,35 +23,23 @@ android {
         jvmTarget = "17"
     }
 
-    // ── Release signing ───────────────────────────────────────────────────────
-    // 1. Generate keystore (see docs/CHECKLIST_LAUNCH.md step 1)
-    // 2. Create android/key.properties (already in .gitignore)
-    // android/key.properties format:
-    //   storePassword=YOUR_STORE_PASSWORD
-    //   keyPassword=YOUR_KEY_PASSWORD
-    //   keyAlias=mortgageus
-    //   storeFile=../keystore/mortgageus-release.jks
-    val keystorePropsFile = rootProject.file("key.properties")
-    val keystoreProps = Properties()
-    if (keystorePropsFile.exists()) {
-        keystoreProps.load(keystorePropsFile.inputStream())
-    }
+    val keystoreProperties = Properties()
+    val keystoreFile = rootProject.file("key.properties")
+    if (keystoreFile.exists()) keystoreProperties.load(keystoreFile.inputStream())
 
     signingConfigs {
         create("release") {
-            if (keystorePropsFile.exists()) {
-                keyAlias      = keystoreProps["keyAlias"]      as String
-                keyPassword   = keystoreProps["keyPassword"]   as String
-                storeFile     = file(keystoreProps["storeFile"] as String)
-                storePassword = keystoreProps["storePassword"] as String
-            }
+            keyAlias      = keystoreProperties["keyAlias"]      as String
+            keyPassword   = keystoreProperties["keyPassword"]   as String
+            storeFile     = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
         }
     }
 
     defaultConfig {
         applicationId = "com.mortgageus.calculator"
         minSdk        = 24
-        targetSdk     = 34
+        targetSdk     = 35
         versionCode   = flutter.versionCode
         versionName   = flutter.versionName
     }
@@ -61,10 +49,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         release {
-            signingConfig = if (keystorePropsFile.exists())
-                signingConfigs.getByName("release")
-            else
-                signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled   = true
             isShrinkResources = true
             proguardFiles(

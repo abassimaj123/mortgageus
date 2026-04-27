@@ -78,9 +78,11 @@ final mortgageInputProvider =
 
 final mortgageInputModelProvider = Provider<MortgageInput>((ref) {
   final s = ref.watch(mortgageInputProvider);
+  // USDA and VA handle their own fee logic inside MortgageCalculator.calculate()
   final pmiRate = (s.homePrice > 0 &&
       (s.downPaymentDollar / s.homePrice) < 0.20 &&
-      s.loanType != LoanType.va)
+      s.loanType != LoanType.va &&
+      s.loanType != LoanType.usda)
       ? MortgageConstants.pmiDefaultAnnualRate * 100
       : 0.0;
 

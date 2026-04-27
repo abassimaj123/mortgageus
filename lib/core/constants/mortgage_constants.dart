@@ -30,7 +30,7 @@ class MortgageConstants {
   static const double defaultRefiClosingCosts = 4000.0;
 
   // ── Term presets ─────────────────────────────────────────────────────────
-  static const List<int> termPresets = [10, 15, 20, 30];
+  static const List<int> termPresets = [10, 15, 20, 25, 30];
 
   // ── Validation limits ────────────────────────────────────────────────────
   static const double maxHomePriceAllowed   = 50000000.0;

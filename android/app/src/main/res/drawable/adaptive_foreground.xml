@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- White house silhouette -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,20 L88,56 L80,56 L80,88 L28,88 L28,56 L20,56 Z"/>
+
+    <!-- 3 bold red horizontal stripes in house body (US flag feel) -->
+    <path android:fillColor="#B22234" android:pathData="M28,58 L80,58 L80,65 L28,65 Z"/>
+    <path android:fillColor="#B22234" android:pathData="M28,69 L80,69 L80,76 L28,76 Z"/>
+    <path android:fillColor="#B22234" android:pathData="M28,80 L80,80 L80,88 L28,88 Z"/>
+
+</vector>

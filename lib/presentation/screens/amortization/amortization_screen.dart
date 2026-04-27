@@ -4,9 +4,16 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/freemium/freemium_service.dart';
+import '../../../core/freemium/iap_service.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../widgets/banner_ad_widget.dart';
+import '../../../core/ads/ad_footer.dart';
+import '../../../main.dart' show isSpanishNotifier;
+import '../../../l10n/strings_en.dart';
+import '../../../l10n/strings_es.dart';
+
+const _kFreeMonthLimit = 24; // 2 years free, full schedule = premium
 
 // ── SharedPreferences key ─────────────────────────────────────────────────────
 const _kViewModeKey = 'amort_view_yearly';
@@ -119,108 +126,116 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final result = ref.watch(mortgageResultProvider);
-    if (result == null) {
-      return const Scaffold(
-        body: Center(child: Text('Enter loan details in Calculator tab')));
-    }
+    final result     = ref.watch(mortgageResultProvider);
+    final inputState = ref.watch(mortgageInputProvider);
 
-    final schedule = result.schedule;
-    final fmt      = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-    final fmtDate  = DateFormat('MMM yyyy');
-    final years    = _buildYearGroups(schedule, result.loanAmount);
+    return ValueListenableBuilder<bool>(
+      valueListenable: isSpanishNotifier,
+      builder: (context, isEs, _) {
+        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Amortization Schedule')),
-      body: Column(
-        children: [
-          Expanded(
-            child: CustomScrollView(slivers: [
+        if (result == null) {
+          return Scaffold(
+            body: Center(child: Text(s.enterLoan)));
+        }
 
-        // ── Summary card ───────────────────────────────────────────────────
-        SliverToBoxAdapter(child: _SummaryCard(result: result, fmt: fmt, fmtDate: fmtDate)),
+        final schedule = result.schedule;
+        final fmt      = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
+        final fmtDate  = DateFormat('MMM yyyy');
+        final years    = _buildYearGroups(schedule, result.loanAmount);
 
-        // ── Pie chart ──────────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        return Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(slivers: [
+
+            // ── Summary card ───────────────────────────────────────────────────
+            SliverToBoxAdapter(child: _SummaryCard(result: result, inputState: inputState, fmt: fmt, fmtDate: fmtDate, s: s)),
+
+            // ── Pie chart ──────────────────────────────────────────────────────
+            SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(children: [
-                  Text('Life of Loan Breakdown',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 180,
-                    child: PieChart(PieChartData(
-                      sections: [
-                        PieChartSectionData(
-                          value: result.loanAmount,
-                          title: 'Principal\n${fmt.format(result.loanAmount)}',
-                          color: AppTheme.primary, radius: 70,
-                          titleStyle: const TextStyle(color: Colors.white, fontSize: 10)),
-                        PieChartSectionData(
-                          value: result.totalInterest,
-                          title: 'Interest\n${fmt.format(result.totalInterest)}',
-                          color: AppTheme.secondary, radius: 70,
-                          titleStyle: const TextStyle(color: Colors.white, fontSize: 10)),
-                      ],
-                      centerSpaceRadius: 0,
-                    )),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(children: [
+                      Text(s.lifeBreakdown,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 180,
+                        child: PieChart(PieChartData(
+                          sections: [
+                            PieChartSectionData(
+                              value: result.loanAmount,
+                              title: '${s.principal}\n${fmt.format(result.loanAmount)}',
+                              color: AppTheme.primary, radius: 70,
+                              titleStyle: const TextStyle(color: Colors.white, fontSize: 10)),
+                            PieChartSectionData(
+                              value: result.totalInterest,
+                              title: '${s.interest}\n${fmt.format(result.totalInterest)}',
+                              color: AppTheme.secondary, radius: 70,
+                              titleStyle: const TextStyle(color: Colors.white, fontSize: 10)),
+                          ],
+                          centerSpaceRadius: 0,
+                        )),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        _Legend(color: AppTheme.primary,   label: s.principal),
+                        const SizedBox(width: 24),
+                        _Legend(color: AppTheme.secondary, label: s.interest),
+                      ]),
+                    ]),
                   ),
-                  const SizedBox(height: 8),
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    _Legend(color: AppTheme.primary,   label: 'Principal'),
-                    const SizedBox(width: 24),
-                    _Legend(color: AppTheme.secondary, label: 'Interest'),
-                  ]),
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+            // ── View toggle ────────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Semantics(
+                  label: 'View mode toggle',
+                  child: SegmentedButton<bool>(
+                    segments: [
+                      ButtonSegment(value: true,  label: Text(s.yearlyView),
+                        icon: const Icon(Icons.calendar_today)),
+                      ButtonSegment(value: false, label: Text(s.monthlyView),
+                        icon: const Icon(Icons.view_list)),
+                    ],
+                    selected: {_yearlyView},
+                    onSelectionChanged: (sel) => _setViewMode(sel.first),
+                  ),
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+            // ── Content: yearly or monthly ─────────────────────────────────────
+            if (_yearlyView)
+              _YearlyList(years: years, fmt: fmt, s: s, isPremium: freemiumService.isPremium)
+            else ...[
+              SliverToBoxAdapter(child: _MonthlyHeader(s: s)),
+              _MonthlyList(schedule: schedule, fmt: fmt, s: s, isPremium: freemiumService.isPremium),
+            ],
+
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
                 ]),
               ),
-            ),
+              const AdFooter(),
+            ],
           ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-        // ── View toggle ────────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Semantics(
-              label: 'View mode toggle',
-              child: SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: true,  label: Text('Yearly View'),
-                    icon: Icon(Icons.calendar_today)),
-                  ButtonSegment(value: false, label: Text('Monthly View'),
-                    icon: Icon(Icons.view_list)),
-                ],
-                selected: {_yearlyView},
-                onSelectionChanged: (s) => _setViewMode(s.first),
-              ),
-            ),
-          ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-        // ── Content: yearly or monthly ─────────────────────────────────────
-        if (_yearlyView)
-          _YearlyList(years: years, fmt: fmt)
-        else ...[
-          SliverToBoxAdapter(child: _MonthlyHeader()),
-          _MonthlyList(schedule: schedule, fmt: fmt),
-        ],
-
-        const SliverToBoxAdapter(child: SizedBox(height: 80)),
-            ]),
-          ),
-          const BannerAdWidget(),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -228,10 +243,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 // ── Summary card ──────────────────────────────────────────────────────────────
 class _SummaryCard extends StatelessWidget {
   final dynamic result;
+  final dynamic inputState;
   final NumberFormat fmt;
   final DateFormat   fmtDate;
+  final dynamic      s;
 
-  const _SummaryCard({required this.result, required this.fmt, required this.fmtDate});
+  const _SummaryCard({required this.result, required this.inputState, required this.fmt, required this.fmtDate, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -243,16 +260,19 @@ class _SummaryCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Loan Summary',
+            Text(s.loanSummary,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Colors.white, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            _SummaryRow('Loan amount',      fmt.format(result.loanAmount)),
-            _SummaryRow('Payoff date',      fmtDate.format(result.payoffDate)),
-            _SummaryRow('Total interest',   fmt.format(result.totalInterest)),
-            _SummaryRow('Total payments',   fmt.format(result.totalCost)),
+            // Show home price + down payment for clarity
+            _SummaryRow(s.homePrice,
+              '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
+            _SummaryRow(s.loanAmount,    fmt.format(result.loanAmount)),
+            _SummaryRow(s.payoffDate,    fmtDate.format(result.payoffDate)),
+            _SummaryRow(s.totalInterest, fmt.format(result.totalInterest)),
+            _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
             if (result.pmiDropMonth != null)
-              _SummaryRow('PMI removed',    'Month ${result.pmiDropMonth}'),
+              _SummaryRow(s.pmiRemoved,  'Month ${result.pmiDropMonth}'),
           ]),
         ),
       ),
@@ -278,21 +298,43 @@ class _SummaryRow extends StatelessWidget {
 class _YearlyList extends StatelessWidget {
   final List<_YearGroup> years;
   final NumberFormat     fmt;
-  const _YearlyList({required this.years, required this.fmt});
+  final dynamic          s;
+  final bool             isPremium;
+  const _YearlyList({required this.years, required this.fmt, required this.s, required this.isPremium});
 
   @override
-  Widget build(BuildContext context) => SliverList(
-    delegate: SliverChildBuilderDelegate(
-      (context, i) => _YearTile(group: years[i], fmt: fmt),
-      childCount: years.length,
-    ),
-  );
+  Widget build(BuildContext context) {
+    // Free: show first 2 years (= 24 months) + lock banner
+    final freeYearLimit = (_kFreeMonthLimit / 12).floor(); // 2
+    final visibleYears  = isPremium ? years : years.take(freeYearLimit).toList();
+    final locked        = !isPremium && years.length > freeYearLimit;
+    final isEs          = isSpanishNotifier.value;
+    final totalYears    = years.length;
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, i) {
+          if (i < visibleYears.length) {
+            return _YearTile(group: visibleYears[i], fmt: fmt, s: s);
+          }
+          // Lock banner (only appended when locked)
+          return _AmortLockBanner(
+            isEs: isEs,
+            lockedYears: totalYears - freeYearLimit,
+            lockedMonths: (totalYears - freeYearLimit) * 12,
+          );
+        },
+        childCount: visibleYears.length + (locked ? 1 : 0),
+      ),
+    );
+  }
 }
 
 class _YearTile extends StatelessWidget {
   final _YearGroup   group;
   final NumberFormat fmt;
-  const _YearTile({required this.group, required this.fmt});
+  final dynamic      s;
+  const _YearTile({required this.group, required this.fmt, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -301,14 +343,14 @@ class _YearTile extends StatelessWidget {
 
     // Build badge list
     final badges = <Widget>[];
-    if (group.hasPmiDrop)  badges.add(_Badge('PMI removed', Colors.green));
-    if (group.isHalfway)   badges.add(_Badge('Halfway',     Colors.blue));
-    if (group.isLastYear)  badges.add(_Badge('Paid off',    AppTheme.secondary));
+    if (group.hasPmiDrop)  badges.add(_Badge(s.pmiRemoved, Colors.green));
+    if (group.isHalfway)   badges.add(_Badge(s.halfway,    Colors.blue));
+    if (group.isLastYear)  badges.add(_Badge(s.paidOff,    AppTheme.secondary));
 
     return Semantics(
-      label: 'Year ${group.yearIndex} ${group.calendarYear}. '
-             'Balance ${fmt.format(group.endBalance)}. '
-             '${group.pctPaid.toStringAsFixed(0)}% paid.',
+      label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '
+             '${s.balance}: ${fmt.format(group.endBalance)}. '
+             '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
         decoration: BoxDecoration(
@@ -329,7 +371,7 @@ class _YearTile extends StatelessWidget {
               : null,
           title: Row(children: [
             Expanded(
-              child: Text('Year ${group.yearIndex}  (${group.calendarYear})',
+              child: Text('${s.year} ${group.yearIndex}  (${group.calendarYear})',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: isCurrentYear ? AppTheme.primary : null)),
@@ -340,9 +382,9 @@ class _YearTile extends StatelessWidget {
           subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const SizedBox(height: 4),
             Text(
-              'Balance: ${fmt.format(group.endBalance)}  •  '
-              'Interest: ${fmt.format(group.yearlyInterest)}  •  '
-              'Principal: ${fmt.format(group.yearlyPrincipal)}',
+              '${s.balance}: ${fmt.format(group.endBalance)}  •  '
+              '${s.interest}: ${fmt.format(group.yearlyInterest)}  •  '
+              '${s.principal}: ${fmt.format(group.yearlyPrincipal)}',
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 6),
@@ -358,12 +400,12 @@ class _YearTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            Text('${group.pctPaid.toStringAsFixed(1)}% paid',
+            Text('${group.pctPaid.toStringAsFixed(1)}% ${s.paid}',
               style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
           ]),
           // Lazy sub-months (only built when expanded)
           children: [
-            _MonthSubTable(months: group.months, fmt: fmt),
+            _MonthSubTable(months: group.months, fmt: fmt, s: s),
           ],
         ),
       ),
@@ -392,7 +434,8 @@ class _Badge extends StatelessWidget {
 class _MonthSubTable extends StatelessWidget {
   final List<AmortizationEntry> months;
   final NumberFormat            fmt;
-  const _MonthSubTable({required this.months, required this.fmt});
+  final dynamic                 s;
+  const _MonthSubTable({required this.months, required this.fmt, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -403,13 +446,13 @@ class _MonthSubTable extends StatelessWidget {
         color: AppTheme.primary.withValues(alpha: 0.85),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: Row(children: [
-          _HCell('Mo.',    1),
-          _HCell('Date',   2),
-          _HCell('Pmt',    2),
-          _HCell('Int.',   2),
-          _HCell('Princ.', 2),
-          _HCell('Bal.',   2),
-          if (hasPmi) _HCell('PMI', 2),
+          _HCell(s.colMo,    1),
+          _HCell(s.colDate,  2),
+          _HCell(s.colPmt,   2),
+          _HCell(s.colInt,   2),
+          _HCell(s.colPrinc, 2),
+          _HCell(s.colBal,   2),
+          if (hasPmi) _HCell(s.pmi, 2),
         ]),
       ),
       // Month rows
@@ -433,7 +476,7 @@ class _MonthSubTable extends StatelessWidget {
               _Cell(fmt.format(e.principal),                    flex: 2),
               _Cell(fmt.format(e.balance),                      flex: 2),
               if (hasPmi)
-                _Cell(e.pmiDropped ? 'OFF' :
+                _Cell(e.pmiDropped ? s.off :
                       e.pmiAmount > 0 ? fmt.format(e.pmiAmount) : '-', flex: 2),
             ]),
           ),
@@ -445,19 +488,22 @@ class _MonthSubTable extends StatelessWidget {
 
 // ── Monthly flat list ─────────────────────────────────────────────────────────
 class _MonthlyHeader extends StatelessWidget {
+  final dynamic s;
+  const _MonthlyHeader({required this.s});
+
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 12),
     child: Container(
       color: AppTheme.primary,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      child: const Row(children: [
-        _HCell('Mo.',    1),
-        _HCell('Date',   2),
-        _HCell('Pmt',    2),
-        _HCell('Princ.', 2),
-        _HCell('Int.',   2),
-        _HCell('Bal.',   2),
+      child: Row(children: [
+        _HCell(s.colMo,    1),
+        _HCell(s.colDate,  2),
+        _HCell(s.colPmt,   2),
+        _HCell(s.colPrinc, 2),
+        _HCell(s.colInt,   2),
+        _HCell(s.colBal,   2),
       ]),
     ),
   );
@@ -466,32 +512,109 @@ class _MonthlyHeader extends StatelessWidget {
 class _MonthlyList extends StatelessWidget {
   final List<AmortizationEntry> schedule;
   final NumberFormat            fmt;
-  const _MonthlyList({required this.schedule, required this.fmt});
+  final dynamic                 s;
+  final bool                    isPremium;
+  const _MonthlyList({required this.schedule, required this.fmt, required this.s, required this.isPremium});
 
   @override
-  Widget build(BuildContext context) => SliverList(
-    delegate: SliverChildBuilderDelegate(
-      (context, i) {
-        final e  = schedule[i];
-        final bg = e.pmiDropped
-            ? Colors.orange.shade50
-            : i % 2 == 0 ? Colors.grey.shade50 : Colors.white;
-        return Container(
-          color: bg,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
-          child: Row(children: [
-            _Cell('${e.month}',                flex: 1),
-            _Cell('${e.date.month}/${e.date.year}', flex: 2),
-            _Cell(fmt.format(e.payment),       flex: 2),
-            _Cell(fmt.format(e.principal),     flex: 2),
-            _Cell(fmt.format(e.interest),      flex: 2),
-            _Cell(fmt.format(e.balance),       flex: 2),
-          ]),
-        );
-      },
-      childCount: schedule.length,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final visible = isPremium ? schedule : schedule.take(_kFreeMonthLimit).toList();
+    final locked  = !isPremium && schedule.length > _kFreeMonthLimit;
+    final isEs    = isSpanishNotifier.value;
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, i) {
+          if (i < visible.length) {
+            final e  = visible[i];
+            final bg = e.pmiDropped
+                ? Colors.orange.shade50
+                : i % 2 == 0 ? Colors.grey.shade50 : Colors.white;
+            return Container(
+              color: bg,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+              child: Row(children: [
+                _Cell('${e.month}',                flex: 1),
+                _Cell('${e.date.month}/${e.date.year}', flex: 2),
+                _Cell(fmt.format(e.payment),       flex: 2),
+                _Cell(fmt.format(e.principal),     flex: 2),
+                _Cell(fmt.format(e.interest),      flex: 2),
+                _Cell(fmt.format(e.balance),       flex: 2),
+              ]),
+            );
+          }
+          return _AmortLockBanner(
+            isEs: isEs,
+            lockedYears: ((schedule.length - _kFreeMonthLimit) / 12).ceil(),
+            lockedMonths: schedule.length - _kFreeMonthLimit,
+          );
+        },
+        childCount: visible.length + (locked ? 1 : 0),
+      ),
+    );
+  }
+}
+
+// ── Premium lock banner ───────────────────────────────────────────────────────
+class _AmortLockBanner extends StatelessWidget {
+  final bool isEs;
+  final int  lockedYears;
+  final int  lockedMonths;
+  const _AmortLockBanner({required this.isEs, required this.lockedYears, required this.lockedMonths});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 80),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primary.withValues(alpha: 0.08), AppTheme.primary.withValues(alpha: 0.02)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      child: Column(children: [
+        const Icon(Icons.lock_outline, color: AppTheme.secondary, size: 36),
+        const SizedBox(height: 12),
+        Text(
+          isEs ? 'Tabla completa bloqueada' : 'Full schedule locked',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          isEs
+              ? '+$lockedYears años · +$lockedMonths meses restantes'
+              : '+$lockedYears years · +$lockedMonths months remaining',
+          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => IAPService.instance.buy(),
+            icon: const Icon(Icons.workspace_premium, size: 18),
+            label: Text(
+              isEs ? 'Desbloquear Premium — \$4.99' : 'Unlock Premium — \$4.99',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.secondary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          isEs ? 'Acceso único · Sin suscripción' : 'One-time purchase · No subscription',
+          style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+        ),
+      ]),
+    );
+  }
 }
 
 // ── Shared widgets ────────────────────────────────────────────────────────────

@@ -32,7 +32,9 @@ class AdConfig {
   static const String rewardediOS     = 'ca-app-pub-3940256099942544/1712485313'; // TEST
 
   // ── Gate settings ─────────────────────────────────────────────────────────
-  static const int calcThreshold        = 5;            // interstitial every N calcs
-  static const int cooldownMinutes      = 5;            // min between interstitials
-  static const int rewardedDurationMinutes = 60;        // ad-free window after rewarded ad
+  static const int calcThreshold           = 10;   // interstitial every N actions (8-12 range midpoint)
+  static const int cooldownMinutes         = 5;    // min between interstitials
+  static const int timeThresholdSeconds    = 240;  // interstitial after ~4 min of usage
+  static const int rewardedDurationMinutes = 60;   // ad-free window after rewarded ad
+  static const int rewardedMinSession      = 2;    // show rewarded option only from session 2+
 }

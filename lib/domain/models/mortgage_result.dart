@@ -30,8 +30,11 @@ class MortgageResult {
   final double             currentLtv;
   final bool               isJumbo;
   final bool               hasPmi;
-  final int?               pmiDropMonth; // month number when PMI drops to 0
+  final bool               isUsda;       // USDA loan — annual fee, never drops
+  final int?               pmiDropMonth; // month number when PMI drops to 0 (null for USDA)
   final List<AmortizationEntry> schedule;
+  final double             stressTestRate;    // annualRatePct + 2.0
+  final double             stressTestMonthly; // P&I at stress rate
 
   const MortgageResult({
     required this.loanAmount,
@@ -42,7 +45,10 @@ class MortgageResult {
     required this.currentLtv,
     required this.isJumbo,
     required this.hasPmi,
+    this.isUsda = false,
     this.pmiDropMonth,
     required this.schedule,
+    required this.stressTestRate,
+    required this.stressTestMonthly,
   });
 }

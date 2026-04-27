@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Navy blue splash background #1B3A6B -->
+    <!-- Navy brand background -->
     <item android:drawable="@color/splash_bg"/>
-    <!-- Centered app icon -->
-    <item>
+    <!-- Centered icon (navy background baked in — no white fringe) -->
+    <item android:gravity="center" android:width="200dp" android:height="200dp">
         <bitmap
-            android:gravity="center"
+            android:gravity="fill"
             android:src="@drawable/ic_splash"/>
     </item>
 </layer-list>

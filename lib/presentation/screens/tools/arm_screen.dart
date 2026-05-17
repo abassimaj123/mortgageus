@@ -90,7 +90,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
         final dynamic s = isEs ? AppStringsES() : AppStringsEN();
         final r = _result;
         return Scaffold(
-          appBar: AppBar(title: Text(s.toolArm)),
+          appBar: AppBar(title: Text((s.toolArm as String))),
           body: Column(children: [
             Expanded(
                 child: SingleChildScrollView(
@@ -327,7 +327,7 @@ class _ResultCard extends StatelessWidget {
               fmt.format(r.balanceAtReset),
             ),
             const Divider(height: 20),
-            _Row(s.armTotalInterest, fmtK.format(r.totalInterest)),
+            _Row((s.armTotalInterest as String), fmtK.format(r.totalInterest)),
             _Row(
               isEs
                   ? 'Interés (tasa fija equivalente)'
@@ -344,7 +344,7 @@ class _ResultCard extends StatelessWidget {
             // Break-even
             if (r.breakEvenMonths == null)
               _breakEvenBanner(
-                isEs ? s.armAlwaysBetter : s.armAlwaysBetter,
+                isEs ? (s.armAlwaysBetter as String) : (s.armAlwaysBetter as String),
                 AppTheme.accentGood,
               )
             else

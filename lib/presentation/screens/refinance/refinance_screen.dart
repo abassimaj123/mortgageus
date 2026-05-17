@@ -98,7 +98,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
       builder: (context, isEs, _) {
         final dynamic s = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
-          appBar: AppBar(title: Text(s.refiTitle)),
+          appBar: AppBar(title: Text((s.refiTitle as String))),
           body: Column(
             children: [
               Expanded(
@@ -110,24 +110,24 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _Section(s.currentLoan, [
-                          _field(s.currentBalance, _balanceCtrl,
+                        _Section((s.currentLoan as String), [
+                          _field((s.currentBalance as String), _balanceCtrl,
                               prefix: '\$',
                               currency: true,
                               errorText: _balanceError,
                               required: true),
-                          _field(s.currentRate, _curRateCtrl,
+                          _field((s.currentRate as String), _curRateCtrl,
                               suffix: '%', required: true),
-                          _field(s.yearsRemaining, _curYearsCtrl,
-                              suffix: s.years, required: true),
+                          _field((s.yearsRemaining as String), _curYearsCtrl,
+                              suffix: s.years as String?, required: true),
                         ]),
                         const SizedBox(height: 16),
-                        _Section(s.newLoan, [
-                          _field(s.newRate, _newRateCtrl,
+                        _Section((s.newLoan as String), [
+                          _field((s.newRate as String), _newRateCtrl,
                               suffix: '%', required: true),
-                          _field(s.newTerm, _newYearsCtrl,
-                              suffix: s.years, required: true),
-                          _field(s.closingCosts, _closingCtrl,
+                          _field((s.newTerm as String), _newYearsCtrl,
+                              suffix: s.years as String?, required: true),
+                          _field((s.closingCosts as String), _closingCtrl,
                               prefix: '\$', currency: true),
                         ]),
                         const SizedBox(height: 16),
@@ -137,7 +137,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                             onPressed: _calculate,
                             style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.all(AppSpacing.lg)),
-                            child: Text(s.calcRefi,
+                            child: Text((s.calcRefi as String),
                                 style: const TextStyle(
                                     fontSize: AppTextSize.bodyLg)),
                           ),
@@ -151,18 +151,18 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(AppSpacing.lg),
                               child: Column(children: [
-                                _ResultRow(s.currentPayment,
+                                _ResultRow((s.currentPayment as String),
                                     _fmt.format(r.oldMonthlyPayment)),
-                                _ResultRow(s.newPayment,
+                                _ResultRow((s.newPayment as String),
                                     _fmt.format(r.newMonthlyPayment)),
-                                _ResultRow(s.monthlySavings,
+                                _ResultRow((s.monthlySavings as String),
                                     _fmt.format(r.monthlySavings),
                                     color: r.monthlySavings > 0
                                         ? AppTheme.accentGood
                                         : Colors.red),
                                 const Divider(height: 24),
                                 _ResultRow(
-                                    s.breakEven,
+                                    (s.breakEven as String),
                                     r.monthlySavings <= 0
                                         ? (isEs
                                             ? 'N/A — tasa más alta'
@@ -173,7 +173,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                                                 : 'N/A — never')
                                             : '${r.breakEvenMonths} ${s.months}'
                                                 ' (${(r.breakEvenMonths / 12).toStringAsFixed(1)} yrs)'),
-                                _ResultRow(s.totalSavings,
+                                _ResultRow((s.totalSavings as String),
                                     _fmt.format(r.totalSavingsOverLife),
                                     color: r.totalSavingsOverLife > 0
                                         ? AppTheme.accentGood

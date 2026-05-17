@@ -250,7 +250,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Home Price
-                              _buildField(s.homePrice, _homePriceCtrl,
+                              _buildField((s.homePrice as String), _homePriceCtrl,
                                   prefix: '\$',
                                   required: true,
                                   currency: true,
@@ -276,7 +276,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               ),
                               const SizedBox(height: 12),
                               // Interest Rate
-                              _buildField(s.interestRate, _rateCtrl,
+                              _buildField((s.interestRate as String), _rateCtrl,
                                   suffix: '%',
                                   required: true,
                                   helperText: isEs
@@ -317,7 +317,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
-                                      child: Text(s.advancedOptions,
+                                      child: Text((s.advancedOptions as String),
                                           style: const TextStyle(
                                             color: AppTheme.primary,
                                             fontWeight: FontWeight.w600,
@@ -355,7 +355,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   ),
                                   padding: const EdgeInsets.all(AppSpacing.md),
                                   child: Column(children: [
-                                    _buildField(s.propertyTaxRate, _taxCtrl,
+                                    _buildField((s.propertyTaxRate as String), _taxCtrl,
                                         suffix: '%',
                                         onChanged: (v) =>
                                             notifier.updatePropertyTaxRate(
@@ -363,7 +363,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                         ',', '.')) ??
                                                     1.1)),
                                     const SizedBox(height: 12),
-                                    _buildField(s.homeInsurance, _insuranceCtrl,
+                                    _buildField((s.homeInsurance as String), _insuranceCtrl,
                                         prefix: '\$',
                                         suffix: '/yr',
                                         onChanged: (v) =>
@@ -372,7 +372,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                         ',', '.')) ??
                                                     1750)),
                                     const SizedBox(height: 12),
-                                    _buildField(s.hoaFees, _hoaCtrl,
+                                    _buildField((s.hoaFees as String), _hoaCtrl,
                                         prefix: '\$',
                                         suffix: '/mo',
                                         onChanged: (v) => notifier.updateHoa(
@@ -534,7 +534,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               // ── Smart Insights ─────────────────────────
                                               const SizedBox(height: 12),
                                               _buildInsightCard(
-                                                result: result,
+                                                result: result!,
                                                 inputState: inputState,
                                                 isEs: isEs,
                                               ),
@@ -558,7 +558,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 },
                                                 icon: const Icon(
                                                     Icons.bookmark_add_rounded),
-                                                label: Text(s.saveCalc),
+                                                label: Text((s.saveCalc as String)),
                                                 style: ElevatedButton.styleFrom(
                                                   minimumSize: const Size(
                                                       double.infinity, 52),
@@ -676,9 +676,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                             size: 18),
                                                         label: Text(
                                                             isPremium
-                                                                ? s.exportPdf
-                                                                : s
-                                                                    .exportPdfPremium,
+                                                                ? (s.exportPdf as String)
+                                                                : (s.exportPdfPremium as String),
                                                             overflow:
                                                                 TextOverflow
                                                                     .ellipsis),
@@ -861,7 +860,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
 
   /// Recomputes the 15-yr comparison result and caches it.
   /// Call this whenever inputs change (outside build).
-  void _recompute15yr(MortgageInputState inputState, dynamic result) {
+  void _recompute15yr(MortgageInputState inputState, MortgageResult result) {
     if (inputState.termYears != 30 || result.loanAmount <= 0) {
       _insightResult15yr = null;
       _insightCacheKey = null;
@@ -901,7 +900,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
 
   /// Computes insights from the current calculation result and optional income.
   Widget _buildInsightCard({
-    required dynamic result,
+    required MortgageResult result,
     required MortgageInputState inputState,
     required bool isEs,
   }) {
@@ -977,7 +976,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
 // ── Hero card ─────────────────────────────────────────────────────────────────
 
 class _HeroCard extends StatelessWidget {
-  final dynamic result;
+  final MortgageResult? result;
   final dynamic s;
   const _HeroCard({this.result, required this.s});
 
@@ -998,7 +997,7 @@ class _HeroCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(s.monthlyPI,
+          Text((s.monthlyPI as String),
               style: const TextStyle(
                   color: Colors.white70, fontSize: AppTextSize.body)),
           const SizedBox(height: 8),
@@ -1021,7 +1020,7 @@ class _HeroCard extends StatelessWidget {
             const SizedBox(height: 12),
             Wrap(spacing: 8, children: [
               _Badge(
-                label: result!.isJumbo ? s.jumbo : s.conforming,
+                label: result!.isJumbo ? (s.jumbo as String) : (s.conforming as String),
                 color:
                     result!.isJumbo ? AppTheme.accentWarn : AppTheme.accentGood,
               ),
@@ -1035,7 +1034,7 @@ class _HeroCard extends StatelessWidget {
               ),
               if (result!.hasPmi)
                 _Badge(
-                  label: result!.isUsda ? s.usdaFee : s.pmi,
+                  label: result!.isUsda ? (s.usdaFee as String) : (s.pmi as String),
                   color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
                 ),
             ]),
@@ -1082,7 +1081,7 @@ class _TermSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(s.loanTerm, style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text((s.loanTerm as String), style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Row(
           children: MortgageConstants.termPresets.map((term) {
@@ -1132,7 +1131,7 @@ class _LoanTypeSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(s.loanType, style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text((s.loanType as String), style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -1184,7 +1183,7 @@ class _DownPaymentRow extends ConsumerWidget {
           controller: ctrl,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
-            labelText: s.downPayment,
+            labelText: s.downPayment as String,
             suffixText: inputState.downPaymentAsDollar ? null : '%',
             prefixText: inputState.downPaymentAsDollar ? '\$' : null,
             border: OutlineInputBorder(
@@ -1348,7 +1347,7 @@ class _ModeBtn extends StatelessWidget {
 // ── Breakdown card ────────────────────────────────────────────────────────────
 
 class _BreakdownCard extends StatelessWidget {
-  final dynamic result;
+  final MortgageResult? result;
   final NumberFormat fmt;
   final NumberFormat fmtK;
   final dynamic s;
@@ -1372,15 +1371,15 @@ class _BreakdownCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(children: [
-          _Row(s.principal, fmt.format(m.principal)),
-          _Row(s.interest, fmt.format(m.interest)),
-          _Row(s.propertyTax, fmt.format(m.propertyTax)),
-          _Row(s.homeInsurance, fmt.format(m.homeInsurance)),
-          if (m.hoa > 0) _Row(s.hoa, fmt.format(m.hoa)),
+          _Row((s.principal as String), fmt.format(m.principal)),
+          _Row((s.interest as String), fmt.format(m.interest)),
+          _Row((s.propertyTax as String), fmt.format(m.propertyTax)),
+          _Row((s.homeInsurance as String), fmt.format(m.homeInsurance)),
+          if (m.hoa > 0) _Row((s.hoa as String), fmt.format(m.hoa)),
           if (m.pmi > 0)
             _Row(
               result!.isUsda
-                  ? s.usdaFeeLabel
+                  ? (s.usdaFeeLabel as String)
                   : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
               fmt.format(m.pmi),
               color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
@@ -1401,11 +1400,11 @@ class _BreakdownCard extends StatelessWidget {
                     ),
             ),
           const Divider(height: 24),
-          _Row(s.totalPITI, fmt.format(m.pitiPayment), bold: true),
+          _Row((s.totalPITI as String), fmt.format(m.pitiPayment), bold: true),
           const SizedBox(height: 8),
-          _Row(s.totalInterest, fmtK.format(result!.totalInterest)),
-          _Row(s.totalCost, fmtK.format(result!.totalCost)),
-          _Row(s.payoffDate,
+          _Row((s.totalInterest as String), fmtK.format(result!.totalInterest)),
+          _Row((s.totalCost as String), fmtK.format(result!.totalCost)),
+          _Row((s.payoffDate as String),
               '${result!.payoffDate.month}/${result!.payoffDate.year}'),
           _Row(
             isEs ? 'LTV' : 'LTV',

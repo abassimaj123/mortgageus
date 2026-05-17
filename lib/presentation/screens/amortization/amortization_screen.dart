@@ -597,21 +597,21 @@ class _SummaryCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(s.loanSummary,
+        Text((s.loanSummary as String),
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
                 ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         // Show home price + down payment for clarity
-        _SummaryRow(s.homePrice,
+        _SummaryRow((s.homePrice as String),
             '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
-        _SummaryRow(s.loanAmount, fmt.format(result.loanAmount)),
-        _SummaryRow(s.payoffDate, fmtDate.format(result.payoffDate)),
-        _SummaryRow(s.totalInterest, fmt.format(result.totalInterest)),
-        _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
+        _SummaryRow((s.loanAmount as String), fmt.format(result.loanAmount)),
+        _SummaryRow((s.payoffDate as String), fmtDate.format(result.payoffDate as DateTime)),
+        _SummaryRow((s.totalInterest as String), fmt.format(result.totalInterest)),
+        _SummaryRow((s.totalPayments as String), fmt.format(result.totalCost)),
         if (result.pmiDropMonth != null)
-          _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
+          _SummaryRow((s.pmiRemoved as String), 'Month ${result.pmiDropMonth}'),
       ]),
     );
   }
@@ -697,9 +697,9 @@ class _YearTileState extends State<_YearTile> {
     final isCurrentYear = group.isCurrentYear;
 
     final badges = <Widget>[];
-    if (group.hasPmiDrop) badges.add(_Badge(s.pmiRemoved, Colors.green));
-    if (group.isHalfway) badges.add(_Badge(s.halfway, Colors.blue));
-    if (group.isLastYear) badges.add(_Badge(s.paidOff, AppTheme.secondary));
+    if (group.hasPmiDrop) badges.add(_Badge((s.pmiRemoved as String), Colors.green));
+    if (group.isHalfway) badges.add(_Badge((s.halfway as String), Colors.blue));
+    if (group.isLastYear) badges.add(_Badge((s.paidOff as String), AppTheme.secondary));
 
     return Semantics(
       label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '
@@ -761,15 +761,15 @@ class _YearTileState extends State<_YearTile> {
                       const SizedBox(height: 6),
                       Wrap(spacing: 6, runSpacing: 4, children: [
                         _MetricChip(
-                            label: s.balance,
+                            label: (s.balance as String),
                             value: fmt.format(group.endBalance),
                             color: AppTheme.primary),
                         _MetricChip(
-                            label: s.interest,
+                            label: (s.interest as String),
                             value: fmt.format(group.yearlyInterest),
                             color: AppTheme.secondary),
                         _MetricChip(
-                            label: s.principal,
+                            label: (s.principal as String),
                             value: fmt.format(group.yearlyPrincipal),
                             color: AppTheme.accentGood),
                       ]),
@@ -852,13 +852,13 @@ class _MonthSubTable extends StatelessWidget {
         color: AppTheme.primary.withValues(alpha: 0.85),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: Row(children: [
-          _HCell(s.colMo, 1),
-          _HCell(s.colDate, 2),
-          _HCell(s.colPmt, 2),
-          _HCell(s.colInt, 2),
-          _HCell(s.colPrinc, 2),
-          _HCell(s.colBal, 2),
-          if (hasPmi) _HCell(s.pmi, 2),
+          _HCell((s.colMo as String), 1),
+          _HCell((s.colDate as String), 2),
+          _HCell((s.colPmt as String), 2),
+          _HCell((s.colInt as String), 2),
+          _HCell((s.colPrinc as String), 2),
+          _HCell((s.colBal as String), 2),
+          if (hasPmi) _HCell((s.pmi as String), 2),
         ]),
       ),
       // Month rows
@@ -886,7 +886,7 @@ class _MonthSubTable extends StatelessWidget {
               if (hasPmi)
                 _Cell(
                     e.pmiDropped
-                        ? s.off
+                        ? (s.off as String)
                         : e.pmiAmount > 0
                             ? fmt.format(e.pmiAmount)
                             : '-',
@@ -911,12 +911,12 @@ class _MonthlyHeader extends StatelessWidget {
           color: AppTheme.primary,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
           child: Row(children: [
-            _HCell(s.colMo, 1),
-            _HCell(s.colDate, 2),
-            _HCell(s.colPmt, 2),
-            _HCell(s.colPrinc, 2),
-            _HCell(s.colInt, 2),
-            _HCell(s.colBal, 2),
+            _HCell((s.colMo as String), 1),
+            _HCell((s.colDate as String), 2),
+            _HCell((s.colPmt as String), 2),
+            _HCell((s.colPrinc as String), 2),
+            _HCell((s.colInt as String), 2),
+            _HCell((s.colBal as String), 2),
           ]),
         ),
       );

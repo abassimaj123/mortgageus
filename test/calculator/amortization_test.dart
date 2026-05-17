@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mortgage_us/domain/models/amortization_entry.dart';
 import 'package:mortgage_us/domain/usecases/mortgage_calculator.dart';
 
-List<dynamic> _schedule(double loan, double rateDecimal, int years) =>
+List<AmortizationEntry> _schedule(double loan, double rateDecimal, int years) =>
     MortgageCalculator.buildSchedule(
       loanAmount: loan,
       annualRatePct: rateDecimal * 100,

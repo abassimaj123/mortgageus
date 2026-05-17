@@ -552,7 +552,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         final dynamic str = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
             appBar: AppBar(
-              title: Text(str.navHistory),
+              title: Text(str.navHistory as String),
               actions: [
                 if (_compareMode && _selectedIds.length == 2)
                   TextButton(

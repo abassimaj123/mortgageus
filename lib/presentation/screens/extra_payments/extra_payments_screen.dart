@@ -94,7 +94,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
       builder: (context, isEs, _) {
         final dynamic s = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
-          appBar: AppBar(title: Text(s.extraTitle)),
+          appBar: AppBar(title: Text((s.extraTitle as String))),
           body: Column(
             children: [
               Expanded(
@@ -139,18 +139,18 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                             ]),
                           ),
                           const SizedBox(height: 16),
-                          Text(s.extraSection,
+                          Text((s.extraSection as String),
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: AppTextSize.bodyLg)),
                           const SizedBox(height: 12),
-                          _field(s.extraMonthly, _extraMonthlyCtrl,
+                          _field((s.extraMonthly as String), _extraMonthlyCtrl,
                               prefix: '\$', currency: true),
-                          _field(s.extraAnnual, _extraAnnualCtrl,
+                          _field((s.extraAnnual as String), _extraAnnualCtrl,
                               prefix: '\$', currency: true),
-                          _field(s.lumpSum, _lumpSumCtrl,
+                          _field((s.lumpSum as String), _lumpSumCtrl,
                               prefix: '\$', currency: true),
-                          _field(s.lumpSumMonth, _lumpMonthCtrl),
+                          _field((s.lumpSumMonth as String), _lumpMonthCtrl),
                           const SizedBox(height: 8),
                           SizedBox(
                             width: double.infinity,
@@ -158,7 +158,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                               onPressed: () => _calculate(inputState),
                               style: ElevatedButton.styleFrom(
                                   padding: const EdgeInsets.all(AppSpacing.lg)),
-                              child: Text(s.calcSavings,
+                              child: Text((s.calcSavings as String),
                                   style: const TextStyle(
                                       fontSize: AppTextSize.bodyLg)),
                             ),
@@ -210,22 +210,22 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Column(children: [
                                   _ResultRow(
-                                      s.originalPayoff,
+                                      (s.originalPayoff as String),
                                       '${r.originalPayoffMonths} ${s.months}'
                                       ' (${r.originalPayoffMonths ~/ 12} ${s.years})'),
                                   _ResultRow(
-                                      s.newPayoff,
+                                      (s.newPayoff as String),
                                       '${r.newPayoffMonths} ${s.months}'
                                       ' (${r.newPayoffMonths ~/ 12} ${s.years})'),
-                                  _ResultRow(s.timeSaved,
+                                  _ResultRow((s.timeSaved as String),
                                       '${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}',
                                       color: AppTheme.accentGood),
                                   const Divider(height: 24),
-                                  _ResultRow(s.origTotalInt,
+                                  _ResultRow((s.origTotalInt as String),
                                       _fmt.format(r.originalTotalInterest)),
-                                  _ResultRow(s.newTotalInt,
+                                  _ResultRow((s.newTotalInt as String),
                                       _fmt.format(r.newTotalInterest)),
-                                  _ResultRow(s.interestSavedRow,
+                                  _ResultRow((s.interestSavedRow as String),
                                       _fmt.format(r.interestSaved),
                                       color: AppTheme.accentGood, bold: true),
                                 ]),

@@ -37,7 +37,7 @@ class InfoTooltip extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(s.ok),
+                child: Text(s.ok as String),
               ),
             ],
           ),

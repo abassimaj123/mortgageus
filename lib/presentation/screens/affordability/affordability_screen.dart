@@ -327,7 +327,7 @@ class _TermRow extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(s.loanTerm, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text((s.loanTerm as String), style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(
               children: MortgageConstants.termPresets.map((t) {
@@ -375,7 +375,7 @@ class _ResultCard extends StatelessWidget {
       Row(children: [
         Expanded(
             child: _PriceCard(
-          label: s.affordConservative,
+          label: (s.affordConservative as String),
           price: r.maxHomePriceConservative,
           fmt: fmt,
           color: AppTheme.accentGood,
@@ -383,7 +383,7 @@ class _ResultCard extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
             child: _PriceCard(
-          label: s.affordStandard,
+          label: (s.affordStandard as String),
           price: r.maxHomePriceStandard > 0
               ? r.maxHomePriceStandard
               : r.maxHomePriceConservative,
@@ -401,20 +401,20 @@ class _ResultCard extends StatelessWidget {
           child: Column(children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(s.affordBreakdown,
+              child: Text((s.affordBreakdown as String),
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: AppTextSize.bodyMd)),
             ),
             const Divider(height: 20),
-            _Row('${s.principal} & ${s.interest}', fmt.format(r.monthlyPI)),
-            _Row(s.propertyTax, fmt.format(r.monthlyTax)),
-            _Row(s.homeInsurance, fmt.format(r.monthlyInsurance)),
+            _Row('${(s.principal as String)} & ${(s.interest as String)}', fmt.format(r.monthlyPI)),
+            _Row((s.propertyTax as String), fmt.format(r.monthlyTax)),
+            _Row((s.homeInsurance as String), fmt.format(r.monthlyInsurance)),
             if (r.monthlyPMI > 0)
-              _Row(s.pmi, fmt.format(r.monthlyPMI), color: Colors.orange),
-            if (r.monthlyHOA > 0) _Row(s.hoa, fmt.format(r.monthlyHOA)),
+              _Row((s.pmi as String), fmt.format(r.monthlyPMI), color: Colors.orange),
+            if (r.monthlyHOA > 0) _Row((s.hoa as String), fmt.format(r.monthlyHOA)),
             const Divider(height: 20),
-            _Row(s.totalPITI, fmt.format(r.totalMonthly), bold: true),
+            _Row((s.totalPITI as String), fmt.format(r.totalMonthly), bold: true),
           ]),
         ),
       ),

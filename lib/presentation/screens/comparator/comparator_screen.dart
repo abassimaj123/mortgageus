@@ -209,7 +209,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       Row(children: [
                         Expanded(
                             child: _ModeToggleBtn(
-                          label: str.standardMode,
+                          label: (str.standardMode as String),
                           icon: Icons.compare_arrows,
                           selected: !_armMode,
                           onTap: () => setState(() => _armMode = false),
@@ -217,7 +217,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                             child: _ModeToggleBtn(
-                          label: str.armMode,
+                          label: (str.armMode as String),
                           icon: Icons.show_chart,
                           selected: _armMode,
                           onTap: () async {
@@ -234,18 +234,18 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       const SizedBox(height: 20),
                       // Standard mode
                       if (!_armMode) ...[
-                        Text(str.scenarioComp,
+                        Text((str.scenarioComp as String),
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: AppTextSize.subtitle)),
                         const SizedBox(height: 4),
-                        Text(str.scenarioDesc,
+                        Text((str.scenarioDesc as String),
                             style: TextStyle(
                                 color: AppTheme.labelGray,
                                 fontSize: AppTextSize.md)),
                         const SizedBox(height: 16),
                         if (r30 == null || r15 == null)
-                          Center(child: Text(str.enterValid))
+                          Center(child: Text((str.enterValid as String)))
                         else
                           _CompareTable(
                               r30: r30, r15: r15, fmt: fmt, fmtK: fmtK, s: str),
@@ -261,7 +261,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                         ),
                         const SizedBox(height: 16),
                         if (armRes == null)
-                          Center(child: Text(str.enterValid))
+                          Center(child: Text((str.enterValid as String)))
                         else
                           _ArmCompareTable(
                             arm: armRes,
@@ -357,37 +357,37 @@ class _CompareTable extends StatelessWidget {
       // Column headers
       Row(children: [
         const Expanded(flex: 3, child: SizedBox()),
-        Expanded(flex: 4, child: _ScenarioHeader(s.yr30, AppTheme.primary)),
+        Expanded(flex: 4, child: _ScenarioHeader((s.yr30 as String), AppTheme.primary)),
         const SizedBox(width: 8),
-        Expanded(flex: 4, child: _ScenarioHeader(s.yr15, AppTheme.accentGood)),
+        Expanded(flex: 4, child: _ScenarioHeader((s.yr15 as String), AppTheme.accentGood)),
       ]),
       const SizedBox(height: 12),
       _CompareRow(
-        label: s.monthlyPILabel,
+        label: (s.monthlyPILabel as String),
         val30: fmt.format(r30.monthly.piPayment),
         val15: fmt.format(r15.monthly.piPayment),
         winner: 30, // 30yr lower monthly
       ),
       _CompareRow(
-        label: s.monthlyPITI,
+        label: (s.monthlyPITI as String),
         val30: fmt.format(r30.monthly.pitiPayment),
         val15: fmt.format(r15.monthly.pitiPayment),
         winner: 30,
       ),
       _CompareRow(
-        label: s.totalInterest,
+        label: (s.totalInterest as String),
         val30: fmtK.format(r30.totalInterest),
         val15: fmtK.format(r15.totalInterest),
         winner: 15, // 15yr saves interest
       ),
       _CompareRow(
-        label: s.totalCost,
+        label: (s.totalCost as String),
         val30: fmtK.format(r30.totalCost),
         val15: fmtK.format(r15.totalCost),
         winner: 15,
       ),
       _CompareRow(
-        label: s.payoffDate,
+        label: (s.payoffDate as String),
         val30: '${r30.payoffDate.month}/${r30.payoffDate.year}',
         val15: '${r15.payoffDate.month}/${r15.payoffDate.year}',
         winner: 15, // 15yr payoff sooner
@@ -404,7 +404,7 @@ class _CompareTable extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(s.advantage15,
+            Text((s.advantage15 as String),
                 style: TextStyle(
                   color: AppTheme.accentGood,
                   fontWeight: FontWeight.bold,
@@ -418,7 +418,7 @@ class _CompareTable extends StatelessWidget {
                 '${s.paidOff15} ${(r30.payoffDate.year - r15.payoffDate.year)} ${s.yearsEarlier}',
                 style: const TextStyle(fontSize: AppTextSize.md)),
             const Divider(height: 20),
-            Text(s.advantage30,
+            Text((s.advantage30 as String),
                 style: TextStyle(
                   color: AppTheme.primary,
                   fontWeight: FontWeight.bold,
@@ -587,7 +587,7 @@ class _ArmControls extends StatelessWidget {
   Widget build(BuildContext context) {
     const presets = [3, 5, 7, 10];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(s.armFixedPeriod,
+      Text((s.armFixedPeriod as String),
           style: const TextStyle(
               fontWeight: FontWeight.w600, fontSize: AppTextSize.body)),
       const SizedBox(height: 8),
@@ -615,7 +615,7 @@ class _ArmControls extends StatelessWidget {
         controller: rateCtrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
-          labelText: s.armAdjRate,
+          labelText: s.armAdjRate as String?,
           suffixText: '%',
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
@@ -664,25 +664,25 @@ class _ArmCompareTable extends StatelessWidget {
       ]),
       const SizedBox(height: 12),
       _CompareRow(
-        label: s.armPaymentDuring,
+        label: (s.armPaymentDuring as String),
         val30: fmt.format(arm.fixedPayment),
         val15: fmt.format(arm.payment1),
         winner: arm.payment1 < arm.fixedPayment ? 15 : 30,
       ),
       _CompareRow(
-        label: s.armPaymentAfter,
+        label: (s.armPaymentAfter as String),
         val30: fmt.format(arm.fixedPayment),
         val15: fmt.format(arm.payment2),
         winner: arm.payment2 < arm.fixedPayment ? 15 : 30,
       ),
       _CompareRow(
-        label: s.armTotalInterest,
+        label: (s.armTotalInterest as String),
         val30: fmtK.format(arm.fixedTotalInterest),
         val15: fmtK.format(arm.totalInterest),
         winner: armIsCheaper ? 15 : 30,
       ),
       _CompareRow(
-        label: s.armTotalCost,
+        label: (s.armTotalCost as String),
         val30: fmtK.format(
             (arm.totalCost - arm.totalInterest) + arm.fixedTotalInterest),
         val15: fmtK.format(arm.totalCost),
@@ -712,7 +712,7 @@ class _ArmCompareTable extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               if (arm.breakEvenMonths == null)
-                Text(s.armAlwaysBetter,
+                Text((s.armAlwaysBetter as String),
                     style: TextStyle(
                         color: AppTheme.accentGood, fontSize: AppTextSize.md))
               else

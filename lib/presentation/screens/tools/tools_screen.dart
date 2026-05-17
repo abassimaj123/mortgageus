@@ -31,8 +31,8 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.add_circle_outline,
             iconSelected: Icons.add_circle,
             color: AppTheme.primary,
-            title: s.toolExtra,
-            subtitle: s.toolExtraSub,
+            title: (s.toolExtra as String),
+            subtitle: (s.toolExtraSub as String),
             onTap: () => Navigator.push(
                 context,
                 PageRouteBuilder(
@@ -46,8 +46,8 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.refresh_rounded,
             iconSelected: Icons.refresh_rounded,
             color: AppTheme.toolRefi,
-            title: s.toolRefi,
-            subtitle: s.toolRefiSub,
+            title: (s.toolRefi as String),
+            subtitle: (s.toolRefiSub as String),
             onTap: () => Navigator.push(
                 context,
                 PageRouteBuilder(
@@ -78,8 +78,8 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.swap_horiz_rounded,
             iconSelected: Icons.swap_horiz,
             color: AppTheme.toolRefi,
-            title: s.toolArm,
-            subtitle: s.toolArmSub,
+            title: (s.toolArm as String),
+            subtitle: (s.toolArmSub as String),
             onTap: () => Navigator.push(
                 context,
                 PageRouteBuilder(
@@ -93,8 +93,8 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.trending_up_rounded,
             iconSelected: Icons.trending_up,
             color: const Color(0xFF0D9488), // teal-600
-            title: s.toolInvestment,
-            subtitle: s.toolInvestmentSub,
+            title: (s.toolInvestment as String),
+            subtitle: (s.toolInvestmentSub as String),
             onTap: () => Navigator.push(
                 context,
                 PageRouteBuilder(
@@ -198,8 +198,8 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.history_rounded,
             iconSelected: Icons.history,
             color: AppTheme.toolHistory,
-            title: s.toolHistory,
-            subtitle: s.toolHistorySub,
+            title: (s.toolHistory as String),
+            subtitle: (s.toolHistorySub as String),
             onTap: () {
               HistoryScreen.refreshNotifier.value++;
               Navigator.push(

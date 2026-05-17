@@ -15,7 +15,7 @@ dependencies:
   fl_chart: ^0.68.0
   pdf: ^3.11.1
   printing: ^5.13.1
-  share_plus: ^10.1.4
+  share_plus: ^13.1.0
   in_app_review: ^2.0.9
   google_mobile_ads: ^5.1.0
   shared_preferences: ^2.2.3

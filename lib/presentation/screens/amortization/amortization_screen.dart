@@ -607,10 +607,9 @@ class _SummaryCard extends StatelessWidget {
         _SummaryRow(s.homePrice,
             '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
         _SummaryRow(s.loanAmount, fmt.format(result.loanAmount)),
-        _SummaryRow(s.payoffDate,
-            fmtDate.format(result.payoffDate as DateTime)),
         _SummaryRow(
-            s.totalInterest, fmt.format(result.totalInterest)),
+            s.payoffDate, fmtDate.format(result.payoffDate as DateTime)),
+        _SummaryRow(s.totalInterest, fmt.format(result.totalInterest)),
         _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
         if (result.pmiDropMonth != null)
           _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
@@ -699,11 +698,9 @@ class _YearTileState extends State<_YearTile> {
     final isCurrentYear = group.isCurrentYear;
 
     final badges = <Widget>[];
-    if (group.hasPmiDrop)
-      badges.add(_Badge(s.pmiRemoved, Colors.green));
+    if (group.hasPmiDrop) badges.add(_Badge(s.pmiRemoved, Colors.green));
     if (group.isHalfway) badges.add(_Badge(s.halfway, Colors.blue));
-    if (group.isLastYear)
-      badges.add(_Badge(s.paidOff, AppTheme.secondary));
+    if (group.isLastYear) badges.add(_Badge(s.paidOff, AppTheme.secondary));
 
     return Semantics(
       label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '

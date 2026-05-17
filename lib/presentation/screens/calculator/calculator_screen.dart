@@ -248,8 +248,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Home Price
-                              _buildField(
-                                  s.homePrice, _homePriceCtrl,
+                              _buildField(s.homePrice, _homePriceCtrl,
                                   prefix: '\$',
                                   required: true,
                                   currency: true,
@@ -354,8 +353,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   ),
                                   padding: const EdgeInsets.all(AppSpacing.md),
                                   child: Column(children: [
-                                    _buildField(
-                                        s.propertyTaxRate, _taxCtrl,
+                                    _buildField(s.propertyTaxRate, _taxCtrl,
                                         suffix: '%',
                                         onChanged: (v) =>
                                             notifier.updatePropertyTaxRate(
@@ -363,8 +361,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                         ',', '.')) ??
                                                     1.1)),
                                     const SizedBox(height: 12),
-                                    _buildField(s.homeInsurance,
-                                        _insuranceCtrl,
+                                    _buildField(s.homeInsurance, _insuranceCtrl,
                                         prefix: '\$',
                                         suffix: '/yr',
                                         onChanged: (v) =>
@@ -559,8 +556,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 },
                                                 icon: const Icon(
                                                     Icons.bookmark_add_rounded),
-                                                label: Text(
-                                                    s.saveCalc),
+                                                label: Text(s.saveCalc),
                                                 style: ElevatedButton.styleFrom(
                                                   minimumSize: const Size(
                                                       double.infinity, 52),
@@ -1024,9 +1020,7 @@ class _HeroCard extends StatelessWidget {
             const SizedBox(height: 12),
             Wrap(spacing: 8, children: [
               _Badge(
-                label: result!.isJumbo
-                    ? s.jumbo
-                    : s.conforming,
+                label: result!.isJumbo ? s.jumbo : s.conforming,
                 color:
                     result!.isJumbo ? AppTheme.accentWarn : AppTheme.accentGood,
               ),
@@ -1040,9 +1034,7 @@ class _HeroCard extends StatelessWidget {
               ),
               if (result!.hasPmi)
                 _Badge(
-                  label: result!.isUsda
-                      ? s.usdaFee
-                      : s.pmi,
+                  label: result!.isUsda ? s.usdaFee : s.pmi,
                   color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
                 ),
             ]),
@@ -1089,8 +1081,7 @@ class _TermSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(s.loanTerm,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(s.loanTerm, style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Row(
           children: MortgageConstants.termPresets.map((term) {
@@ -1140,8 +1131,7 @@ class _LoanTypeSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(s.loanType,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(s.loanType, style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,

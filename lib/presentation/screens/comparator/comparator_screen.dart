@@ -353,13 +353,9 @@ class _CompareTable extends StatelessWidget {
       // Column headers
       Row(children: [
         const Expanded(flex: 3, child: SizedBox()),
-        Expanded(
-            flex: 4,
-            child: _ScenarioHeader(s.yr30, AppTheme.primary)),
+        Expanded(flex: 4, child: _ScenarioHeader(s.yr30, AppTheme.primary)),
         const SizedBox(width: 8),
-        Expanded(
-            flex: 4,
-            child: _ScenarioHeader(s.yr15, AppTheme.accentGood)),
+        Expanded(flex: 4, child: _ScenarioHeader(s.yr15, AppTheme.accentGood)),
       ]),
       const SizedBox(height: 12),
       _CompareRow(

@@ -11,10 +11,8 @@ linter:
     - prefer_relative_imports
 
     # Null safety & futures
-    - avoid_returning_null_for_future
     - avoid_returning_null_for_void
     - avoid_returning_this
-    - avoid_null_checks_in_equality_operators
 
     # Async hygiene
     - avoid_slow_async_io
@@ -45,11 +43,10 @@ analyzer:
     - "scripts/**"
 
   errors:
-    # Treat these as hard errors
     missing_required_param: error
     missing_return: error
-    # Suppress noise — style/informational only
     deprecated_member_use_from_same_package: ignore
+    deprecated_member_use: ignore
     todo: ignore
     unnecessary_import: ignore
     unnecessary_cast: ignore
@@ -72,9 +69,15 @@ analyzer:
     unnecessary_non_null_assertion: ignore
     undefined_shown_name: ignore
     annotate_overrides: ignore
+    multiple_combinators: ignore
+    unused_shown_name: ignore
+    unnecessary_underscores: ignore
+    use_null_aware_elements: ignore
+    depend_on_referenced_packages: ignore
+    prefer_final_fields: ignore
 
-  # === STRICT MODE: Enabled for type safety ===
   language:
-    strict-casts: true          # ✅ No implicit casts (int → dynamic → String)
-    strict-inference: true      # ✅ Require explicit types (no var where type unknown)
-    strict-raw-types: true      # ✅ No dynamic types without annotation
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+

@@ -343,9 +343,7 @@ class _ResultCard extends StatelessWidget {
             // Break-even
             if (r.breakEvenMonths == null)
               _breakEvenBanner(
-                isEs
-                    ? s.armAlwaysBetter
-                    : s.armAlwaysBetter,
+                isEs ? s.armAlwaysBetter : s.armAlwaysBetter,
                 AppTheme.accentGood,
               )
             else

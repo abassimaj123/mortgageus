@@ -325,8 +325,7 @@ class _TermRow extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(s.loanTerm,
-              style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(s.loanTerm, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(
               children: MortgageConstants.termPresets.map((t) {
@@ -406,18 +405,14 @@ class _ResultCard extends StatelessWidget {
                       fontSize: AppTextSize.bodyMd)),
             ),
             const Divider(height: 20),
-            _Row('${s.principal} & ${s.interest}',
-                fmt.format(r.monthlyPI)),
+            _Row('${s.principal} & ${s.interest}', fmt.format(r.monthlyPI)),
             _Row(s.propertyTax, fmt.format(r.monthlyTax)),
             _Row(s.homeInsurance, fmt.format(r.monthlyInsurance)),
             if (r.monthlyPMI > 0)
-              _Row(s.pmi, fmt.format(r.monthlyPMI),
-                  color: Colors.orange),
-            if (r.monthlyHOA > 0)
-              _Row(s.hoa, fmt.format(r.monthlyHOA)),
+              _Row(s.pmi, fmt.format(r.monthlyPMI), color: Colors.orange),
+            if (r.monthlyHOA > 0) _Row(s.hoa, fmt.format(r.monthlyHOA)),
             const Divider(height: 20),
-            _Row(s.totalPITI, fmt.format(r.totalMonthly),
-                bold: true),
+            _Row(s.totalPITI, fmt.format(r.totalMonthly), bold: true),
           ]),
         ),
       ),

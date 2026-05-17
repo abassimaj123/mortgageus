@@ -33,14 +33,14 @@ class SettingsScreen extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         return CalcwiseSettingsScaffold(
-          title: (s.settingsTitle as String),
+          title: s.settingsTitle,
           bottomNavigationBar: const CalcwiseAdFooter(),
           children: [
             // ── Language ───────────────────────────────────────
             CalcwiseSettingsSection(
-              title: (s.language as String),
+              title: s.language,
               children: [
                 Padding(
                   padding:
@@ -86,21 +86,21 @@ class SettingsScreen extends StatelessWidget {
                         ListTile(
                           leading:
                               const Icon(Icons.verified, color: Colors.amber),
-                          title: Text((s.premiumActive as String)),
-                          subtitle: Text((s.premiumSubtitle as String)),
+                          title: Text(s.premiumActive),
+                          subtitle: Text(s.premiumSubtitle),
                         ),
                       ]
                     : [
                         CalcwiseSettingsTile(
                           icon: Icons.star_rounded,
-                          label: (s.getPremium as String),
+                          label: s.getPremium,
                           subtitle: s.premiumSubtitle as String?,
                           trailing: '\$2.99',
                           onTap: () => IAPService.instance.buy(),
                         ),
                         CalcwiseSettingsTile(
                           icon: Icons.restore,
-                          label: (s.restorePurchase as String),
+                          label: s.restorePurchase,
                           onTap: () => IAPService.instance.restore(),
                         ),
                         if (kDebugMode)
@@ -115,16 +115,16 @@ class SettingsScreen extends StatelessWidget {
             const Divider(height: 1),
             // ── Support ────────────────────────────────────────
             CalcwiseSettingsSection(
-              title: (s.support as String),
+              title: s.support,
               children: [
                 CalcwiseSettingsTile(
                   icon: Icons.email_rounded,
-                  label: (s.contactSupport as String),
+                  label: s.contactSupport,
                   onTap: () => _launch('mailto:support@mortgageus.app'),
                 ),
                 CalcwiseSettingsTile(
                   icon: Icons.privacy_tip_rounded,
-                  label: (s.privacyPolicy as String),
+                  label: s.privacyPolicy,
                   onTap: () => _launch('https://calqwise.com/privacy'),
                 ),
                 CalcwiseRateAppTile(
@@ -134,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
             const Divider(height: 1),
             // ── Discover ───────────────────────────────────────
             CalcwiseSettingsSection(
-              title: (s.discover as String),
+              title: s.discover,
               children: [
                 CalcwiseSettingsTile(
                   icon: Icons.apps_rounded,
@@ -158,7 +158,7 @@ class SettingsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Text(
-                (s.disclaimer as String),
+                s.disclaimer,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: const Color(0xFF475569),
                       fontStyle: FontStyle.italic,

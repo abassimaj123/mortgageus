@@ -8,8 +8,6 @@ import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../../presentation/widgets/paywall_soft.dart';
-import '../../../presentation/widgets/paywall_hard.dart';
 
 /// FHA Loan Calculator
 /// Min 3.5% down. Upfront MIP = 1.75% of loan (financed).

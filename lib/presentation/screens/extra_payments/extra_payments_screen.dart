@@ -11,8 +11,6 @@ import '../../../main.dart' show adService, paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../widgets/paywall_soft.dart';
-import '../../widgets/paywall_hard.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 
@@ -92,9 +90,9 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
-          appBar: AppBar(title: Text((s.extraTitle as String))),
+          appBar: AppBar(title: Text(s.extraTitle)),
           body: Column(
             children: [
               Expanded(
@@ -139,18 +137,18 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                             ]),
                           ),
                           const SizedBox(height: 16),
-                          Text((s.extraSection as String),
+                          Text(s.extraSection,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: AppTextSize.bodyLg)),
                           const SizedBox(height: 12),
-                          _field((s.extraMonthly as String), _extraMonthlyCtrl,
+                          _field(s.extraMonthly, _extraMonthlyCtrl,
                               prefix: '\$', currency: true),
-                          _field((s.extraAnnual as String), _extraAnnualCtrl,
+                          _field(s.extraAnnual, _extraAnnualCtrl,
                               prefix: '\$', currency: true),
-                          _field((s.lumpSum as String), _lumpSumCtrl,
+                          _field(s.lumpSum, _lumpSumCtrl,
                               prefix: '\$', currency: true),
-                          _field((s.lumpSumMonth as String), _lumpMonthCtrl),
+                          _field(s.lumpSumMonth, _lumpMonthCtrl),
                           const SizedBox(height: 8),
                           SizedBox(
                             width: double.infinity,
@@ -158,7 +156,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                               onPressed: () => _calculate(inputState),
                               style: ElevatedButton.styleFrom(
                                   padding: const EdgeInsets.all(AppSpacing.lg)),
-                              child: Text((s.calcSavings as String),
+                              child: Text(s.calcSavings,
                                   style: const TextStyle(
                                       fontSize: AppTextSize.bodyLg)),
                             ),
@@ -210,22 +208,22 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Column(children: [
                                   _ResultRow(
-                                      (s.originalPayoff as String),
+                                      s.originalPayoff,
                                       '${r.originalPayoffMonths} ${s.months}'
                                       ' (${r.originalPayoffMonths ~/ 12} ${s.years})'),
                                   _ResultRow(
-                                      (s.newPayoff as String),
+                                      s.newPayoff,
                                       '${r.newPayoffMonths} ${s.months}'
                                       ' (${r.newPayoffMonths ~/ 12} ${s.years})'),
-                                  _ResultRow((s.timeSaved as String),
+                                  _ResultRow(s.timeSaved,
                                       '${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}',
                                       color: AppTheme.accentGood),
                                   const Divider(height: 24),
-                                  _ResultRow((s.origTotalInt as String),
+                                  _ResultRow(s.origTotalInt,
                                       _fmt.format(r.originalTotalInterest)),
-                                  _ResultRow((s.newTotalInt as String),
+                                  _ResultRow(s.newTotalInt,
                                       _fmt.format(r.newTotalInterest)),
-                                  _ResultRow((s.interestSavedRow as String),
+                                  _ResultRow(s.interestSavedRow,
                                       _fmt.format(r.interestSaved),
                                       color: AppTheme.accentGood, bold: true),
                                 ]),

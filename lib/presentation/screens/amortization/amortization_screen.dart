@@ -8,10 +8,10 @@ import '../../../core/freemium/freemium_service.dart';
 import '../../../core/freemium/iap_service.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
+import '../../../domain/models/mortgage_result.dart';
 import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
-import 'package:calcwise_core/calcwise_core.dart' show CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart';
 
 const _kFreeMonthLimit = 24; // 2 years free, full schedule = premium
@@ -568,11 +568,11 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 
 // ── Summary card ──────────────────────────────────────────────────────────────
 class _SummaryCard extends StatelessWidget {
-  final dynamic result;
-  final dynamic inputState;
+  final MortgageResult result;
+  final MortgageInputState inputState;
   final NumberFormat fmt;
   final DateFormat fmtDate;
-  final dynamic s;
+  final AppStrings s;
 
   const _SummaryCard(
       {required this.result,
@@ -597,23 +597,23 @@ class _SummaryCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text((s.loanSummary as String),
+        Text(s.loanSummary,
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
                 ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         // Show home price + down payment for clarity
-        _SummaryRow((s.homePrice as String),
+        _SummaryRow(s.homePrice,
             '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
-        _SummaryRow((s.loanAmount as String), fmt.format(result.loanAmount)),
-        _SummaryRow((s.payoffDate as String),
+        _SummaryRow(s.loanAmount, fmt.format(result.loanAmount)),
+        _SummaryRow(s.payoffDate,
             fmtDate.format(result.payoffDate as DateTime)),
         _SummaryRow(
-            (s.totalInterest as String), fmt.format(result.totalInterest)),
-        _SummaryRow((s.totalPayments as String), fmt.format(result.totalCost)),
+            s.totalInterest, fmt.format(result.totalInterest)),
+        _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
         if (result.pmiDropMonth != null)
-          _SummaryRow((s.pmiRemoved as String), 'Month ${result.pmiDropMonth}'),
+          _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
       ]),
     );
   }
@@ -643,7 +643,7 @@ class _SummaryRow extends StatelessWidget {
 class _YearlyList extends StatelessWidget {
   final List<_YearGroup> years;
   final NumberFormat fmt;
-  final dynamic s;
+  final AppStrings s;
   final bool isPremium;
   const _YearlyList(
       {required this.years,
@@ -682,7 +682,7 @@ class _YearlyList extends StatelessWidget {
 class _YearTile extends StatefulWidget {
   final _YearGroup group;
   final NumberFormat fmt;
-  final dynamic s;
+  final AppStrings s;
   const _YearTile({required this.group, required this.fmt, required this.s});
   @override
   State<_YearTile> createState() => _YearTileState();
@@ -700,10 +700,10 @@ class _YearTileState extends State<_YearTile> {
 
     final badges = <Widget>[];
     if (group.hasPmiDrop)
-      badges.add(_Badge((s.pmiRemoved as String), Colors.green));
-    if (group.isHalfway) badges.add(_Badge((s.halfway as String), Colors.blue));
+      badges.add(_Badge(s.pmiRemoved, Colors.green));
+    if (group.isHalfway) badges.add(_Badge(s.halfway, Colors.blue));
     if (group.isLastYear)
-      badges.add(_Badge((s.paidOff as String), AppTheme.secondary));
+      badges.add(_Badge(s.paidOff, AppTheme.secondary));
 
     return Semantics(
       label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '
@@ -765,15 +765,15 @@ class _YearTileState extends State<_YearTile> {
                       const SizedBox(height: 6),
                       Wrap(spacing: 6, runSpacing: 4, children: [
                         _MetricChip(
-                            label: (s.balance as String),
+                            label: s.balance,
                             value: fmt.format(group.endBalance),
                             color: AppTheme.primary),
                         _MetricChip(
-                            label: (s.interest as String),
+                            label: s.interest,
                             value: fmt.format(group.yearlyInterest),
                             color: AppTheme.secondary),
                         _MetricChip(
-                            label: (s.principal as String),
+                            label: s.principal,
                             value: fmt.format(group.yearlyPrincipal),
                             color: AppTheme.accentGood),
                       ]),
@@ -843,7 +843,7 @@ class _Badge extends StatelessWidget {
 class _MonthSubTable extends StatelessWidget {
   final List<AmortizationEntry> months;
   final NumberFormat fmt;
-  final dynamic s;
+  final AppStrings s;
   const _MonthSubTable(
       {required this.months, required this.fmt, required this.s});
 
@@ -856,13 +856,13 @@ class _MonthSubTable extends StatelessWidget {
         color: AppTheme.primary.withValues(alpha: 0.85),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: Row(children: [
-          _HCell((s.colMo as String), 1),
-          _HCell((s.colDate as String), 2),
-          _HCell((s.colPmt as String), 2),
-          _HCell((s.colInt as String), 2),
-          _HCell((s.colPrinc as String), 2),
-          _HCell((s.colBal as String), 2),
-          if (hasPmi) _HCell((s.pmi as String), 2),
+          _HCell(s.colMo, 1),
+          _HCell(s.colDate, 2),
+          _HCell(s.colPmt, 2),
+          _HCell(s.colInt, 2),
+          _HCell(s.colPrinc, 2),
+          _HCell(s.colBal, 2),
+          if (hasPmi) _HCell(s.pmi, 2),
         ]),
       ),
       // Month rows
@@ -890,7 +890,7 @@ class _MonthSubTable extends StatelessWidget {
               if (hasPmi)
                 _Cell(
                     e.pmiDropped
-                        ? (s.off as String)
+                        ? s.off
                         : e.pmiAmount > 0
                             ? fmt.format(e.pmiAmount)
                             : '-',
@@ -905,7 +905,7 @@ class _MonthSubTable extends StatelessWidget {
 
 // ── Monthly flat list ─────────────────────────────────────────────────────────
 class _MonthlyHeader extends StatelessWidget {
-  final dynamic s;
+  final AppStrings s;
   const _MonthlyHeader({required this.s});
 
   @override
@@ -915,12 +915,12 @@ class _MonthlyHeader extends StatelessWidget {
           color: AppTheme.primary,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
           child: Row(children: [
-            _HCell((s.colMo as String), 1),
-            _HCell((s.colDate as String), 2),
-            _HCell((s.colPmt as String), 2),
-            _HCell((s.colPrinc as String), 2),
-            _HCell((s.colInt as String), 2),
-            _HCell((s.colBal as String), 2),
+            _HCell(s.colMo, 1),
+            _HCell(s.colDate, 2),
+            _HCell(s.colPmt, 2),
+            _HCell(s.colPrinc, 2),
+            _HCell(s.colInt, 2),
+            _HCell(s.colBal, 2),
           ]),
         ),
       );
@@ -929,7 +929,7 @@ class _MonthlyHeader extends StatelessWidget {
 class _MonthlyList extends StatelessWidget {
   final List<AmortizationEntry> schedule;
   final NumberFormat fmt;
-  final dynamic s;
+  final AppStrings s;
   final bool isPremium;
   const _MonthlyList(
       {required this.schedule,

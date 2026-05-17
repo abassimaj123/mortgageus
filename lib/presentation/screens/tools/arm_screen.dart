@@ -9,7 +9,6 @@ import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show isSpanishNotifier;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
-import 'package:calcwise_core/calcwise_core.dart' show CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 class ArmScreen extends ConsumerStatefulWidget {
@@ -87,10 +86,10 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         final r = _result;
         return Scaffold(
-          appBar: AppBar(title: Text((s.toolArm as String))),
+          appBar: AppBar(title: Text(s.toolArm)),
           body: Column(children: [
             Expanded(
                 child: SingleChildScrollView(
@@ -270,7 +269,7 @@ class _ResultCard extends StatelessWidget {
   final ARMResult r;
   final NumberFormat fmt;
   final NumberFormat fmtK;
-  final dynamic s;
+  final AppStrings s;
   final bool isEs;
   final int fixedYears;
   final int termYears;
@@ -327,7 +326,7 @@ class _ResultCard extends StatelessWidget {
               fmt.format(r.balanceAtReset),
             ),
             const Divider(height: 20),
-            _Row((s.armTotalInterest as String), fmtK.format(r.totalInterest)),
+            _Row(s.armTotalInterest, fmtK.format(r.totalInterest)),
             _Row(
               isEs
                   ? 'Interés (tasa fija equivalente)'
@@ -345,8 +344,8 @@ class _ResultCard extends StatelessWidget {
             if (r.breakEvenMonths == null)
               _breakEvenBanner(
                 isEs
-                    ? (s.armAlwaysBetter as String)
-                    : (s.armAlwaysBetter as String),
+                    ? s.armAlwaysBetter
+                    : s.armAlwaysBetter,
                 AppTheme.accentGood,
               )
             else

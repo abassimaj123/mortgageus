@@ -10,8 +10,6 @@ import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../../presentation/widgets/paywall_soft.dart';
-import '../../../presentation/widgets/paywall_hard.dart';
 
 class PmiScreen extends ConsumerStatefulWidget {
   const PmiScreen({super.key});

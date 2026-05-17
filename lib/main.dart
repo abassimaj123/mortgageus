@@ -11,8 +11,6 @@ import 'core/services/analytics_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/freemium/freemium_service.dart';
 import 'core/freemium/iap_service.dart';
-import 'presentation/widgets/paywall_soft.dart';
-import 'presentation/widgets/paywall_hard.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/firebase/firebase_options.dart';
 import 'presentation/screens/calculator/calculator_screen.dart';
@@ -241,7 +239,7 @@ class _MainShellState extends State<_MainShell> {
                   session: paywallSession,
                   onSettings: () => Navigator.push(
                     context,
-                    PageRouteBuilder(
+                    PageRouteBuilder<void>(
                       pageBuilder: (_, __, ___) => const SettingsScreen(),
                       transitionsBuilder: (_, anim, __, child) =>
                           FadeTransition(opacity: anim, child: child),

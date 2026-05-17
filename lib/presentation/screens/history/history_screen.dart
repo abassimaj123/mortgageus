@@ -4,8 +4,6 @@ import 'package:intl/intl.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/freemium/iap_service.dart';
-import 'package:calcwise_core/calcwise_core.dart'
-    show MonetizationConfig, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/pdf_export_service.dart';
@@ -265,7 +263,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     } catch (e) {
       if (context.mounted) {
         final bool isEs = isSpanishNotifier.value;
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${s.exportFailed}: $e')),
         );
@@ -532,7 +530,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final row2 = _history.firstWhere((r) => r['id'] == ids[1]);
     Navigator.push(
       context,
-      PageRouteBuilder(
+      PageRouteBuilder<void>(
         pageBuilder: (_, __, ___) =>
             _HistoryCompareScreen(row1: row1, row2: row2, isEs: isEs),
         transitionsBuilder: (_, anim, __, child) =>
@@ -549,10 +547,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic str = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings str = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
             appBar: AppBar(
-              title: Text(str.navHistory as String),
+              title: Text(str.navHistory),
               actions: [
                 if (_compareMode && _selectedIds.length == 2)
                   TextButton(
@@ -925,7 +923,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ? (canSelect ? () => _toggleSelect(id) : null)
             : () => Navigator.push(
                 context,
-                PageRouteBuilder(
+                PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => HistoryDetailScreen(row: row),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),

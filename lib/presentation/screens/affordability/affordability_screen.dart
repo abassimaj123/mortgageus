@@ -18,8 +18,6 @@ import '../../../main.dart'
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../widgets/paywall_soft.dart';
-import '../../widgets/paywall_hard.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 
@@ -319,7 +317,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
 class _TermRow extends StatelessWidget {
   final int selected;
   final ValueChanged<int> onChanged;
-  final dynamic s;
+  final AppStrings s;
   const _TermRow(
       {required this.selected, required this.onChanged, required this.s});
 
@@ -327,7 +325,7 @@ class _TermRow extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text((s.loanTerm as String),
+          Text(s.loanTerm,
               style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(
@@ -359,7 +357,7 @@ class _ResultCard extends StatelessWidget {
   final AffordabilityResult r;
   final NumberFormat fmt;
   final NumberFormat fmtK;
-  final dynamic s;
+  final AppStrings s;
   final bool isEs;
   const _ResultCard({
     required this.r,
@@ -376,7 +374,7 @@ class _ResultCard extends StatelessWidget {
       Row(children: [
         Expanded(
             child: _PriceCard(
-          label: (s.affordConservative as String),
+          label: s.affordConservative,
           price: r.maxHomePriceConservative,
           fmt: fmt,
           color: AppTheme.accentGood,
@@ -384,7 +382,7 @@ class _ResultCard extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
             child: _PriceCard(
-          label: (s.affordStandard as String),
+          label: s.affordStandard,
           price: r.maxHomePriceStandard > 0
               ? r.maxHomePriceStandard
               : r.maxHomePriceConservative,
@@ -402,23 +400,23 @@ class _ResultCard extends StatelessWidget {
           child: Column(children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Text((s.affordBreakdown as String),
+              child: Text(s.affordBreakdown,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: AppTextSize.bodyMd)),
             ),
             const Divider(height: 20),
-            _Row('${(s.principal as String)} & ${(s.interest as String)}',
+            _Row('${s.principal} & ${s.interest}',
                 fmt.format(r.monthlyPI)),
-            _Row((s.propertyTax as String), fmt.format(r.monthlyTax)),
-            _Row((s.homeInsurance as String), fmt.format(r.monthlyInsurance)),
+            _Row(s.propertyTax, fmt.format(r.monthlyTax)),
+            _Row(s.homeInsurance, fmt.format(r.monthlyInsurance)),
             if (r.monthlyPMI > 0)
-              _Row((s.pmi as String), fmt.format(r.monthlyPMI),
+              _Row(s.pmi, fmt.format(r.monthlyPMI),
                   color: Colors.orange),
             if (r.monthlyHOA > 0)
-              _Row((s.hoa as String), fmt.format(r.monthlyHOA)),
+              _Row(s.hoa, fmt.format(r.monthlyHOA)),
             const Divider(height: 20),
-            _Row((s.totalPITI as String), fmt.format(r.totalMonthly),
+            _Row(s.totalPITI, fmt.format(r.totalMonthly),
                 bold: true),
           ]),
         ),

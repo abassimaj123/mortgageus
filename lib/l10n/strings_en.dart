@@ -185,221 +185,403 @@ abstract class AppStrings {
 
 class AppStringsEN implements AppStrings {
   // App / nav
+  @override
   final appTitle = 'MortgageUS';
+  @override
   final tagline = 'Home Loan Calculator';
+  @override
   final navCalculator = 'Calculator';
+  @override
   final navSchedule = 'Schedule';
+  @override
   final navCompare = 'Compare';
+  @override
   final navExtra = 'Extra';
+  @override
   final navRefi = 'Refi';
+  @override
   final navHistory = 'History';
+  @override
   final adFreeActive = 'Ad-Free — Tap to extend';
+  @override
   final getAdFree = 'Watch ad — 60 min free';
 
   // Calculator
+  @override
   final homePrice = 'Home Price';
+  @override
   final downPayment = 'Down Payment';
+  @override
   final interestRate = 'Interest Rate';
+  @override
   final loanTerm = 'Loan Term';
+  @override
   final loanType = 'Loan Type';
+  @override
   final advancedOptions = 'Advanced options';
+  @override
   final propertyTaxRate = 'Property Tax Rate';
+  @override
   final homeInsurance = 'Home Insurance';
+  @override
   final hoaFees = 'HOA Fees';
+  @override
   final monthlyPI = 'Monthly Payment (P&I)';
+  @override
   final totalPITI = 'Total PITI';
+  @override
   final jumbo = 'Jumbo';
+  @override
   final conforming = 'Conforming';
+  @override
   final pmi = 'PMI';
+  @override
   final principal = 'Principal';
+  @override
   final interest = 'Interest';
+  @override
   final propertyTax = 'Property Tax';
+  @override
   final hoa = 'HOA';
+  @override
   final totalInterest = 'Total Interest';
+  @override
   final totalCost = 'Total Cost';
+  @override
   final payoffDate = 'Payoff Date';
+  @override
   final pmiDropsAt = 'PMI 0.80% (drops at';
+  @override
   final mo = 'mo';
+  @override
   final usdaFee = 'USDA Fee';
+  @override
   final usdaFeeLabel = 'USDA Annual Fee (never drops)';
 
   // Amortization
+  @override
   final amortTitle = 'Amortization Schedule';
+  @override
   final enterLoan = 'Enter loan details in Calculator tab';
+  @override
   final lifeBreakdown = 'Life of Loan Breakdown';
+  @override
   final yearlyView = 'Yearly View';
+  @override
   final monthlyView = 'Monthly View';
+  @override
   final loanSummary = 'Loan Summary';
+  @override
   final loanAmount = 'Loan amount';
+  @override
   final totalPayments = 'Total payments';
+  @override
   final pmiRemoved = 'PMI removed';
+  @override
   final halfway = 'Halfway';
+  @override
   final paidOff = 'Paid off';
+  @override
   final year = 'Year';
+  @override
   final balance = 'Balance';
+  @override
   final colMo = 'Mo.';
+  @override
   final colDate = 'Date';
+  @override
   final colPmt = 'Pmt';
+  @override
   final colInt = 'Int.';
+  @override
   final colPrinc = 'Princ.';
+  @override
   final colBal = 'Bal.';
+  @override
   final off = 'OFF';
+  @override
   final paid = 'paid';
 
   // Comparator
+  @override
   final comparatorTitle = 'Loan Comparator';
+  @override
   final home = 'Home:';
+  @override
   final down = 'Down:';
+  @override
   final rate = 'Rate:';
+  @override
   final scenarioComp = 'Scenario Comparison';
+  @override
   final scenarioDesc =
       'Same loan, different terms — see which works best for you.';
+  @override
   final enterValid = 'Enter valid loan details in Calculator tab';
+  @override
   final yr30 = '30-Year';
+  @override
   final yr15 = '15-Year';
+  @override
   final monthlyPILabel = 'Monthly P&I';
+  @override
   final monthlyPITI = 'Monthly PITI';
+  @override
   final advantage15 = '15-Year Advantage';
+  @override
   final interestSaved = 'Interest saved:';
+  @override
   final paidOff15 = 'Paid off:';
+  @override
   final yearsEarlier = 'years earlier';
+  @override
   final advantage30 = '30-Year Advantage';
+  @override
   final monthlySavings = 'Monthly savings:';
+  @override
   final lower = 'lower';
 
   // Extra payments
+  @override
   final extraTitle = 'Extra Payment Calculator';
+  @override
   final loan = 'Loan:';
+  @override
   final extraSection = 'Extra Payments';
+  @override
   final extraMonthly = 'Extra Monthly Payment';
+  @override
   final extraAnnual = 'Extra Annual Payment';
+  @override
   final lumpSum = 'Lump Sum Payment';
+  @override
   final lumpSumMonth = 'Lump Sum in Month #';
+  @override
   final calcSavings = 'Calculate Savings';
+  @override
   final youCouldSave = 'You could save';
+  @override
   final byPaying = 'by paying';
+  @override
   final extraPerMonth = 'extra/month';
+  @override
   final originalPayoff = 'Original Payoff';
+  @override
   final newPayoff = 'New Payoff';
+  @override
   final timeSaved = 'Time Saved';
+  @override
   final origTotalInt = 'Original Total Interest';
+  @override
   final newTotalInt = 'New Total Interest';
+  @override
   final interestSavedRow = 'Interest Saved';
+  @override
   final years = 'yrs';
+  @override
   final months = 'months';
 
   // Refinance
+  @override
   final refiTitle = 'Refinance Calculator';
+  @override
   final currentLoan = 'Current Loan';
+  @override
   final currentBalance = 'Current Balance';
+  @override
   final currentRate = 'Current Rate (%)';
+  @override
   final yearsRemaining = 'Years Remaining';
+  @override
   final newLoan = 'New Loan';
+  @override
   final newRate = 'New Rate (%)';
+  @override
   final newTerm = 'New Term';
+  @override
   final closingCosts = 'Closing Costs';
+  @override
   final calcRefi = 'Calculate Refinance';
+  @override
   final currentPayment = 'Current Payment';
+  @override
   final newPayment = 'New Payment';
+  @override
   final breakEven = 'Break-Even';
+  @override
   final totalSavings = 'Total Savings Over Life';
+  @override
   final refiMakesSense = 'Refinancing makes sense — break-even in';
+  @override
   final refiMayNot = 'Refinancing may not make sense';
+  @override
   final breakEvenLong = '(break-even > 7 years)';
 
   // Settings
+  @override
   final settingsTitle = 'Settings';
+  @override
   final language = 'Language';
+  @override
   final support = 'Support';
+  @override
   final contactSupport = 'Contact Support';
+  @override
   final privacyPolicy = 'Privacy Policy';
+  @override
   final discover = 'Discover';
+  @override
   final calcSuite = 'Financial Calculators Suite';
 
   // Calculator actions
+  @override
   final saveCalc = 'Save Calculation';
+  @override
   final exportPdf = 'Export PDF';
+  @override
   final exportPdfPremium = 'Export PDF — Premium';
 
   // Ad-free / rewarded
+  @override
   final adFreeMode = 'Ad-Free Mode';
+  @override
   final watchAdDesc = 'Watch a short ad to enjoy 1 hour without ads.';
+  @override
   final watchShortAd = 'Watch Short Ad';
+  @override
   final adFreeHourLabel = '1 hour ad-free — always free';
+  @override
   final adFreeUnlocked = '1 hour ad-free unlocked!';
+  @override
   final adNotAvailable = 'Ad not available. Try again later.';
+  @override
   final adFreeActiveBadge = 'Active';
+  @override
   final loading = 'Loading…';
+  @override
   final adFreeMinFree = '60 min ad-free';
+  @override
   final getPremiumBtn = r'Get Premium — $4.99';
 
   // ARM calculator
+  @override
   final standardMode = 'Standard';
+  @override
   final armMode = 'Fixed vs ARM';
+  @override
   final armFixedPeriod = 'Fixed Period';
+  @override
   final armAdjRate = 'Adjusted Rate (%)';
+  @override
   final armPaymentDuring = 'Payment (fixed period)';
+  @override
   final armPaymentAfter = 'Payment (after reset)';
+  @override
   final armTotalInterest = 'Total Interest';
+  @override
   final armTotalCost = 'Total Cost';
+  @override
   final armBreakEven = 'Break-Even';
+  @override
   final armAlwaysBetter = 'ARM stays cheaper — no break-even';
+  @override
   final armCrossesAt = 'ARM costs more after month';
 
   // Affordability calculator
+  @override
   final navAfford = 'Afford';
+  @override
   final affordTitle = 'Affordability Calculator';
+  @override
   final grossIncome = 'Annual Gross Income';
+  @override
   final monthlyDebts = 'Monthly Debts';
+  @override
   final availDown = 'Down Payment Available';
+  @override
   final affordMaxHome = 'Max Home Price';
+  @override
   final affordConservative = 'Conservative (28% DTI)';
+  @override
   final affordStandard = 'Standard (43% DTI)';
+  @override
   final affordBreakdown = 'Monthly Breakdown (at standard price)';
+  @override
   final affordMaxLoan = 'Max Loan Amount';
+  @override
   final affordUseCalc = 'Use in Calculator';
+  @override
   final affordEnterIncome =
       'Enter your income above to see what you can afford';
 
   // Premium
+  @override
   final premiumActive = 'Premium Active';
+  @override
   final premiumSubtitle = 'Unlimited history · No ads · PDF export';
+  @override
   final getPremium = 'Unlock Premium — \$4.99';
+  @override
   final getPremiumShort = 'Premium — \$4.99';
+  @override
   final restorePurchase = 'Restore Purchase';
 
   // Tools hub
+  @override
   final navTools = 'Tools';
+  @override
   final toolsTitle = 'Tools';
+  @override
   final toolExtra = 'Extra Payments';
+  @override
   final toolExtraSub = 'Pay off faster, save interest';
+  @override
   final toolRefi = 'Refinance';
+  @override
   final toolRefiSub = 'Is refinancing worth it?';
+  @override
   final toolHistory = 'History';
+  @override
   final toolHistorySub = 'Saved calculations';
+  @override
   final toolArm = 'ARM Calculator';
+  @override
   final toolArmSub = '5/7/10yr adjustable rate analysis';
+  @override
   final disclaimer =
       'For informational purposes only. Not financial advice. Consult a qualified advisor before making financial decisions.';
 
   // Investment Return (buy-to-let analysis)
+  @override
   final toolInvestment = 'Investment Return';
+  @override
   final toolInvestmentSub = 'IRR, NPV & cash flow for buy-to-let';
 
   // Error messages
+  @override
   final exportFailed = 'Export failed';
 
   // Common actions
+  @override
   final ok = 'OK';
 
   // Rate watch
+  @override
   final rateWatch = 'Rate Watch';
+  @override
   final setTargetRate = 'Set Target Rate';
+  @override
   final targetRateLbl = 'Target rate (%)';
+  @override
   final targetRateHint = 'e.g. 6.25';
+  @override
   final cancel = 'Cancel';
+  @override
   final set = 'Set';
+  @override
   final rateAlertActive = 'Alert when rate ≤ ';
+  @override
   final rateAlertSuffix = '% — tap to change';
+  @override
   final tapSetRateAlert = 'Tap to set a rate alert';
 }

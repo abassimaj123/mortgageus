@@ -126,7 +126,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       }
     } catch (e) {
       if (context.mounted) {
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${s.exportFailed}: $e')),
         );

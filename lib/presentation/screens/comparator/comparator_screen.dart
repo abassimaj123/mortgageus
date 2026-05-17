@@ -1,5 +1,3 @@
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseTheme, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,8 +12,6 @@ import '../../../domain/models/mortgage_result.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
-import '../../widgets/paywall_soft.dart';
-import '../../widgets/paywall_hard.dart';
 import '../history/history_screen.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../main.dart' show adService, paywallSession, isSpanishNotifier;
@@ -161,7 +157,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic str = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings str = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
           body: Center(
@@ -209,7 +205,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       Row(children: [
                         Expanded(
                             child: _ModeToggleBtn(
-                          label: (str.standardMode as String),
+                          label: str.standardMode,
                           icon: Icons.compare_arrows,
                           selected: !_armMode,
                           onTap: () => setState(() => _armMode = false),
@@ -217,7 +213,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                             child: _ModeToggleBtn(
-                          label: (str.armMode as String),
+                          label: str.armMode,
                           icon: Icons.show_chart,
                           selected: _armMode,
                           onTap: () async {
@@ -234,18 +230,18 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       const SizedBox(height: 20),
                       // Standard mode
                       if (!_armMode) ...[
-                        Text((str.scenarioComp as String),
+                        Text(str.scenarioComp,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: AppTextSize.subtitle)),
                         const SizedBox(height: 4),
-                        Text((str.scenarioDesc as String),
+                        Text(str.scenarioDesc,
                             style: TextStyle(
                                 color: AppTheme.labelGray,
                                 fontSize: AppTextSize.md)),
                         const SizedBox(height: 16),
                         if (r30 == null || r15 == null)
-                          Center(child: Text((str.enterValid as String)))
+                          Center(child: Text(str.enterValid))
                         else
                           _CompareTable(
                               r30: r30, r15: r15, fmt: fmt, fmtK: fmtK, s: str),
@@ -261,7 +257,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                         ),
                         const SizedBox(height: 16),
                         if (armRes == null)
-                          Center(child: Text((str.enterValid as String)))
+                          Center(child: Text(str.enterValid))
                         else
                           _ArmCompareTable(
                             arm: armRes,
@@ -341,7 +337,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
 class _CompareTable extends StatelessWidget {
   final MortgageResult r30, r15;
   final NumberFormat fmt, fmtK;
-  final dynamic s;
+  final AppStrings s;
   const _CompareTable({
     required this.r30,
     required this.r15,
@@ -359,39 +355,39 @@ class _CompareTable extends StatelessWidget {
         const Expanded(flex: 3, child: SizedBox()),
         Expanded(
             flex: 4,
-            child: _ScenarioHeader((s.yr30 as String), AppTheme.primary)),
+            child: _ScenarioHeader(s.yr30, AppTheme.primary)),
         const SizedBox(width: 8),
         Expanded(
             flex: 4,
-            child: _ScenarioHeader((s.yr15 as String), AppTheme.accentGood)),
+            child: _ScenarioHeader(s.yr15, AppTheme.accentGood)),
       ]),
       const SizedBox(height: 12),
       _CompareRow(
-        label: (s.monthlyPILabel as String),
+        label: s.monthlyPILabel,
         val30: fmt.format(r30.monthly.piPayment),
         val15: fmt.format(r15.monthly.piPayment),
         winner: 30, // 30yr lower monthly
       ),
       _CompareRow(
-        label: (s.monthlyPITI as String),
+        label: s.monthlyPITI,
         val30: fmt.format(r30.monthly.pitiPayment),
         val15: fmt.format(r15.monthly.pitiPayment),
         winner: 30,
       ),
       _CompareRow(
-        label: (s.totalInterest as String),
+        label: s.totalInterest,
         val30: fmtK.format(r30.totalInterest),
         val15: fmtK.format(r15.totalInterest),
         winner: 15, // 15yr saves interest
       ),
       _CompareRow(
-        label: (s.totalCost as String),
+        label: s.totalCost,
         val30: fmtK.format(r30.totalCost),
         val15: fmtK.format(r15.totalCost),
         winner: 15,
       ),
       _CompareRow(
-        label: (s.payoffDate as String),
+        label: s.payoffDate,
         val30: '${r30.payoffDate.month}/${r30.payoffDate.year}',
         val15: '${r15.payoffDate.month}/${r15.payoffDate.year}',
         winner: 15, // 15yr payoff sooner
@@ -408,7 +404,7 @@ class _CompareTable extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text((s.advantage15 as String),
+            Text(s.advantage15,
                 style: TextStyle(
                   color: AppTheme.accentGood,
                   fontWeight: FontWeight.bold,
@@ -422,7 +418,7 @@ class _CompareTable extends StatelessWidget {
                 '${s.paidOff15} ${(r30.payoffDate.year - r15.payoffDate.year)} ${s.yearsEarlier}',
                 style: const TextStyle(fontSize: AppTextSize.md)),
             const Divider(height: 20),
-            Text((s.advantage30 as String),
+            Text(s.advantage30,
                 style: TextStyle(
                   color: AppTheme.primary,
                   fontWeight: FontWeight.bold,
@@ -578,7 +574,7 @@ class _ArmControls extends StatelessWidget {
   final int fixedYears;
   final TextEditingController rateCtrl;
   final ValueChanged<int> onFixedYearsChanged;
-  final dynamic s;
+  final AppStrings s;
 
   const _ArmControls({
     required this.fixedYears,
@@ -591,7 +587,7 @@ class _ArmControls extends StatelessWidget {
   Widget build(BuildContext context) {
     const presets = [3, 5, 7, 10];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text((s.armFixedPeriod as String),
+      Text(s.armFixedPeriod,
           style: const TextStyle(
               fontWeight: FontWeight.w600, fontSize: AppTextSize.body)),
       const SizedBox(height: 8),
@@ -639,7 +635,7 @@ class _ArmCompareTable extends StatelessWidget {
   final double adjRate;
   final NumberFormat fmt;
   final NumberFormat fmtK;
-  final dynamic s;
+  final AppStrings s;
 
   const _ArmCompareTable({
     required this.arm,
@@ -668,25 +664,25 @@ class _ArmCompareTable extends StatelessWidget {
       ]),
       const SizedBox(height: 12),
       _CompareRow(
-        label: (s.armPaymentDuring as String),
+        label: s.armPaymentDuring,
         val30: fmt.format(arm.fixedPayment),
         val15: fmt.format(arm.payment1),
         winner: arm.payment1 < arm.fixedPayment ? 15 : 30,
       ),
       _CompareRow(
-        label: (s.armPaymentAfter as String),
+        label: s.armPaymentAfter,
         val30: fmt.format(arm.fixedPayment),
         val15: fmt.format(arm.payment2),
         winner: arm.payment2 < arm.fixedPayment ? 15 : 30,
       ),
       _CompareRow(
-        label: (s.armTotalInterest as String),
+        label: s.armTotalInterest,
         val30: fmtK.format(arm.fixedTotalInterest),
         val15: fmtK.format(arm.totalInterest),
         winner: armIsCheaper ? 15 : 30,
       ),
       _CompareRow(
-        label: (s.armTotalCost as String),
+        label: s.armTotalCost,
         val30: fmtK.format(
             (arm.totalCost - arm.totalInterest) + arm.fixedTotalInterest),
         val15: fmtK.format(arm.totalCost),
@@ -716,7 +712,7 @@ class _ArmCompareTable extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               if (arm.breakEvenMonths == null)
-                Text((s.armAlwaysBetter as String),
+                Text(s.armAlwaysBetter,
                     style: TextStyle(
                         color: AppTheme.accentGood, fontSize: AppTextSize.md))
               else

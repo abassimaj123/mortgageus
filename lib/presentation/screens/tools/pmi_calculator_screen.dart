@@ -8,8 +8,6 @@ import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../../presentation/widgets/paywall_soft.dart';
-import '../../../presentation/widgets/paywall_hard.dart';
 
 /// PMI Standalone Calculator
 /// Monthly PMI = loan × annual_rate(by credit score & LTV) / 12.

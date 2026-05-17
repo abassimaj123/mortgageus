@@ -19,7 +19,7 @@ class InfoTooltip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEs = isSpanishNotifier.value;
-    final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+    final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
     return Semantics(
       button: true,
       label: isEs ? 'Información sobre $title' : 'Information about $title',
@@ -37,7 +37,7 @@ class InfoTooltip extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(s.ok as String),
+                child: Text(s.ok),
               ),
             ],
           ),

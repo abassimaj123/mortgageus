@@ -10,8 +10,6 @@ import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../../presentation/widgets/paywall_soft.dart';
-import '../../../presentation/widgets/paywall_hard.dart';
 
 // ── Color for Investment Return tool icon (emerald-teal) ──────────────────────
 const Color _kToolColor = Color(0xFF0D9488); // teal-600

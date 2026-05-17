@@ -14,7 +14,6 @@ import 'va_screen.dart';
 import 'usda_screen.dart';
 import 'pmi_calculator_screen.dart';
 import 'points_screen.dart';
-import 'package:calcwise_core/calcwise_core.dart' show CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart';
 
 class ToolsScreen extends StatelessWidget {
@@ -25,17 +24,17 @@ class ToolsScreen extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         final tools = [
           _ToolItem(
             icon: Icons.add_circle_outline,
             iconSelected: Icons.add_circle,
             color: AppTheme.primary,
-            title: (s.toolExtra as String),
-            subtitle: (s.toolExtraSub as String),
+            title: s.toolExtra,
+            subtitle: s.toolExtraSub,
             onTap: () => Navigator.push(
                 context,
-                PageRouteBuilder(
+                PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const ExtraPaymentsScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),
@@ -46,11 +45,11 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.refresh_rounded,
             iconSelected: Icons.refresh_rounded,
             color: AppTheme.toolRefi,
-            title: (s.toolRefi as String),
-            subtitle: (s.toolRefiSub as String),
+            title: s.toolRefi,
+            subtitle: s.toolRefiSub,
             onTap: () => Navigator.push(
                 context,
-                PageRouteBuilder(
+                PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const RefinanceScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),
@@ -67,7 +66,7 @@ class ToolsScreen extends StatelessWidget {
                 : 'Calculate your mortgage insurance',
             onTap: () => Navigator.push(
                 context,
-                PageRouteBuilder(
+                PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const PmiScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),
@@ -78,11 +77,11 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.swap_horiz_rounded,
             iconSelected: Icons.swap_horiz,
             color: AppTheme.toolRefi,
-            title: (s.toolArm as String),
-            subtitle: (s.toolArmSub as String),
+            title: s.toolArm,
+            subtitle: s.toolArmSub,
             onTap: () => Navigator.push(
                 context,
-                PageRouteBuilder(
+                PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const ArmScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),
@@ -93,11 +92,11 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.trending_up_rounded,
             iconSelected: Icons.trending_up,
             color: const Color(0xFF0D9488), // teal-600
-            title: (s.toolInvestment as String),
-            subtitle: (s.toolInvestmentSub as String),
+            title: s.toolInvestment,
+            subtitle: s.toolInvestmentSub,
             onTap: () => Navigator.push(
                 context,
-                PageRouteBuilder(
+                PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const InvestmentReturnScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),
@@ -114,7 +113,7 @@ class ToolsScreen extends StatelessWidget {
                 : 'Calculate MIP and total FHA payment',
             onTap: () => Navigator.push(
               context,
-              PageRouteBuilder(
+              PageRouteBuilder<void>(
                 pageBuilder: (_, __, ___) => const FhaScreen(),
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
@@ -132,7 +131,7 @@ class ToolsScreen extends StatelessWidget {
                 : 'Funding fee and VA monthly payment',
             onTap: () => Navigator.push(
               context,
-              PageRouteBuilder(
+              PageRouteBuilder<void>(
                 pageBuilder: (_, __, ___) => const VaScreen(),
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
@@ -150,7 +149,7 @@ class ToolsScreen extends StatelessWidget {
                 : 'Rural loan with 0% down',
             onTap: () => Navigator.push(
               context,
-              PageRouteBuilder(
+              PageRouteBuilder<void>(
                 pageBuilder: (_, __, ___) => const UsdaScreen(),
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
@@ -168,7 +167,7 @@ class ToolsScreen extends StatelessWidget {
                 : 'Rate by credit score and LTV',
             onTap: () => Navigator.push(
               context,
-              PageRouteBuilder(
+              PageRouteBuilder<void>(
                 pageBuilder: (_, __, ___) => const PmiCalculatorScreen(),
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
@@ -186,7 +185,7 @@ class ToolsScreen extends StatelessWidget {
                 : 'Breakeven and lifetime savings',
             onTap: () => Navigator.push(
               context,
-              PageRouteBuilder(
+              PageRouteBuilder<void>(
                 pageBuilder: (_, __, ___) => const PointsScreen(),
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
@@ -198,13 +197,13 @@ class ToolsScreen extends StatelessWidget {
             icon: Icons.history_rounded,
             iconSelected: Icons.history,
             color: AppTheme.toolHistory,
-            title: (s.toolHistory as String),
-            subtitle: (s.toolHistorySub as String),
+            title: s.toolHistory,
+            subtitle: s.toolHistorySub,
             onTap: () {
               HistoryScreen.refreshNotifier.value++;
               Navigator.push(
                 context,
-                PageRouteBuilder(
+                PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const HistoryScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),

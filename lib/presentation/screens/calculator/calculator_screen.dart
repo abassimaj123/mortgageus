@@ -33,8 +33,6 @@ import '../../../main.dart' show adService;
 import '../../../core/services/analytics_service.dart';
 import '../../../main.dart'
     show paywallSession, isSpanishNotifier, preFillNotifier;
-import '../../widgets/paywall_soft.dart';
-import '../../widgets/paywall_hard.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../../widgets/info_tooltip.dart';
@@ -218,7 +216,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
           body: GestureDetector(
@@ -251,7 +249,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                             children: [
                               // Home Price
                               _buildField(
-                                  (s.homePrice as String), _homePriceCtrl,
+                                  s.homePrice, _homePriceCtrl,
                                   prefix: '\$',
                                   required: true,
                                   currency: true,
@@ -277,7 +275,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               ),
                               const SizedBox(height: 12),
                               // Interest Rate
-                              _buildField((s.interestRate as String), _rateCtrl,
+                              _buildField(s.interestRate, _rateCtrl,
                                   suffix: '%',
                                   required: true,
                                   helperText: isEs
@@ -318,7 +316,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
-                                      child: Text((s.advancedOptions as String),
+                                      child: Text(s.advancedOptions,
                                           style: const TextStyle(
                                             color: AppTheme.primary,
                                             fontWeight: FontWeight.w600,
@@ -357,7 +355,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   padding: const EdgeInsets.all(AppSpacing.md),
                                   child: Column(children: [
                                     _buildField(
-                                        (s.propertyTaxRate as String), _taxCtrl,
+                                        s.propertyTaxRate, _taxCtrl,
                                         suffix: '%',
                                         onChanged: (v) =>
                                             notifier.updatePropertyTaxRate(
@@ -365,7 +363,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                         ',', '.')) ??
                                                     1.1)),
                                     const SizedBox(height: 12),
-                                    _buildField((s.homeInsurance as String),
+                                    _buildField(s.homeInsurance,
                                         _insuranceCtrl,
                                         prefix: '\$',
                                         suffix: '/yr',
@@ -375,7 +373,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                         ',', '.')) ??
                                                     1750)),
                                     const SizedBox(height: 12),
-                                    _buildField((s.hoaFees as String), _hoaCtrl,
+                                    _buildField(s.hoaFees, _hoaCtrl,
                                         prefix: '\$',
                                         suffix: '/mo',
                                         onChanged: (v) => notifier.updateHoa(
@@ -562,7 +560,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 icon: const Icon(
                                                     Icons.bookmark_add_rounded),
                                                 label: Text(
-                                                    (s.saveCalc as String)),
+                                                    s.saveCalc),
                                                 style: ElevatedButton.styleFrom(
                                                   minimumSize: const Size(
                                                       double.infinity, 52),
@@ -983,7 +981,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
 
 class _HeroCard extends StatelessWidget {
   final MortgageResult? result;
-  final dynamic s;
+  final AppStrings s;
   const _HeroCard({this.result, required this.s});
 
   @override
@@ -1003,7 +1001,7 @@ class _HeroCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text((s.monthlyPI as String),
+          Text(s.monthlyPI,
               style: const TextStyle(
                   color: Colors.white70, fontSize: AppTextSize.body)),
           const SizedBox(height: 8),
@@ -1027,8 +1025,8 @@ class _HeroCard extends StatelessWidget {
             Wrap(spacing: 8, children: [
               _Badge(
                 label: result!.isJumbo
-                    ? (s.jumbo as String)
-                    : (s.conforming as String),
+                    ? s.jumbo
+                    : s.conforming,
                 color:
                     result!.isJumbo ? AppTheme.accentWarn : AppTheme.accentGood,
               ),
@@ -1043,8 +1041,8 @@ class _HeroCard extends StatelessWidget {
               if (result!.hasPmi)
                 _Badge(
                   label: result!.isUsda
-                      ? (s.usdaFee as String)
-                      : (s.pmi as String),
+                      ? s.usdaFee
+                      : s.pmi,
                   color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
                 ),
             ]),
@@ -1082,7 +1080,7 @@ class _Badge extends StatelessWidget {
 class _TermSelector extends ConsumerWidget {
   final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
-  final dynamic s;
+  final AppStrings s;
   const _TermSelector(
       {required this.inputState, required this.notifier, required this.s});
 
@@ -1091,7 +1089,7 @@ class _TermSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text((s.loanTerm as String),
+        Text(s.loanTerm,
             style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Row(
@@ -1133,7 +1131,7 @@ class _TermSelector extends ConsumerWidget {
 class _LoanTypeSelector extends ConsumerWidget {
   final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
-  final dynamic s;
+  final AppStrings s;
   const _LoanTypeSelector(
       {required this.inputState, required this.notifier, required this.s});
 
@@ -1142,7 +1140,7 @@ class _LoanTypeSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text((s.loanType as String),
+        Text(s.loanType,
             style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Wrap(
@@ -1179,7 +1177,7 @@ class _DownPaymentRow extends ConsumerWidget {
   final TextEditingController ctrl;
   final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
-  final dynamic s;
+  final AppStrings s;
   const _DownPaymentRow({
     required this.ctrl,
     required this.inputState,
@@ -1362,7 +1360,7 @@ class _BreakdownCard extends StatelessWidget {
   final MortgageResult? result;
   final NumberFormat fmt;
   final NumberFormat fmtK;
-  final dynamic s;
+  final AppStrings s;
   final bool isEs;
   const _BreakdownCard(
       {this.result,
@@ -1383,15 +1381,15 @@ class _BreakdownCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(children: [
-          _Row((s.principal as String), fmt.format(m.principal)),
-          _Row((s.interest as String), fmt.format(m.interest)),
-          _Row((s.propertyTax as String), fmt.format(m.propertyTax)),
-          _Row((s.homeInsurance as String), fmt.format(m.homeInsurance)),
-          if (m.hoa > 0) _Row((s.hoa as String), fmt.format(m.hoa)),
+          _Row(s.principal, fmt.format(m.principal)),
+          _Row(s.interest, fmt.format(m.interest)),
+          _Row(s.propertyTax, fmt.format(m.propertyTax)),
+          _Row(s.homeInsurance, fmt.format(m.homeInsurance)),
+          if (m.hoa > 0) _Row(s.hoa, fmt.format(m.hoa)),
           if (m.pmi > 0)
             _Row(
               result!.isUsda
-                  ? (s.usdaFeeLabel as String)
+                  ? s.usdaFeeLabel
                   : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
               fmt.format(m.pmi),
               color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
@@ -1412,11 +1410,11 @@ class _BreakdownCard extends StatelessWidget {
                     ),
             ),
           const Divider(height: 24),
-          _Row((s.totalPITI as String), fmt.format(m.pitiPayment), bold: true),
+          _Row(s.totalPITI, fmt.format(m.pitiPayment), bold: true),
           const SizedBox(height: 8),
-          _Row((s.totalInterest as String), fmtK.format(result!.totalInterest)),
-          _Row((s.totalCost as String), fmtK.format(result!.totalCost)),
-          _Row((s.payoffDate as String),
+          _Row(s.totalInterest, fmtK.format(result!.totalInterest)),
+          _Row(s.totalCost, fmtK.format(result!.totalCost)),
+          _Row(s.payoffDate,
               '${result!.payoffDate.month}/${result!.payoffDate.year}'),
           _Row(
             isEs ? 'LTV' : 'LTV',

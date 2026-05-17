@@ -1,0 +1,14 @@
+{
+  "total_files_scanned": 48,
+  "total_findings": 1,
+  "findings": [
+    {
+      "file": "android/app/src/main/res/xml/network_security_config.xml",
+      "line": 0,
+      "issue": "Network security configuration not found",
+      "code": "Missing file",
+      "severity": "MEDIUM",
+      "recommendation": "Create network_security_config.xml to enforce HTTPS and certificate pinning"
+    }
+  ]
+}

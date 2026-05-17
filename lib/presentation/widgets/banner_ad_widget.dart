@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../../core/ads/ad_service.dart';
 import '../../core/ads/ad_config.dart';
-import '../providers/ad_free_provider.dart';
+import '../../main.dart' show adService;
+import '../../core/freemium/freemium_service.dart';
+import '../../core/services/analytics_service.dart';
 
-/// Displays a banner ad at the bottom of a screen.
-/// Hides itself when ad-free mode is active or ad fails to load.
-class BannerAdWidget extends ConsumerStatefulWidget {
+class BannerAdWidget extends StatefulWidget {
   const BannerAdWidget({super.key});
 
   @override
-  ConsumerState<BannerAdWidget> createState() => _BannerAdWidgetState();
+  State<BannerAdWidget> createState() => _BannerAdWidgetState();
 }
 
-class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
+class _BannerAdWidgetState extends State<BannerAdWidget> {
   BannerAd? _banner;
-  bool      _loaded = false;
+  bool _loaded = false;
+  bool _retried = false;
 
   @override
   void initState() {
@@ -26,12 +25,28 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
 
   void _loadBanner() {
     _banner = BannerAd(
-      adUnitId: AdService.bannerId,
-      size:     AdSize.banner,
-      request:  const AdRequest(),
+      adUnitId: adService.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
       listener: BannerAdListener(
-        onAdLoaded:       (_) => setState(() => _loaded = true),
-        onAdFailedToLoad: (ad, _) { ad.dispose(); _banner = null; },
+        onAdLoaded: (_) {
+          if (mounted) setState(() => _loaded = true);
+        },
+        onAdFailedToLoad: (ad, _) {
+          ad.dispose();
+          if (!mounted) return;
+          setState(() {
+            _banner = null;
+            _loaded = false;
+          });
+          AnalyticsService.instance.logBannerFailed();
+          if (!_retried) {
+            _retried = true;
+            Future.delayed(const Duration(seconds: 3), () {
+              if (mounted) _loadBanner();
+            });
+          }
+        },
       ),
     )..load();
   }
@@ -44,14 +59,18 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isAdFree = ref.watch(adFreeProvider);
-    if (isAdFree || !_loaded || _banner == null || !AdConfig.adsEnabled) {
-      return const SizedBox.shrink();
-    }
-    return SizedBox(
-      width:  _banner!.size.width.toDouble(),
-      height: _banner!.size.height.toDouble(),
-      child:  AdWidget(ad: _banner!),
+    if (!AdConfig.adsEnabled) return const SizedBox.shrink();
+    return ValueListenableBuilder<bool>(
+      valueListenable: freemiumService.isPremiumNotifier,
+      builder: (_, isPremium, __) {
+        if (isPremium) return const SizedBox.shrink();
+        if (!_loaded || _banner == null) return const SizedBox(height: 50);
+        return SizedBox(
+          width: _banner!.size.width.toDouble(),
+          height: _banner!.size.height.toDouble(),
+          child: AdWidget(ad: _banner!),
+        );
+      },
     );
   }
 }

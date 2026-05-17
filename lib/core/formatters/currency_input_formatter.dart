@@ -14,11 +14,11 @@ class CurrencyInputFormatter extends TextInputFormatter {
     final digits = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     if (digits.isEmpty) return newValue.copyWith(text: '');
 
-    final number    = int.tryParse(digits) ?? 0;
+    final number = int.tryParse(digits) ?? 0;
     final formatted = _fmt.format(number);
 
     return newValue.copyWith(
-      text:      formatted,
+      text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
     );
   }

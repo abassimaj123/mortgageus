@@ -2,9 +2,9 @@ class RefinanceResult {
   final double oldMonthlyPayment;
   final double newMonthlyPayment;
   final double monthlySavings;
-  final int    breakEvenMonths;
+  final int breakEvenMonths;
   final double totalSavingsOverLife;
-  final bool   refinanceMakesSense; // break-even < 7 years
+  final bool refinanceMakesSense; // break-even < 7 years
 
   const RefinanceResult({
     required this.oldMonthlyPayment,

@@ -1,0 +1,44 @@
+import 'package:flutter/material.dart';
+import 'package:calcwise_core/calcwise_core.dart';
+
+class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => CalcwiseOnboarding(
+        appKey: 'mortgageus',
+        onDone: () => Navigator.of(context).pushReplacementNamed('/home'),
+        pages: const [
+          OnboardingPage(
+            icon: Icons.home_rounded,
+            title: 'Your Smart\nMortgage Calculator',
+            subtitle:
+                'Monthly payment, amortization & property breakdown — all in one place.',
+            pills: ['51 States', '2026 Rates', 'Amortization'],
+            titleFr: 'Votre calculatrice\nhypothécaire',
+            subtitleFr:
+                'Versement mensuel, amortissement et bilan immobilier — tout en un.',
+            pillsFr: ['51 États', 'Taux 2026', 'Amortissement'],
+            titleEs: 'Tu calculadora\nhipotecaria',
+            subtitleEs:
+                'Pago mensual, amortización y análisis de propiedad — todo en uno.',
+            pillsEs: ['51 Estados', 'Tasas 2026', 'Amortización'],
+          ),
+          OnboardingPage(
+            icon: Icons.bar_chart_rounded,
+            title: 'Compare Loan\nScenarios',
+            subtitle:
+                'Switch between 15yr and 30yr or fixed vs adjustable — instantly.',
+            pills: ['Fixed Rate', 'ARM', '15 vs 30 Year'],
+            titleFr: 'Comparez les\nscénarios',
+            subtitleFr:
+                'Passez de 15 à 30 ans ou taux fixe vs variable — instantanément.',
+            pillsFr: ['Taux fixe', 'ARM', '15 vs 30 ans'],
+            titleEs: 'Compara\nescenarios',
+            subtitleEs:
+                'Cambia entre 15 y 30 años o tasa fija vs variable — al instante.',
+            pillsEs: ['Tasa fija', 'ARM', '15 vs 30 años'],
+          ),
+        ],
+      );
+}

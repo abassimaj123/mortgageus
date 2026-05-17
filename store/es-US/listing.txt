@@ -1,0 +1,80 @@
+======================================================
+PLAY STORE LISTING — MortgageUS (es-US)
+======================================================
+
+TÍTULO DE LA APP (30 caracteres máx.)
+--------------------------------------
+MortgageUS – Calculadora Hipotecas
+
+DESCRIPCIÓN CORTA (80 caracteres máx.)
+----------------------------------------
+La calculadora hipotecaria más completa de EE.UU. 7 herramientas. Gratis.
+
+DESCRIPCIÓN COMPLETA (4000 caracteres máx.)
+---------------------------------------------
+MortgageUS es la calculadora hipotecaria más completa para Estados Unidos — diseñada para compradores de vivienda, propietarios e inversores que necesitan números precisos de inmediato.
+
+★ 7 CALCULADORAS PODEROSAS EN UNA SOLA APP
+
+🏠 CALCULADORA DE HIPOTECA
+Calcula tu pago mensual (capital + interés), desglose completo PITI (Principal, Interés, Impuestos, Seguro), PMI, HOA y más. Detecta automáticamente préstamos Conformes vs. Jumbo según los límites FHFA 2026 ($832,750). El PMI se cancela automáticamente al 78% LTV según la Ley de Protección al Propietario.
+
+📊 TABLA DE AMORTIZACIÓN
+Ve cada pago a lo largo de tu préstamo. Desglose anual animado con división interés/capital, barras de progreso y punto de mitad del préstamo. Gráfico de dona que muestra exactamente cuánto va a intereses.
+
+💰 CALCULADORA DE ASEQUIBILIDAD
+Descubre cuánto puedes pagar por una casa. Usa los ratios DTI del 28% (vivienda) y 36% (deuda total) para estimaciones conservadoras y estándar. Incluye deudas mensuales existentes.
+
+➕ CALCULADORA DE PAGOS ADICIONALES
+Descubre cuánto tiempo e interés ahorras pagando extra cada mes o con un pago único. Conoce tu nueva fecha de pago y ahorros exactos antes de comprometerte.
+
+🔄 CALCULADORA DE REFINANCIAMIENTO
+¿Vale la pena refinanciar? Ingresa tu préstamo actual, nueva tasa y costos de cierre. Obtén tu mes de punto de equilibrio y ahorros totales a lo largo del tiempo.
+
+📈 CALCULADORA ARM
+Escenarios de tasa ajustable 5/1, 7/1, 10/1. Ve tu pago a la tasa inicial, después de cada ajuste por cap y en el peor caso. Conoce tu riesgo antes de firmar.
+
+⚖️ COMPARADOR DE PRÉSTAMOS
+Compara hasta 3 escenarios de préstamo lado a lado — diferentes plazos, tasas o pagos iniciales. Ve qué opción ahorra más durante la vida del préstamo.
+
+★ ¿POR QUÉ MORTGAGEUS?
+
+✅ Cancelación automática de PMI al 78% LTV — la única app gratuita que implementa la HPA correctamente
+✅ Límites conformes FHFA 2026 ($832,750) integrados — siempre actualizados
+✅ Análisis de choque de tasa ARM — único en este rango de precio
+✅ Comparador de préstamos múltiples — compara 3 préstamos a la vez
+✅ Desglose PITI completo siempre — no solo capital + interés como la mayoría
+✅ Sin cuenta requerida — 100% sin conexión, tus datos permanecen en tu dispositivo
+✅ Inglés + Español (EN/ES)
+✅ Modo oscuro
+
+★ MODELO FREEMIUM
+
+Gratis: acceso completo a las 7 calculadoras, 5 cálculos guardados
+Premium ($4.99 pago único): guardados ilimitados, sin anuncios, historial completo
+Ver un anuncio corto: 60 minutos sin anuncios, hasta 2× por día
+
+★ PERFECTO PARA
+
+• Compradores de primera vivienda que comparan opciones de préstamo
+• Propietarios que evalúan refinanciamiento
+• Inversionistas inmobiliarios que necesitan números rápidos
+• Cualquiera que compare escenarios de 15, 20 o 30 años vs ARM
+
+Sin cuenta. Sin recopilación de datos. Sin suscripción. Solo matemáticas.
+
+CATEGORÍA
+---------
+Finanzas
+
+CALIFICACIÓN DE CONTENIDO
+--------------------------
+Para todos
+
+CORREO DE CONTACTO
+-------------------
+abassimaj@gmail.com
+
+SITIO WEB / POLÍTICA DE PRIVACIDAD
+------------------------------------
+https://abassimaj.github.io/mortgageus-privacy/

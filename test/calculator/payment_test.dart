@@ -5,13 +5,12 @@ void main() {
   // Helper — matches user's function signature, translates decimal rate to %
   double pay(double loan, double rateDecimal, int years) =>
       MortgageCalculator.calcMonthlyPayment(
-        loanAmount:    loan,
+        loanAmount: loan,
         annualRatePct: rateDecimal * 100,
-        termYears:     years,
+        termYears: years,
       );
 
   group('calcMonthlyPayment — additional cases', () {
-
     test('Payment \$320k at 6.5% / 30 years ≈ \$2,022.62', () {
       expect(pay(320000, 0.065, 30), closeTo(2022.62, 0.50));
     });
@@ -44,7 +43,7 @@ void main() {
     test('Zero term throws ArgumentError', () {
       expect(
         () => MortgageCalculator.calcMonthlyPayment(
-          loanAmount: 300000, annualRatePct: 6.5, termYears: 0),
+            loanAmount: 300000, annualRatePct: 6.5, termYears: 0),
         throwsArgumentError,
       );
     });

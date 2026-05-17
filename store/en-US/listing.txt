@@ -1,0 +1,84 @@
+======================================================
+PLAY STORE LISTING — MortgageUS (en-US)
+======================================================
+
+APP TITLE (30 chars max)
+------------------------
+MortgageUS – Loan Calculator
+
+SHORT DESCRIPTION (80 chars max)
+---------------------------------
+The most complete US mortgage calculator. 7 tools. Free.
+
+FULL DESCRIPTION (4000 chars max)
+-----------------------------------
+MortgageUS is the most complete mortgage calculator for the United States — built for home buyers, homeowners, and real estate investors who want accurate numbers fast.
+
+★ 7 POWERFUL CALCULATORS IN ONE APP
+
+🏠 MORTGAGE CALCULATOR
+Calculate your monthly payment (P&I), full PITI breakdown (Principal, Interest, Taxes, Insurance), PMI, HOA, and more. Automatically detects Conforming vs. Jumbo loans based on 2026 FHFA limits ($832,750). PMI auto-cancels at 78% LTV per the Homeowners Protection Act.
+
+📊 AMORTIZATION SCHEDULE
+See every payment across your full loan term. Animated yearly breakdown with interest vs. principal split, progress bars, and halfway milestone. Donut chart shows exactly how much goes to interest.
+
+💰 AFFORDABILITY CALCULATOR
+Find out how much home you can afford. Uses both the 28% front-end (housing) and 36% back-end (total debt) DTI ratios for conservative and standard estimates. Accounts for existing monthly debts.
+
+➕ EXTRA PAYMENT CALCULATOR
+See how much time and interest you save by paying extra each month or with a lump sum. Know your new payoff date and exact interest savings before you commit.
+
+🔄 REFINANCE CALCULATOR
+Should you refinance? Enter your current loan, new rate, and closing costs. Get your break-even month and total lifetime savings — no guessing.
+
+📈 ARM CALCULATOR
+5/1, 7/1, 10/1 Adjustable Rate Mortgage scenarios. See your payment at the initial rate, after each cap adjustment, and at the worst-case ceiling. Know your rate shock risk before signing.
+
+⚖️ LOAN COMPARATOR
+Compare up to 3 loan scenarios side by side — different terms, rates, or down payments. See which option saves the most over the life of the loan.
+
+★ WHY MORTGAGEUS?
+
+✅ PMI auto-cancel at 78% LTV — the only free app that implements the HPA correctly
+✅ 2026 FHFA conforming limits ($832,750) built in — always current
+✅ ARM rate shock analysis — unique in this price range
+✅ Multi-scenario loan comparator — compare 3 loans at once
+✅ Full PITI breakdown every time — not just P&I like most apps
+✅ No account required — 100% offline, your data stays on your device
+✅ English + Spanish (EN/ES)
+✅ Dark mode support
+
+★ FREEMIUM MODEL
+
+Free: full access to all 7 calculators, 5 saved calculations
+Premium ($4.99 one-time): unlimited saves, no ads, all history
+Watch a short ad: 60 minutes ad-free, up to 2× per day
+
+★ PERFECT FOR
+
+• First-time home buyers comparing loan options
+• Homeowners evaluating refinancing
+• Real estate investors running quick numbers
+• Anyone comparing 15yr vs 30yr vs ARM scenarios
+
+No account. No data collection. No subscription. Just math.
+
+KEYWORDS (Play Store tags)
+---------------------------
+mortgage calculator, home loan, PITI, amortization, refinance, ARM calculator, affordability, PMI, HOA, real estate, home buyer, loan comparison
+
+CATEGORY
+--------
+Finance
+
+CONTENT RATING
+--------------
+Everyone
+
+CONTACT EMAIL
+-------------
+abassimaj@gmail.com
+
+WEBSITE / PRIVACY POLICY
+-------------------------
+https://abassimaj.github.io/mortgageus-privacy/

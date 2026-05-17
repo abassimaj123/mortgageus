@@ -22,10 +22,10 @@ import 'package:mortgage_us/core/freemium/freemium_service.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Namespaced keys matching appKey = 'mortgageus'
-const _kPremium  = 'mortgageus_premium';
-const _kExp      = 'mortgageus_rewarded_exp';
-const _kDay      = 'mortgageus_rewarded_day';
-const _kCount    = 'mortgageus_rewarded_count';
+const _kPremium = 'mortgageus_premium';
+const _kExp = 'mortgageus_rewarded_exp';
+const _kDay = 'mortgageus_rewarded_day';
+const _kCount = 'mortgageus_rewarded_count';
 
 int _todayKey() {
   final n = DateTime.now();
@@ -57,7 +57,7 @@ void main() {
 
     test('returns false when daily cap reached', () async {
       SharedPreferences.setMockInitialValues({
-        _kDay:   _todayKey(),
+        _kDay: _todayKey(),
         _kCount: MonetizationConfig.maxRewardedPerDay,
       });
       await freemiumService.initialize();
@@ -66,7 +66,7 @@ void main() {
 
     test('returns true when cap was reached yesterday (daily reset)', () async {
       SharedPreferences.setMockInitialValues({
-        _kDay:   _yesterdayKey(),
+        _kDay: _yesterdayKey(),
         _kCount: MonetizationConfig.maxRewardedPerDay,
       });
       await freemiumService.initialize();
@@ -77,8 +77,8 @@ void main() {
       // Simulate an active session: expiry is far in the future.
       final future = DateTime.now().add(const Duration(minutes: 59));
       SharedPreferences.setMockInitialValues({
-        _kExp:   future.toIso8601String(),
-        _kDay:   _todayKey(),
+        _kExp: future.toIso8601String(),
+        _kDay: _todayKey(),
         _kCount: 1,
       });
       await freemiumService.initialize();
@@ -89,8 +89,8 @@ void main() {
       // Expired session — isRewardedNotifier should be false.
       final past = DateTime.now().subtract(const Duration(minutes: 1));
       SharedPreferences.setMockInitialValues({
-        _kExp:   past.toIso8601String(),
-        _kDay:   _todayKey(),
+        _kExp: past.toIso8601String(),
+        _kDay: _todayKey(),
         _kCount: 1,
       });
       await freemiumService.initialize();
@@ -113,7 +113,7 @@ void main() {
 
     test('does not activate when cap is already reached', () async {
       SharedPreferences.setMockInitialValues({
-        _kDay:   _todayKey(),
+        _kDay: _todayKey(),
         _kCount: MonetizationConfig.maxRewardedPerDay,
       });
       await freemiumService.initialize();
@@ -122,7 +122,8 @@ void main() {
       expect(prefs.getInt(_kCount), MonetizationConfig.maxRewardedPerDay);
     });
 
-    test('second activation brings count to 2 and still allows watching', () async {
+    test('second activation brings count to 2 and still allows watching',
+        () async {
       await freemiumService.activateRewarded();
 
       // Simulate session expiry so canWatchRewarded() allows a second view.

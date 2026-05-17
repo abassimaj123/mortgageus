@@ -4,10 +4,12 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/constants/mortgage_constants.dart';
-import '../../../core/freemium/paywall_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
-import '../../../../main.dart' show isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import 'package:calcwise_core/calcwise_core.dart'
+    show PaywallTrigger, CalcwiseAdFooter;
+import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../presentation/widgets/paywall_soft.dart';
 import '../../../presentation/widgets/paywall_hard.dart';
 
@@ -23,13 +25,13 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
   double _downPct = 10.0;
   bool _analyticsLogged = false;
 
-  static const double _pmiAnnualRate = 0.85; // 0.85% default
+  static const double _pmiAnnualRate = 0.80; // 0.80% — matches app-wide default
 
-  void _onInteraction() {
+  Future<void> _onInteraction() async {
     if (!_analyticsLogged) {
       _analyticsLogged = true;
       AnalyticsService.instance.logPmiCalculated();
-      final trigger = paywallService.recordAction();
+      final trigger = await paywallSession.recordAction();
       if (mounted) {
         if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
         if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
@@ -48,7 +50,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
     required double loanAmount,
     required double homePrice,
     required double annualRatePct,
-    required int    termYears,
+    required int termYears,
   }) {
     if (homePrice <= 0) return null;
     final targetBalance = homePrice * MortgageConstants.pmiAutoCancelLtv;
@@ -57,14 +59,14 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
     final n = termYears * 12;
     final r = annualRatePct / 100.0 / 12.0;
     final payment = MortgageCalculator.calcMonthlyPayment(
-      loanAmount:    loanAmount,
+      loanAmount: loanAmount,
       annualRatePct: annualRatePct,
-      termYears:     termYears,
+      termYears: termYears,
     );
 
     double balance = loanAmount;
     for (int m = 1; m <= n; m++) {
-      final interest  = balance * r;
+      final interest = balance * r;
       final principal = (payment - interest).clamp(0.0, balance);
       balance -= principal;
       if (balance <= targetBalance) return m;
@@ -78,17 +80,17 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
         final rawPrice = double.tryParse(
-              _homePriceCtrl.text.replaceAll(RegExp(r'[^\d]'), '')) ??
+                _homePriceCtrl.text.replaceAll(RegExp(r'[^\d]'), '')) ??
             0.0;
-        final downAmt  = rawPrice * _downPct / 100.0;
-        final loan     = (rawPrice - downAmt).clamp(0.0, double.infinity);
-        final ltv      = rawPrice > 0 ? (loan / rawPrice) * 100.0 : 0.0;
-        final hasPmi   = ltv > 80.0;
+        final downAmt = rawPrice * _downPct / 100.0;
+        final loan = (rawPrice - downAmt).clamp(0.0, double.infinity);
+        final ltv = rawPrice > 0 ? (loan / rawPrice) * 100.0 : 0.0;
+        final hasPmi = ltv > 80.0;
 
         final monthlyPmi = hasPmi
             ? MortgageCalculator.calcPmiMonthly(
-                loanAmount:       loan,
-                homePrice:        rawPrice,
+                loanAmount: loan,
+                homePrice: rawPrice,
                 pmiAnnualRatePct: _pmiAnnualRate,
               )
             : 0.0;
@@ -96,15 +98,14 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
         // Months until PMI auto-cancel (use current market rate as proxy)
         final int? dropMonth = hasPmi
             ? _monthsUntilPmiDrop(
-                loanAmount:    loan,
-                homePrice:     rawPrice,
+                loanAmount: loan,
+                homePrice: rawPrice,
                 annualRatePct: MortgageConstants.defaultInterestRate,
-                termYears:     MortgageConstants.defaultTermYears,
+                termYears: MortgageConstants.defaultTermYears,
               )
             : null;
 
-        final totalPmiCost =
-            (dropMonth != null) ? monthlyPmi * dropMonth : 0.0;
+        final totalPmiCost = (dropMonth != null) ? monthlyPmi * dropMonth : 0.0;
 
         final fmt = NumberFormat.currency(
             locale: 'en_US', symbol: '\$', decimalDigits: 2);
@@ -115,131 +116,137 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
           appBar: AppBar(
             title: Text(isEs ? 'Calculadora PMI' : 'PMI Calculator'),
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Home Price ─────────────────────────────────────────────
-                TextField(
-                  controller: _homePriceCtrl,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [CurrencyInputFormatter()],
-                  decoration: InputDecoration(
-                    labelText: isEs ? 'Precio de la vivienda' : 'Home Price',
-                    prefixText: '\$',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                  ),
-                  onChanged: (_) {
-                    setState(() {});
-                    _onInteraction();
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // ── Down Payment slider ────────────────────────────────────
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      isEs
-                          ? 'Pago inicial: ${_downPct.toStringAsFixed(1)}%'
-                          : 'Down Payment: ${_downPct.toStringAsFixed(1)}%',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 15),
+          body: Column(children: [
+            Expanded(
+                child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Home Price ─────────────────────────────────────────────
+                  TextFormField(
+                    controller: _homePriceCtrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [CurrencyInputFormatter()],
+                    decoration: InputDecoration(
+                      labelText: isEs ? 'Precio de la vivienda' : 'Home Price',
+                      prefixText: '\$',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.lg)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
                     ),
-                    Text(
-                      fmtWhole.format(downAmt),
-                      style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                Slider(
-                  value: _downPct,
-                  min: 3.0,
-                  max: 25.0,
-                  divisions: 220,
-                  activeColor: AppTheme.primary,
-                  label: '${_downPct.toStringAsFixed(1)}%',
-                  onChanged: (v) => setState(() => _downPct = v),
-                  onChangeEnd: (_) => _onInteraction(),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('3%',
-                        style: TextStyle(
-                            color: Colors.grey.shade500, fontSize: 12)),
-                    Text('25%',
-                        style: TextStyle(
-                            color: Colors.grey.shade500, fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // ── Results ────────────────────────────────────────────────
-                if (rawPrice <= 0)
-                  Center(
-                    child: Text(
-                      isEs
-                          ? 'Ingresa un precio válido'
-                          : 'Enter a valid home price',
-                      style: TextStyle(color: Colors.grey.shade500),
-                    ),
-                  )
-                else if (!hasPmi)
-                  _NoPmiBadge(isEs: isEs)
-                else
-                  _PmiResultsCard(
-                    isEs: isEs,
-                    ltv: ltv,
-                    monthlyPmi: monthlyPmi,
-                    dropMonth: dropMonth,
-                    totalPmiCost: totalPmiCost,
-                    fmt: fmt,
-                    fmtWhole: fmtWhole,
+                    onChanged: (_) {
+                      setState(() {});
+                      _onInteraction();
+                    },
                   ),
+                  const SizedBox(height: 20),
 
-                const SizedBox(height: 20),
-
-                // ── Info box ───────────────────────────────────────────────
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    border: Border.all(color: Colors.blue.shade200),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // ── Down Payment slider ────────────────────────────────────
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.info_outline,
-                          color: Colors.blue.shade700, size: 18),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          isEs
-                              ? 'El PMI generalmente cuesta entre 0.5% y 1.5% del préstamo al año. Se cancela automáticamente cuando tu LTV llega al 78%.'
-                              : 'PMI typically costs 0.5%–1.5% of your loan annually. It\'s automatically cancelled when your LTV reaches 78%.',
-                          style: TextStyle(
-                              color: Colors.blue.shade900,
-                              fontSize: 13,
-                              height: 1.4),
-                        ),
+                      Text(
+                        isEs
+                            ? 'Pago inicial: ${_downPct.toStringAsFixed(1)}%'
+                            : 'Down Payment: ${_downPct.toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: AppTextSize.bodyMd),
+                      ),
+                      Text(
+                        fmtWhole.format(downAmt),
+                        style: const TextStyle(
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 80),
-              ],
-            ),
-          ),
+                  Slider(
+                    value: _downPct,
+                    min: 3.0,
+                    max: 25.0,
+                    divisions: 220,
+                    activeColor: AppTheme.primary,
+                    label: '${_downPct.toStringAsFixed(1)}%',
+                    onChanged: (v) => setState(() => _downPct = v),
+                    onChangeEnd: (_) => _onInteraction(),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('3%',
+                          style: TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: AppTextSize.sm)),
+                      Text('25%',
+                          style: TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: AppTextSize.sm)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ── Results ────────────────────────────────────────────────
+                  if (rawPrice <= 0)
+                    Center(
+                      child: Text(
+                        isEs
+                            ? 'Ingresa un precio válido'
+                            : 'Enter a valid home price',
+                        style: TextStyle(color: Color(0xFF64748B)),
+                      ),
+                    )
+                  else if (!hasPmi)
+                    _NoPmiBadge(isEs: isEs)
+                  else
+                    _PmiResultsCard(
+                      isEs: isEs,
+                      ltv: ltv,
+                      monthlyPmi: monthlyPmi,
+                      dropMonth: dropMonth,
+                      totalPmiCost: totalPmiCost,
+                      fmt: fmt,
+                      fmtWhole: fmtWhole,
+                    ),
+
+                  const SizedBox(height: 20),
+
+                  // ── Info box ───────────────────────────────────────────────
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.mdPlus),
+                    decoration: BoxDecoration(
+                      color: AppTheme.infoSurface,
+                      border: Border.all(color: AppTheme.infoBorder),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.info_outline,
+                            color: AppTheme.infoIcon, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            isEs
+                                ? 'El PMI generalmente cuesta entre 0.5% y 1.5% del préstamo al año (estimación: 0.80%). Se cancela automáticamente cuando el LTV llega al 78%.'
+                                : 'PMI typically costs 0.5%–1.5% of your loan annually (default estimate: 0.80%). Auto-cancelled when LTV reaches 78%.',
+                            style: const TextStyle(
+                                color: AppTheme.infoText,
+                                fontSize: AppTextSize.md,
+                                height: 1.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            const CalcwiseAdFooter(),
+          ]),
         );
       },
     );
@@ -255,11 +262,11 @@ class _NoPmiBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.green.shade50,
           border: Border.all(color: Colors.green.shade300),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Row(
           children: [
@@ -271,7 +278,7 @@ class _NoPmiBadge extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.green.shade800,
-                fontSize: 16,
+                fontSize: AppTextSize.bodyLg,
               ),
             ),
           ],
@@ -282,11 +289,11 @@ class _NoPmiBadge extends StatelessWidget {
 // ── PMI results card ──────────────────────────────────────────────────────────
 
 class _PmiResultsCard extends StatelessWidget {
-  final bool         isEs;
-  final double       ltv;
-  final double       monthlyPmi;
-  final int?         dropMonth;
-  final double       totalPmiCost;
+  final bool isEs;
+  final double ltv;
+  final double monthlyPmi;
+  final int? dropMonth;
+  final double totalPmiCost;
   final NumberFormat fmt;
   final NumberFormat fmtWhole;
 
@@ -307,10 +314,11 @@ class _PmiResultsCard extends StatelessWidget {
         : (isEs ? 'N/A' : 'N/A');
 
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
             _Row(
@@ -323,7 +331,9 @@ class _PmiResultsCard extends StatelessWidget {
                       : AppTheme.accentGood,
             ),
             _Row(
-              label: isEs ? 'PMI mensual estimado (0.85%)' : 'Est. Monthly PMI (0.85%)',
+              label: isEs
+                  ? 'PMI mensual estimado (0.80%)'
+                  : 'Est. Monthly PMI (0.80%)',
               value: fmt.format(monthlyPmi),
               bold: true,
               color: Colors.orange.shade800,
@@ -352,7 +362,7 @@ class _PmiResultsCard extends StatelessWidget {
 
 class _Row extends StatelessWidget {
   final String label, value;
-  final bool   bold;
+  final bool bold;
   final Color? color;
   const _Row({
     required this.label,
@@ -370,15 +380,15 @@ class _Row extends StatelessWidget {
             Flexible(
               child: Text(label,
                   style: TextStyle(
-                      color: Colors.grey.shade700, fontSize: 14)),
+                      color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
             const SizedBox(width: 8),
             Text(
               value,
               style: TextStyle(
                 fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-                color: color ?? (bold ? Colors.black87 : null),
-                fontSize: 14,
+                color: color ?? (bold ? AppTheme.labelGray : null),
+                fontSize: AppTextSize.body,
               ),
             ),
           ],

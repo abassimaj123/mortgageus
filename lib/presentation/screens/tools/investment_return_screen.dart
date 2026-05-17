@@ -1,0 +1,896 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../../core/irr_engine.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
+import '../../../core/services/analytics_service.dart';
+import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import 'package:calcwise_core/calcwise_core.dart'
+    show PaywallTrigger, CalcwiseAdFooter;
+import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../../presentation/widgets/paywall_soft.dart';
+import '../../../presentation/widgets/paywall_hard.dart';
+
+// ── Color for Investment Return tool icon (emerald-teal) ──────────────────────
+const Color _kToolColor = Color(0xFF0D9488); // teal-600
+
+class InvestmentReturnScreen extends StatefulWidget {
+  const InvestmentReturnScreen({super.key});
+
+  @override
+  State<InvestmentReturnScreen> createState() => _InvestmentReturnScreenState();
+}
+
+class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
+  // ── Controllers ──────────────────────────────────────────────────────────
+  final _priceCtrl = TextEditingController(text: '400000');
+  final _rentCtrl = TextEditingController(text: '2500');
+  final _discountCtrl = TextEditingController(text: '10');
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  double _downPct = 20.0;
+  double _appreciation = 3.0;
+  int _holdYears = 10;
+  bool _analyticsLogged = false;
+
+  static const List<int> _holdOptions = [5, 10, 15, 20];
+
+  // ── Interest rate used for mortgage calculation ───────────────────────────
+  static const double _defaultRate = 7.0;
+  static const int _defaultTerm = 30;
+  static const double _expenseRatio = 0.30; // 30% of gross rent
+
+  @override
+  void dispose() {
+    _priceCtrl.dispose();
+    _rentCtrl.dispose();
+    _discountCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onInteraction() async {
+    if (!_analyticsLogged) {
+      _analyticsLogged = true;
+      AnalyticsService.instance.logInvestmentReturnCalculated();
+      final trigger = await paywallSession.recordAction();
+      if (mounted) {
+        if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+        if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+      }
+    }
+  }
+
+  // ── Core calculation ──────────────────────────────────────────────────────
+  _InvestmentResult? _calculate() {
+    final price = _parseAmount(_priceCtrl.text);
+    final rent = _parseAmount(_rentCtrl.text);
+    final discount = double.tryParse(_discountCtrl.text) ?? 10.0;
+
+    if (price <= 0 || rent <= 0) return null;
+
+    final downAmt = price * _downPct / 100;
+    final loanAmt = price - downAmt;
+    final closingCosts = price * 0.02; // 2% closing costs estimate
+    final initialInv = downAmt + closingCosts;
+
+    final mortgageMo = loanAmt > 0
+        ? MortgageCalculator.calcMonthlyPayment(
+            loanAmount: loanAmt,
+            annualRatePct: _defaultRate,
+            termYears: _defaultTerm,
+          )
+        : 0.0;
+
+    final expensesMo = rent * _expenseRatio;
+    final monthlyCF = rent - mortgageMo - expensesMo;
+    final annualCF = monthlyCF * 12;
+    final annualMortgage = mortgageMo * 12;
+    final cashOnCash = initialInv > 0 ? annualCF / initialInv * 100 : 0.0;
+
+    final flows = IrrEngine.buildRentalCashFlows(
+      initialInvestment: initialInv,
+      annualCashFlow: annualCF,
+      propertyValue: price,
+      appreciationPercent: _appreciation,
+      annualMortgagePayment: annualMortgage,
+      years: _holdYears,
+    );
+
+    final irrVal = IrrEngine.irr(flows);
+    final npvVal = IrrEngine.npv(discount, flows);
+
+    // Equity multiple = total cash in / initial investment
+    final totalCashIn = flows.skip(1).fold(0.0, (a, b) => a + b);
+    final equityMult =
+        initialInv > 0 ? (totalCashIn + initialInv) / initialInv : 0.0;
+
+    return _InvestmentResult(
+      price: price,
+      downAmt: downAmt,
+      initialInv: initialInv,
+      loanAmt: loanAmt,
+      mortgageMo: mortgageMo,
+      monthlyCF: monthlyCF,
+      cashOnCash: cashOnCash,
+      irr: irrVal,
+      npv: npvVal,
+      equityMult: equityMult,
+    );
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isSpanishNotifier,
+      builder: (context, isEs, _) {
+        final result = _calculate();
+
+        final fmtCur = NumberFormat.currency(
+            locale: 'en_US', symbol: '\$', decimalDigits: 0);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(isEs ? 'Retorno de Inversión' : 'Investment Return'),
+          ),
+          body: Column(children: [
+            Expanded(
+                child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Purchase price ─────────────────────────────────────────
+                  _SectionLabel(
+                      label: isEs ? 'Precio de compra' : 'Purchase Price'),
+                  TextFormField(
+                    controller: _priceCtrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [CurrencyInputFormatter()],
+                    decoration: _inputDecor(
+                      label: isEs ? 'Precio de compra' : 'Purchase Price',
+                      prefix: '\$',
+                    ),
+                    onChanged: (_) {
+                      setState(() {});
+                      _onInteraction();
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Down payment slider ────────────────────────────────────
+                  _SliderRow(
+                    labelEn: 'Down Payment',
+                    labelEs: 'Enganche',
+                    value: _downPct,
+                    valueSuffix: '%',
+                    displayValue:
+                        result != null ? fmtCur.format(result.downAmt) : '—',
+                    min: 3.0,
+                    max: 50.0,
+                    divisions: 470,
+                    minLabel: '3%',
+                    maxLabel: '50%',
+                    isEs: isEs,
+                    onChanged: (v) => setState(() => _downPct = v),
+                    onChangeEnd: (_) => _onInteraction(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Monthly rent ──────────────────────────────────────────
+                  _SectionLabel(
+                      label: isEs
+                          ? 'Renta mensual estimada'
+                          : 'Monthly Rent Estimate'),
+                  TextFormField(
+                    controller: _rentCtrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [CurrencyInputFormatter()],
+                    decoration: _inputDecor(
+                      label: isEs ? 'Renta mensual' : 'Monthly Rent',
+                      prefix: '\$',
+                    ),
+                    onChanged: (_) {
+                      setState(() {});
+                      _onInteraction();
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Appreciation slider ────────────────────────────────────
+                  _SliderRow(
+                    labelEn: 'Annual Appreciation',
+                    labelEs: 'Apreciación Anual',
+                    value: _appreciation,
+                    valueSuffix: '%',
+                    displayValue: '${_appreciation.toStringAsFixed(1)}%',
+                    min: 0.0,
+                    max: 10.0,
+                    divisions: 100,
+                    minLabel: '0%',
+                    maxLabel: '10%',
+                    isEs: isEs,
+                    onChanged: (v) => setState(() => _appreciation = v),
+                    onChangeEnd: (_) => _onInteraction(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Hold period toggle ─────────────────────────────────────
+                  _SectionLabel(
+                      label: isEs ? 'Período de tenencia' : 'Hold Period'),
+                  const SizedBox(height: 8),
+                  _HoldPeriodToggle(
+                    selected: _holdYears,
+                    options: _holdOptions,
+                    isEs: isEs,
+                    onSelect: (v) {
+                      setState(() => _holdYears = v);
+                      _onInteraction();
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Discount rate ─────────────────────────────────────────
+                  TextFormField(
+                    controller: _discountCtrl,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: _inputDecor(
+                      label: isEs
+                          ? 'Tasa de descuento NPV (%)'
+                          : 'NPV Discount Rate (%)',
+                      prefix: null,
+                      suffix: '%',
+                    ),
+                    onChanged: (_) {
+                      setState(() {});
+                      _onInteraction();
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ── Assumptions note ───────────────────────────────────────
+                  _AssumptionsBox(isEs: isEs),
+                  const SizedBox(height: 20),
+
+                  // ── Results (premium-gated) ───────────────────────────────
+                  if (result == null)
+                    Center(
+                      child: Text(
+                        isEs
+                            ? 'Ingresa un precio y renta válidos'
+                            : 'Enter a valid price and rent',
+                        style: const TextStyle(color: Color(0xFF64748B)),
+                      ),
+                    )
+                  else
+                    _ResultsSection(result: result, isEs: isEs),
+                ],
+              ),
+            )),
+            const CalcwiseAdFooter(),
+          ]),
+        );
+      },
+    );
+  }
+
+  InputDecoration _inputDecor({
+    required String label,
+    String? prefix,
+    String? suffix,
+  }) =>
+      InputDecoration(
+        labelText: label,
+        prefixText: prefix,
+        suffixText: suffix,
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      );
+
+  double _parseAmount(String text) =>
+      double.tryParse(text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0.0;
+}
+
+// ── Results section (premium gate) ────────────────────────────────────────────
+
+class _ResultsSection extends StatelessWidget {
+  final _InvestmentResult result;
+  final bool isEs;
+
+  const _ResultsSection({required this.result, required this.isEs});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: freemiumService.isPremiumNotifier,
+      builder: (context, isPremium, _) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: freemiumService.isRewardedNotifier,
+          builder: (context, isRewarded, _) {
+            final unlocked = isPremium || isRewarded;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ResultsCard(result: result, isEs: isEs, unlocked: unlocked),
+                if (!unlocked) ...[
+                  const SizedBox(height: 16),
+                  _PremiumGateBanner(isEs: isEs),
+                ],
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+// ── Results card ──────────────────────────────────────────────────────────────
+
+class _ResultsCard extends StatelessWidget {
+  final _InvestmentResult result;
+  final bool isEs;
+  final bool unlocked;
+
+  const _ResultsCard({
+    required this.result,
+    required this.isEs,
+    required this.unlocked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fmtCur =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
+    final verdict = _verdict(result.irr);
+    final verdictColor = _verdictColor(verdict);
+    final verdictLabel = _verdictLabel(verdict, isEs);
+
+    Widget blurred(Widget child) {
+      if (unlocked) return child;
+      return Stack(
+        children: [
+          child,
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              child: Container(
+                color: Colors.white.withValues(alpha: 0.82),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.lock_outline,
+                          color: AppTheme.primary, size: 32),
+                      const SizedBox(height: 8),
+                      Text(
+                        isEs ? 'Resultados — Premium' : 'Results — Premium',
+                        style: const TextStyle(
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: AppTextSize.bodyMd,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return blurred(
+      Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl)),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Verdict badge ──────────────────────────────────────────
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: verdictColor.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+                  border:
+                      Border.all(color: verdictColor.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(_verdictIcon(verdict), color: verdictColor, size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        verdictLabel,
+                        style: TextStyle(
+                          color: verdictColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: AppTextSize.bodyMd,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${result.irr.toStringAsFixed(1)}% IRR',
+                      style: TextStyle(
+                        color: verdictColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppTextSize.body,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // ── Cash flow row ──────────────────────────────────────────
+              _Row(
+                label: isEs ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
+                value: '${result.monthlyCF >= 0 ? '+' : ''}'
+                    '${fmtCur.format(result.monthlyCF)}',
+                color: result.monthlyCF >= 0
+                    ? AppTheme.accentGood
+                    : Colors.red.shade700,
+                bold: true,
+              ),
+              _Row(
+                label: isEs
+                    ? 'Inversión inicial (enganche + cierre)'
+                    : 'Initial Investment (down + closing)',
+                value: fmtCur.format(result.initialInv),
+              ),
+              _Row(
+                label: isEs
+                    ? 'Pago hipotecario mensual (7%, 30 años)'
+                    : 'Monthly Mortgage Payment (7%, 30yr)',
+                value: fmtCur.format(result.mortgageMo),
+              ),
+              const Divider(height: 24),
+
+              // ── IRR / NPV ──────────────────────────────────────────────
+              _Row(
+                label: isEs
+                    ? 'TIR (tasa interna de retorno)'
+                    : 'IRR (Internal Rate of Return)',
+                value: '${result.irr.toStringAsFixed(1)}%',
+                color: verdictColor,
+                bold: true,
+              ),
+              _Row(
+                label: isEs
+                    ? 'VPN (valor presente neto)'
+                    : 'NPV (Net Present Value)',
+                value: '${result.npv >= 0 ? '+' : ''}'
+                    '${fmtCur.format(result.npv)}',
+                color:
+                    result.npv >= 0 ? AppTheme.accentGood : Colors.red.shade700,
+                bold: true,
+              ),
+              const Divider(height: 24),
+
+              // ── ROI metrics ────────────────────────────────────────────
+              _Row(
+                label: isEs
+                    ? 'ROI efectivo anual (cash-on-cash)'
+                    : 'Cash-on-Cash ROI',
+                value: '${result.cashOnCash.toStringAsFixed(1)}%',
+                color: result.cashOnCash >= 6
+                    ? AppTheme.accentGood
+                    : AppTheme.accentWarn,
+              ),
+              _Row(
+                label: isEs ? 'Múltiplo de capital' : 'Equity Multiple',
+                value: '${result.equityMult.toStringAsFixed(2)}x',
+              ),
+
+              const SizedBox(height: 8),
+              // ── Legend ─────────────────────────────────────────────────
+              _VerdictLegend(isEs: isEs),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Premium gate banner ───────────────────────────────────────────────────────
+
+class _PremiumGateBanner extends StatelessWidget {
+  final bool isEs;
+  const _PremiumGateBanner({required this.isEs});
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: () => PaywallHard.show(context),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.mdPlus),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primary, AppTheme.primaryDark],
+            ),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.lock_open_rounded,
+                  color: Colors.white, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  isEs
+                      ? 'Desbloquea IRR, NPV y análisis completo — Premium'
+                      : 'Unlock IRR, NPV & full analysis — Premium',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppTextSize.body,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded,
+                  color: Colors.white70, size: 22),
+            ],
+          ),
+        ),
+      );
+}
+
+// ── Assumptions box ───────────────────────────────────────────────────────────
+
+class _AssumptionsBox extends StatelessWidget {
+  final bool isEs;
+  const _AssumptionsBox({required this.isEs});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.mdPlus),
+        decoration: BoxDecoration(
+          color: AppTheme.infoSurface,
+          border: Border.all(color: AppTheme.infoBorder),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.info_outline, color: AppTheme.infoIcon, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                isEs
+                    ? 'Supuestos: tasa hipotecaria 7% a 30 años · gastos operativos 30% de la renta · costos de cierre 2% · venta con 6% de gastos.'
+                    : 'Assumptions: 7% mortgage rate, 30yr · 30% operating expenses · 2% closing costs · 6% selling costs at exit.',
+                style: const TextStyle(
+                  color: AppTheme.infoText,
+                  fontSize: AppTextSize.sm,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+// ── Verdict legend ────────────────────────────────────────────────────────────
+
+class _VerdictLegend extends StatelessWidget {
+  final bool isEs;
+  const _VerdictLegend({required this.isEs});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = isEs
+        ? [
+            ('Excelente', 'IRR > 15%', AppTheme.accentGood),
+            ('Bueno', 'IRR 10–15%', const Color(0xFF2196F3)),
+            ('Regular', 'IRR 6–10%', AppTheme.accentWarn),
+            ('Bajo', 'IRR < 6%', Colors.red.shade600),
+          ]
+        : [
+            ('Excellent', 'IRR > 15%', AppTheme.accentGood),
+            ('Good', 'IRR 10–15%', const Color(0xFF2196F3)),
+            ('Fair', 'IRR 6–10%', AppTheme.accentWarn),
+            ('Poor', 'IRR < 6%', Colors.red.shade600),
+          ];
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 4,
+      children: items
+          .map((e) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration:
+                        BoxDecoration(color: e.$3, shape: BoxShape.circle),
+                  ),
+                  const SizedBox(width: 4),
+                  Text('${e.$1} ${e.$2}',
+                      style: const TextStyle(
+                          fontSize: AppTextSize.xs, color: Color(0xFF64748B))),
+                ],
+              ))
+          .toList(),
+    );
+  }
+}
+
+// ── Hold period toggle ────────────────────────────────────────────────────────
+
+class _HoldPeriodToggle extends StatelessWidget {
+  final int selected;
+  final List<int> options;
+  final bool isEs;
+  final ValueChanged<int> onSelect;
+
+  const _HoldPeriodToggle({
+    required this.selected,
+    required this.options,
+    required this.isEs,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: options
+            .map(
+              (y) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: _ToggleChip(
+                    label: '$y ${isEs ? 'años' : 'yrs'}',
+                    selected: selected == y,
+                    onTap: () => onSelect(y),
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+      );
+}
+
+class _ToggleChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ToggleChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: AppDuration.fast,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.primary : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selected ? Colors.white : const Color(0xFF334155),
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+              fontSize: AppTextSize.md,
+            ),
+          ),
+        ),
+      );
+}
+
+// ── Slider row ────────────────────────────────────────────────────────────────
+
+class _SliderRow extends StatelessWidget {
+  final String labelEn, labelEs;
+  final double value, min, max;
+  final String valueSuffix, displayValue, minLabel, maxLabel;
+  final int divisions;
+  final bool isEs;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeEnd;
+
+  const _SliderRow({
+    required this.labelEn,
+    required this.labelEs,
+    required this.value,
+    required this.valueSuffix,
+    required this.displayValue,
+    required this.min,
+    required this.max,
+    required this.divisions,
+    required this.minLabel,
+    required this.maxLabel,
+    required this.isEs,
+    required this.onChanged,
+    required this.onChangeEnd,
+  });
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${isEs ? labelEs : labelEn}: '
+                '${value.toStringAsFixed(1)}$valueSuffix',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: AppTextSize.bodyMd),
+              ),
+              Text(
+                displayValue,
+                style: const TextStyle(
+                    color: AppTheme.primary, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: divisions,
+            activeColor: AppTheme.primary,
+            label: '${value.toStringAsFixed(1)}$valueSuffix',
+            onChanged: onChanged,
+            onChangeEnd: onChangeEnd,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(minLabel,
+                  style: const TextStyle(
+                      color: Color(0xFF64748B), fontSize: AppTextSize.sm)),
+              Text(maxLabel,
+                  style: const TextStyle(
+                      color: Color(0xFF64748B), fontSize: AppTextSize.sm)),
+            ],
+          ),
+        ],
+      );
+}
+
+// ── Section label ─────────────────────────────────────────────────────────────
+
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel({required this.label});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(
+          label,
+          style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: AppTextSize.bodyMd,
+              color: Color(0xFF1E293B)),
+        ),
+      );
+}
+
+// ── Result row ────────────────────────────────────────────────────────────────
+
+class _Row extends StatelessWidget {
+  final String label, value;
+  final bool bold;
+  final Color? color;
+  const _Row({
+    required this.label,
+    required this.value,
+    this.bold = false,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(label,
+                  style: const TextStyle(
+                      color: Color(0xFF334155), fontSize: AppTextSize.body)),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+                color: color ?? (bold ? AppTheme.labelGray : null),
+                fontSize: AppTextSize.body,
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+// ── Verdict helpers ────────────────────────────────────────────────────────────
+
+enum _Verdict { excellent, good, fair, poor }
+
+_Verdict _verdict(double irr) {
+  if (irr > 15) return _Verdict.excellent;
+  if (irr > 10) return _Verdict.good;
+  if (irr > 6) return _Verdict.fair;
+  return _Verdict.poor;
+}
+
+Color _verdictColor(_Verdict v) => switch (v) {
+      _Verdict.excellent => AppTheme.accentGood,
+      _Verdict.good => const Color(0xFF2196F3),
+      _Verdict.fair => AppTheme.accentWarn,
+      _Verdict.poor => Colors.red.shade600,
+    };
+
+IconData _verdictIcon(_Verdict v) => switch (v) {
+      _Verdict.excellent => Icons.thumb_up_rounded,
+      _Verdict.good => Icons.trending_up_rounded,
+      _Verdict.fair => Icons.remove_rounded,
+      _Verdict.poor => Icons.thumb_down_rounded,
+    };
+
+String _verdictLabel(_Verdict v, bool isEs) => switch (v) {
+      _Verdict.excellent =>
+        isEs ? 'Excelente — Gran inversión' : 'Excellent — Strong investment',
+      _Verdict.good =>
+        isEs ? 'Bueno — Inversión sólida' : 'Good — Solid investment',
+      _Verdict.fair =>
+        isEs ? 'Regular — Inversión moderada' : 'Fair — Moderate return',
+      _Verdict.poor => isEs
+          ? 'Bajo — Considerar otras opciones'
+          : 'Poor — Consider alternatives',
+    };
+
+// ── Data class ────────────────────────────────────────────────────────────────
+
+class _InvestmentResult {
+  final double price;
+  final double downAmt;
+  final double initialInv;
+  final double loanAmt;
+  final double mortgageMo;
+  final double monthlyCF;
+  final double cashOnCash;
+  final double irr;
+  final double npv;
+  final double equityMult;
+
+  const _InvestmentResult({
+    required this.price,
+    required this.downAmt,
+    required this.initialInv,
+    required this.loanAmt,
+    required this.mortgageMo,
+    required this.monthlyCF,
+    required this.cashOnCash,
+    required this.irr,
+    required this.npv,
+    required this.equityMult,
+  });
+}

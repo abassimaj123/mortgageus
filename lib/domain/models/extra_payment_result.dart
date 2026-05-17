@@ -1,7 +1,7 @@
 class ExtraPaymentResult {
-  final int    originalPayoffMonths;
-  final int    newPayoffMonths;
-  final int    monthsSaved;
+  final int originalPayoffMonths;
+  final int newPayoffMonths;
+  final int monthsSaved;
   final double originalTotalInterest;
   final double newTotalInterest;
   final double interestSaved;
@@ -15,6 +15,6 @@ class ExtraPaymentResult {
     required this.interestSaved,
   });
 
-  int get yearsSaved     => monthsSaved ~/ 12;
+  int get yearsSaved => monthsSaved ~/ 12;
   int get remMonthsSaved => monthsSaved % 12;
 }

@@ -8,10 +8,11 @@ import '../../../core/freemium/freemium_service.dart';
 import '../../../core/freemium/iap_service.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../core/ads/ad_footer.dart';
-import '../../../main.dart' show isSpanishNotifier;
+import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
+import 'package:calcwise_core/calcwise_core.dart' show CalcwiseAdFooter;
+import 'package:calcwise_core/calcwise_core.dart';
 
 const _kFreeMonthLimit = 24; // 2 years free, full schedule = premium
 
@@ -20,17 +21,17 @@ const _kViewModeKey = 'amort_view_yearly';
 
 // ── Yearly group model ────────────────────────────────────────────────────────
 class _YearGroup {
-  final int    yearIndex;   // 1-based (Year 1, Year 2 …)
-  final int    calendarYear;
+  final int yearIndex; // 1-based (Year 1, Year 2 …)
+  final int calendarYear;
   final List<AmortizationEntry> months;
   final double yearlyInterest;
   final double yearlyPrincipal;
   final double endBalance;
-  final bool   hasPmiDrop;
-  final bool   isHalfway;
-  final bool   isLastYear;
-  final bool   isCurrentYear;
-  final double pctPaid;     // % of original loan paid at end of year
+  final bool hasPmiDrop;
+  final bool isHalfway;
+  final bool isLastYear;
+  final bool isCurrentYear;
+  final double pctPaid; // % of original loan paid at end of year
 
   const _YearGroup({
     required this.yearIndex,
@@ -51,25 +52,25 @@ List<_YearGroup> _buildYearGroups(
   List<AmortizationEntry> schedule,
   double loanAmount,
 ) {
-  final groups   = <_YearGroup>[];
-  final now      = DateTime.now();
+  final groups = <_YearGroup>[];
+  final now = DateTime.now();
   final halfPaid = loanAmount / 2;
-  bool  halfFlagged = false;
+  bool halfFlagged = false;
 
   for (int y = 0; y < (schedule.length / 12).ceil(); y++) {
-    final start  = y * 12;
-    final end    = (start + 12).clamp(0, schedule.length);
+    final start = y * 12;
+    final end = (start + 12).clamp(0, schedule.length);
     final months = schedule.sublist(start, end);
 
-    final interest  = months.fold<double>(0, (s, e) => s + e.interest);
+    final interest = months.fold<double>(0, (s, e) => s + e.interest);
     final principal = months.fold<double>(0, (s, e) => s + e.principal);
-    final endBal    = months.last.balance;
-    final calYear   = months.first.date.year;
-    final paid      = loanAmount - endBal;
-    final pct       = (paid / loanAmount * 100).clamp(0, 100);
+    final endBal = months.last.balance;
+    final calYear = months.first.date.year;
+    final paid = loanAmount - endBal;
+    final pct = (paid / loanAmount * 100).clamp(0, 100);
 
     final hasPmiDrop = months.any((e) => e.pmiDropped);
-    final isLast     = y == (schedule.length / 12).ceil() - 1;
+    final isLast = y == (schedule.length / 12).ceil() - 1;
 
     bool isHalf = false;
     if (!halfFlagged && paid >= halfPaid) {
@@ -78,17 +79,17 @@ List<_YearGroup> _buildYearGroups(
     }
 
     groups.add(_YearGroup(
-      yearIndex:    y + 1,
+      yearIndex: y + 1,
       calendarYear: calYear,
-      months:       months,
-      yearlyInterest:  interest,
+      months: months,
+      yearlyInterest: interest,
       yearlyPrincipal: principal,
-      endBalance:   endBal,
-      hasPmiDrop:   hasPmiDrop,
-      isHalfway:    isHalf,
-      isLastYear:   isLast,
+      endBalance: endBal,
+      hasPmiDrop: hasPmiDrop,
+      isHalfway: isHalf,
+      isLastYear: isLast,
       isCurrentYear: calYear == now.year,
-      pctPaid:      pct.toDouble(),
+      pctPaid: pct.toDouble(),
     ));
   }
   return groups;
@@ -105,10 +106,23 @@ class AmortizationScreen extends ConsumerStatefulWidget {
 class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
   bool _yearlyView = true;
 
+  void _rebuild() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     _loadPref();
+    freemiumService.isRewardedNotifier.addListener(_rebuild);
+    freemiumService.isPremiumNotifier.addListener(_rebuild);
+  }
+
+  @override
+  void dispose() {
+    freemiumService.isRewardedNotifier.removeListener(_rebuild);
+    freemiumService.isPremiumNotifier.removeListener(_rebuild);
+    super.dispose();
   }
 
   Future<void> _loadPref() async {
@@ -126,70 +140,309 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final result     = ref.watch(mortgageResultProvider);
+    final result = ref.watch(mortgageResultProvider);
     final inputState = ref.watch(mortgageInputProvider);
 
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
-        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
+        final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
 
         if (result == null) {
           return Scaffold(
-            body: Center(child: Text(s.enterLoan)));
+            bottomNavigationBar: const CalcwiseAdFooter(),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.xxxl),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.table_rows_rounded,
+                          size: 40, color: AppTheme.primary),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      isEs
+                          ? 'Tu tabla aparecerá aquí'
+                          : 'Your schedule will appear here',
+                      style: const TextStyle(
+                          fontSize: AppTextSize.subtitle,
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      isEs
+                          ? 'Ingresa los datos de tu préstamo en la calculadora para ver el desglose mes a mes.'
+                          : 'Enter your loan details in the calculator to see your month-by-month breakdown.',
+                      style: const TextStyle(
+                          fontSize: AppTextSize.body,
+                          color: AppTheme.labelGray),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: () => tabSwitchNotifier.value = 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary,
+                          borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+                        ),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Icon(Icons.calculate_rounded,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                              isEs ? 'Ir a la calculadora' : 'Go to Calculator',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600)),
+                        ]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
         }
 
         final schedule = result.schedule;
-        final fmt      = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-        final fmtDate  = DateFormat('MMM yyyy');
-        final years    = _buildYearGroups(schedule, result.loanAmount);
+        final fmt = NumberFormat.currency(
+            locale: 'en_US', symbol: '\$', decimalDigits: 0);
+        final fmtDate = DateFormat('MMM yyyy');
+        final years = _buildYearGroups(schedule, result.loanAmount);
 
         return Scaffold(
-          body: Column(
-            children: [
-              Expanded(
-                child: CustomScrollView(slivers: [
-
+          bottomNavigationBar: const CalcwiseAdFooter(),
+          body: CustomScrollView(slivers: [
             // ── Summary card ───────────────────────────────────────────────────
-            SliverToBoxAdapter(child: _SummaryCard(result: result, inputState: inputState, fmt: fmt, fmtDate: fmtDate, s: s)),
+            SliverToBoxAdapter(
+                child: _SummaryCard(
+                    result: result,
+                    inputState: inputState,
+                    fmt: fmt,
+                    fmtDate: fmtDate,
+                    s: s)),
 
-            // ── Pie chart ──────────────────────────────────────────────────────
+            // ── Donut chart ────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2))
+                    ],
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Column(children: [
                       Text(s.lifeBreakdown,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 180,
-                        child: PieChart(PieChartData(
-                          sections: [
-                            PieChartSectionData(
-                              value: result.loanAmount,
-                              title: '${s.principal}\n${fmt.format(result.loanAmount)}',
-                              color: AppTheme.primary, radius: 70,
-                              titleStyle: const TextStyle(color: Colors.white, fontSize: 10)),
-                            PieChartSectionData(
-                              value: result.totalInterest,
-                              title: '${s.interest}\n${fmt.format(result.totalInterest)}',
-                              color: AppTheme.secondary, radius: 70,
-                              titleStyle: const TextStyle(color: Colors.white, fontSize: 10)),
-                          ],
-                          centerSpaceRadius: 0,
-                        )),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 12),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isSmallScreen = constraints.maxWidth < 400;
+                          final chartSize = isSmallScreen
+                              ? (constraints.maxWidth - 32) * 0.7
+                              : (constraints.maxWidth - 32) * 0.4;
+                          // Responsive radius scaling: scales with chart size
+                          final responsiveCenter = chartSize * 0.35;
+                          final responsiveSection = chartSize * 0.15;
+                          final _total =
+                              result.loanAmount + result.totalInterest;
+                          final _principalPct = _total > 0
+                              ? (result.loanAmount / _total * 100).round()
+                              : 0;
+                          final _interestPct = _total > 0
+                              ? (result.totalInterest / _total * 100).round()
+                              : 0;
+                          final _chartLabel = isEs
+                              ? 'Desglose total: ${fmt.format(result.loanAmount)} capital ($_principalPct%), '
+                                  '${fmt.format(result.totalInterest)} interés ($_interestPct%)'
+                              : 'Lifetime breakdown: ${fmt.format(result.loanAmount)} principal ($_principalPct%), '
+                                  '${fmt.format(result.totalInterest)} interest ($_interestPct%)';
+                          return Flex(
+                            direction:
+                                isSmallScreen ? Axis.vertical : Axis.horizontal,
+                            children: [
+                              Semantics(
+                                label: _chartLabel,
+                                excludeSemantics: true,
+                                child: SizedBox(
+                                  height: chartSize,
+                                  width: chartSize,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      PieChart(
+                                        PieChartData(
+                                          sectionsSpace: 2,
+                                          centerSpaceRadius: responsiveCenter,
+                                          pieTouchData: PieTouchData(
+                                            enabled: true,
+                                            touchCallback: (event, response) {},
+                                          ),
+                                          sections: [
+                                            PieChartSectionData(
+                                              value: result.loanAmount,
+                                              color: AppTheme.primary,
+                                              radius: responsiveSection,
+                                              showTitle: false,
+                                            ),
+                                            PieChartSectionData(
+                                              value: result.totalInterest,
+                                              color: AppTheme.secondary,
+                                              radius: responsiveSection,
+                                              showTitle: false,
+                                            ),
+                                          ],
+                                        ),
+                                        swapAnimationDuration:
+                                            const Duration(milliseconds: 500),
+                                      ),
+                                      // Center overlay — interest %
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '${result.loanAmount + result.totalInterest > 0 ? (result.totalInterest / (result.loanAmount + result.totalInterest) * 100).round() : 0}%',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: AppTextSize.title,
+                                              color: AppTheme.secondary,
+                                            ),
+                                          ),
+                                          Text(
+                                            isEs ? 'interés' : 'interest',
+                                            style: const TextStyle(
+                                              fontSize: AppTextSize.xs,
+                                              color: AppTheme.labelGray,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ), // Semantics
+                              if (isSmallScreen)
+                                const SizedBox(height: 16)
+                              else
+                                const SizedBox(width: 16),
+                              if (isSmallScreen)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _LegendRow(
+                                      color: AppTheme.primary,
+                                      label: s.principal,
+                                      value: fmt.format(result.loanAmount),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _LegendRow(
+                                      color: AppTheme.secondary,
+                                      label: s.interest,
+                                      value: fmt.format(result.totalInterest),
+                                      valueColor: AppTheme.secondary,
+                                    ),
+                                    const SizedBox(height: 9),
+                                    Container(
+                                        height: 1,
+                                        color: AppTheme.labelGray,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 0)),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          isEs ? 'Total' : 'Total',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: AppTextSize.md),
+                                        ),
+                                        Text(
+                                          fmt.format(result.loanAmount +
+                                              result.totalInterest),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: AppTextSize.md),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                              else
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _LegendRow(
+                                        color: AppTheme.primary,
+                                        label: s.principal,
+                                        value: fmt.format(result.loanAmount),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      _LegendRow(
+                                        color: AppTheme.secondary,
+                                        label: s.interest,
+                                        value: fmt.format(result.totalInterest),
+                                        valueColor: AppTheme.secondary,
+                                      ),
+                                      const SizedBox(height: 9),
+                                      Container(
+                                          height: 1,
+                                          color: AppTheme.labelGray,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 0)),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            isEs ? 'Total' : 'Total',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: AppTextSize.md),
+                                          ),
+                                          Text(
+                                            fmt.format(result.loanAmount +
+                                                result.totalInterest),
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: AppTextSize.md),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
-                      const SizedBox(height: 8),
-                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        _Legend(color: AppTheme.primary,   label: s.principal),
-                        const SizedBox(width: 24),
-                        _Legend(color: AppTheme.secondary, label: s.interest),
-                      ]),
                     ]),
                   ),
                 ),
@@ -204,15 +457,84 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Semantics(
                   label: 'View mode toggle',
-                  child: SegmentedButton<bool>(
-                    segments: [
-                      ButtonSegment(value: true,  label: Text(s.yearlyView),
-                        icon: const Icon(Icons.calendar_today)),
-                      ButtonSegment(value: false, label: Text(s.monthlyView),
-                        icon: const Icon(Icons.view_list)),
-                    ],
-                    selected: {_yearlyView},
-                    onSelectionChanged: (sel) => _setViewMode(sel.first),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                          color: AppTheme.primary.withValues(alpha: 0.5)),
+                    ),
+                    child: Row(children: [
+                      Expanded(
+                          child: GestureDetector(
+                        onTap: () => _setViewMode(true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: _yearlyView
+                                ? AppTheme.primary
+                                : Colors.transparent,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(7),
+                              bottomLeft: Radius.circular(7),
+                            ),
+                          ),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.calendar_today,
+                                    size: 16,
+                                    color: _yearlyView
+                                        ? Colors.white
+                                        : AppTheme.primary),
+                                const SizedBox(width: 6),
+                                Text(s.yearlyView,
+                                    style: TextStyle(
+                                        color: _yearlyView
+                                            ? Colors.white
+                                            : AppTheme.primary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: AppTextSize.md)),
+                              ]),
+                        ),
+                      )),
+                      Container(
+                          width: 1,
+                          height: 38,
+                          color: AppTheme.primary.withValues(alpha: 0.5)),
+                      Expanded(
+                          child: GestureDetector(
+                        onTap: () => _setViewMode(false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: !_yearlyView
+                                ? AppTheme.primary
+                                : Colors.transparent,
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(7),
+                              bottomRight: Radius.circular(7),
+                            ),
+                          ),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.view_list,
+                                    size: 16,
+                                    color: !_yearlyView
+                                        ? Colors.white
+                                        : AppTheme.primary),
+                                const SizedBox(width: 6),
+                                Text(s.monthlyView,
+                                    style: TextStyle(
+                                        color: !_yearlyView
+                                            ? Colors.white
+                                            : AppTheme.primary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: AppTextSize.md)),
+                              ]),
+                        ),
+                      )),
+                    ]),
                   ),
                 ),
               ),
@@ -222,18 +544,22 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 
             // ── Content: yearly or monthly ─────────────────────────────────────
             if (_yearlyView)
-              _YearlyList(years: years, fmt: fmt, s: s, isPremium: freemiumService.isPremium)
+              _YearlyList(
+                  years: years,
+                  fmt: fmt,
+                  s: s,
+                  isPremium: freemiumService.hasFullAccess)
             else ...[
               SliverToBoxAdapter(child: _MonthlyHeader(s: s)),
-              _MonthlyList(schedule: schedule, fmt: fmt, s: s, isPremium: freemiumService.isPremium),
+              _MonthlyList(
+                  schedule: schedule,
+                  fmt: fmt,
+                  s: s,
+                  isPremium: freemiumService.hasFullAccess),
             ],
 
             const SliverToBoxAdapter(child: SizedBox(height: 80)),
-                ]),
-              ),
-              const AdFooter(),
-            ],
-          ),
+          ]),
         );
       },
     );
@@ -245,37 +571,48 @@ class _SummaryCard extends StatelessWidget {
   final dynamic result;
   final dynamic inputState;
   final NumberFormat fmt;
-  final DateFormat   fmtDate;
-  final dynamic      s;
+  final DateFormat fmtDate;
+  final dynamic s;
 
-  const _SummaryCard({required this.result, required this.inputState, required this.fmt, required this.fmtDate, required this.s});
+  const _SummaryCard(
+      {required this.result,
+      required this.inputState,
+      required this.fmt,
+      required this.fmtDate,
+      required this.s});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Card(
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      decoration: BoxDecoration(
         color: AppTheme.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(s.loanSummary,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            // Show home price + down payment for clarity
-            _SummaryRow(s.homePrice,
-              '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
-            _SummaryRow(s.loanAmount,    fmt.format(result.loanAmount)),
-            _SummaryRow(s.payoffDate,    fmtDate.format(result.payoffDate)),
-            _SummaryRow(s.totalInterest, fmt.format(result.totalInterest)),
-            _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
-            if (result.pmiDropMonth != null)
-              _SummaryRow(s.pmiRemoved,  'Month ${result.pmiDropMonth}'),
-          ]),
-        ),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        boxShadow: [
+          BoxShadow(
+              color: AppTheme.primary.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4))
+        ],
       ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(s.loanSummary,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        // Show home price + down payment for clarity
+        _SummaryRow(s.homePrice,
+            '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
+        _SummaryRow(s.loanAmount, fmt.format(result.loanAmount)),
+        _SummaryRow(s.payoffDate, fmtDate.format(result.payoffDate)),
+        _SummaryRow(s.totalInterest, fmt.format(result.totalInterest)),
+        _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
+        if (result.pmiDropMonth != null)
+          _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
+      ]),
     );
   }
 }
@@ -285,31 +622,41 @@ class _SummaryRow extends StatelessWidget {
   const _SummaryRow(this.label, this.value);
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 3),
-    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: const TextStyle(color: Colors.white70, fontSize: 13)),
-      Text(value,  style: const TextStyle(color: Colors.white,   fontSize: 13,
-        fontWeight: FontWeight.w600)),
-    ]),
-  );
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white70, fontSize: AppTextSize.md)),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: AppTextSize.md,
+                  fontWeight: FontWeight.w600)),
+        ]),
+      );
 }
 
 // ── Yearly accordion list ─────────────────────────────────────────────────────
 class _YearlyList extends StatelessWidget {
   final List<_YearGroup> years;
-  final NumberFormat     fmt;
-  final dynamic          s;
-  final bool             isPremium;
-  const _YearlyList({required this.years, required this.fmt, required this.s, required this.isPremium});
+  final NumberFormat fmt;
+  final dynamic s;
+  final bool isPremium;
+  const _YearlyList(
+      {required this.years,
+      required this.fmt,
+      required this.s,
+      required this.isPremium});
 
   @override
   Widget build(BuildContext context) {
     // Free: show first 2 years (= 24 months) + lock banner
     final freeYearLimit = (_kFreeMonthLimit / 12).floor(); // 2
-    final visibleYears  = isPremium ? years : years.take(freeYearLimit).toList();
-    final locked        = !isPremium && years.length > freeYearLimit;
-    final isEs          = isSpanishNotifier.value;
-    final totalYears    = years.length;
+    final visibleYears = isPremium ? years : years.take(freeYearLimit).toList();
+    final locked = !isPremium && years.length > freeYearLimit;
+    final isEs = isSpanishNotifier.value;
+    final totalYears = years.length;
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -330,83 +677,140 @@ class _YearlyList extends StatelessWidget {
   }
 }
 
-class _YearTile extends StatelessWidget {
-  final _YearGroup   group;
+class _YearTile extends StatefulWidget {
+  final _YearGroup group;
   final NumberFormat fmt;
-  final dynamic      s;
+  final dynamic s;
   const _YearTile({required this.group, required this.fmt, required this.s});
+  @override
+  State<_YearTile> createState() => _YearTileState();
+}
+
+class _YearTileState extends State<_YearTile> {
+  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final group = widget.group;
+    final fmt = widget.fmt;
+    final s = widget.s;
     final isCurrentYear = group.isCurrentYear;
 
-    // Build badge list
     final badges = <Widget>[];
-    if (group.hasPmiDrop)  badges.add(_Badge(s.pmiRemoved, Colors.green));
-    if (group.isHalfway)   badges.add(_Badge(s.halfway,    Colors.blue));
-    if (group.isLastYear)  badges.add(_Badge(s.paidOff,    AppTheme.secondary));
+    if (group.hasPmiDrop) badges.add(_Badge(s.pmiRemoved, Colors.green));
+    if (group.isHalfway) badges.add(_Badge(s.halfway, Colors.blue));
+    if (group.isLastYear) badges.add(_Badge(s.paidOff, AppTheme.secondary));
 
     return Semantics(
       label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '
-             '${s.balance}: ${fmt.format(group.endBalance)}. '
-             '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
+          '${s.balance}: ${fmt.format(group.endBalance)}. '
+          '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
         decoration: BoxDecoration(
-          color: isCurrentYear
-              ? AppTheme.secondary.withValues(alpha: 0.08)
-              : null,
+          color:
+              isCurrentYear ? AppTheme.secondary.withValues(alpha: 0.08) : null,
           border: isCurrentYear
               ? Border.all(color: AppTheme.secondary, width: 1.5)
               : null,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
-        child: ExpansionTile(
-          key: PageStorageKey('year_${group.yearIndex}'),
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          childrenPadding: EdgeInsets.zero,
-          leading: isCurrentYear
-              ? const Icon(Icons.star, color: AppTheme.secondary, size: 18)
-              : null,
-          title: Row(children: [
-            Expanded(
-              child: Text('${s.year} ${group.yearIndex}  (${group.calendarYear})',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isCurrentYear ? AppTheme.primary : null)),
-            ),
-            if (badges.isNotEmpty)
-              Wrap(spacing: 4, children: badges),
-          ]),
-          subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const SizedBox(height: 4),
-            Text(
-              '${s.balance}: ${fmt.format(group.endBalance)}  •  '
-              '${s.interest}: ${fmt.format(group.yearlyInterest)}  •  '
-              '${s.principal}: ${fmt.format(group.yearlyPrincipal)}',
-              style: theme.textTheme.bodySmall,
-            ),
-            const SizedBox(height: 6),
-            // Progress bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: group.pctPaid / 100,
-                minHeight: 6,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  group.pctPaid > 78 ? Colors.green : AppTheme.primary),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Column(children: [
+            // ── Header row (tappable) ──────────────────────────────────────
+            GestureDetector(
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: Container(
+                color: Colors.transparent,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        if (isCurrentYear) ...[
+                          const Icon(Icons.star_rounded,
+                              color: AppTheme.secondary, size: 18),
+                          const SizedBox(width: 6),
+                        ],
+                        Expanded(
+                          child: Row(children: [
+                            Expanded(
+                              child: Text(
+                                '${s.year} ${group.yearIndex}  (${group.calendarYear})',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: AppTextSize.body,
+                                  color:
+                                      isCurrentYear ? AppTheme.primary : null,
+                                ),
+                              ),
+                            ),
+                            if (badges.isNotEmpty)
+                              Wrap(spacing: 4, children: badges),
+                          ]),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          _expanded ? Icons.expand_less : Icons.expand_more,
+                          color: AppTheme.labelGray,
+                          size: 20,
+                        ),
+                      ]),
+                      const SizedBox(height: 6),
+                      Wrap(spacing: 6, runSpacing: 4, children: [
+                        _MetricChip(
+                            label: s.balance,
+                            value: fmt.format(group.endBalance),
+                            color: AppTheme.primary),
+                        _MetricChip(
+                            label: s.interest,
+                            value: fmt.format(group.yearlyInterest),
+                            color: AppTheme.secondary),
+                        _MetricChip(
+                            label: s.principal,
+                            value: fmt.format(group.yearlyPrincipal),
+                            color: AppTheme.accentGood),
+                      ]),
+                      const SizedBox(height: 8),
+                      // Custom progress bar — no Material LinearProgressIndicator
+                      LayoutBuilder(
+                        builder: (context, constraints) =>
+                            TweenAnimationBuilder<double>(
+                          tween: Tween<double>(
+                              begin: 0.0, end: group.pctPaid / 100),
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeOut,
+                          builder: (context, value, _) => ClipRRect(
+                            borderRadius: BorderRadius.circular(AppRadius.xs),
+                            child: SizedBox(
+                              height: 6,
+                              width: constraints.maxWidth,
+                              child: Stack(children: [
+                                Container(
+                                    color: AppTheme.labelGray
+                                        .withValues(alpha: 0.15)),
+                                Container(
+                                  width: constraints.maxWidth * value,
+                                  color: group.pctPaid > 78
+                                      ? AppTheme.accentGood
+                                      : AppTheme.primary,
+                                ),
+                              ]),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text('${group.pctPaid.toStringAsFixed(1)}% ${s.paid}',
+                          style: const TextStyle(fontSize: 10)),
+                    ]),
               ),
             ),
-            const SizedBox(height: 2),
-            Text('${group.pctPaid.toStringAsFixed(1)}% ${s.paid}',
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
+            // ── Expanded sub-months ────────────────────────────────────────
+            if (_expanded) _MonthSubTable(months: group.months, fmt: fmt, s: s),
           ]),
-          // Lazy sub-months (only built when expanded)
-          children: [
-            _MonthSubTable(months: group.months, fmt: fmt, s: s),
-          ],
         ),
       ),
     );
@@ -415,27 +819,29 @@ class _YearTile extends StatelessWidget {
 
 class _Badge extends StatelessWidget {
   final String label;
-  final Color  color;
+  final Color color;
   const _Badge(this.label, this.color);
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: color.withValues(alpha: 0.5)),
-    ),
-    child: Text(label,
-      style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.bold)),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 9, color: color, fontWeight: FontWeight.bold)),
+      );
 }
 
 // ── Sub-month table inside ExpansionTile ──────────────────────────────────────
 class _MonthSubTable extends StatelessWidget {
   final List<AmortizationEntry> months;
-  final NumberFormat            fmt;
-  final dynamic                 s;
-  const _MonthSubTable({required this.months, required this.fmt, required this.s});
+  final NumberFormat fmt;
+  final dynamic s;
+  const _MonthSubTable(
+      {required this.months, required this.fmt, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -446,12 +852,12 @@ class _MonthSubTable extends StatelessWidget {
         color: AppTheme.primary.withValues(alpha: 0.85),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: Row(children: [
-          _HCell(s.colMo,    1),
-          _HCell(s.colDate,  2),
-          _HCell(s.colPmt,   2),
-          _HCell(s.colInt,   2),
+          _HCell(s.colMo, 1),
+          _HCell(s.colDate, 2),
+          _HCell(s.colPmt, 2),
+          _HCell(s.colInt, 2),
           _HCell(s.colPrinc, 2),
-          _HCell(s.colBal,   2),
+          _HCell(s.colBal, 2),
           if (hasPmi) _HCell(s.pmi, 2),
         ]),
       ),
@@ -460,8 +866,10 @@ class _MonthSubTable extends StatelessWidget {
         final i = entry.key;
         final e = entry.value;
         final bg = e.pmiDropped
-            ? Colors.green.shade50
-            : i % 2 == 0 ? Colors.grey.shade50 : Colors.white;
+            ? AppTheme.accentGood.withValues(alpha: 0.08)
+            : i % 2 == 0
+                ? Theme.of(context).colorScheme.surfaceContainerLow
+                : Theme.of(context).colorScheme.surface;
 
         return Semantics(
           label: 'Month ${e.month}, balance ${fmt.format(e.balance)}',
@@ -469,15 +877,20 @@ class _MonthSubTable extends StatelessWidget {
             color: bg,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Row(children: [
-              _Cell('${e.month}',                               flex: 1),
-              _Cell('${e.date.month}/${e.date.year}',           flex: 2),
-              _Cell(fmt.format(e.payment),                      flex: 2),
-              _Cell(fmt.format(e.interest),                     flex: 2),
-              _Cell(fmt.format(e.principal),                    flex: 2),
-              _Cell(fmt.format(e.balance),                      flex: 2),
+              _Cell('${e.month}', flex: 1),
+              _Cell('${e.date.month}/${e.date.year}', flex: 2),
+              _Cell(fmt.format(e.payment), flex: 2),
+              _Cell(fmt.format(e.interest), flex: 2),
+              _Cell(fmt.format(e.principal), flex: 2),
+              _Cell(fmt.format(e.balance), flex: 2),
               if (hasPmi)
-                _Cell(e.pmiDropped ? s.off :
-                      e.pmiAmount > 0 ? fmt.format(e.pmiAmount) : '-', flex: 2),
+                _Cell(
+                    e.pmiDropped
+                        ? s.off
+                        : e.pmiAmount > 0
+                            ? fmt.format(e.pmiAmount)
+                            : '-',
+                    flex: 2),
             ]),
           ),
         );
@@ -493,53 +906,60 @@ class _MonthlyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    child: Container(
-      color: AppTheme.primary,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      child: Row(children: [
-        _HCell(s.colMo,    1),
-        _HCell(s.colDate,  2),
-        _HCell(s.colPmt,   2),
-        _HCell(s.colPrinc, 2),
-        _HCell(s.colInt,   2),
-        _HCell(s.colBal,   2),
-      ]),
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Container(
+          color: AppTheme.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Row(children: [
+            _HCell(s.colMo, 1),
+            _HCell(s.colDate, 2),
+            _HCell(s.colPmt, 2),
+            _HCell(s.colPrinc, 2),
+            _HCell(s.colInt, 2),
+            _HCell(s.colBal, 2),
+          ]),
+        ),
+      );
 }
 
 class _MonthlyList extends StatelessWidget {
   final List<AmortizationEntry> schedule;
-  final NumberFormat            fmt;
-  final dynamic                 s;
-  final bool                    isPremium;
-  const _MonthlyList({required this.schedule, required this.fmt, required this.s, required this.isPremium});
+  final NumberFormat fmt;
+  final dynamic s;
+  final bool isPremium;
+  const _MonthlyList(
+      {required this.schedule,
+      required this.fmt,
+      required this.s,
+      required this.isPremium});
 
   @override
   Widget build(BuildContext context) {
-    final visible = isPremium ? schedule : schedule.take(_kFreeMonthLimit).toList();
-    final locked  = !isPremium && schedule.length > _kFreeMonthLimit;
-    final isEs    = isSpanishNotifier.value;
+    final visible =
+        isPremium ? schedule : schedule.take(_kFreeMonthLimit).toList();
+    final locked = !isPremium && schedule.length > _kFreeMonthLimit;
+    final isEs = isSpanishNotifier.value;
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, i) {
           if (i < visible.length) {
-            final e  = visible[i];
+            final e = visible[i];
             final bg = e.pmiDropped
-                ? Colors.orange.shade50
-                : i % 2 == 0 ? Colors.grey.shade50 : Colors.white;
+                ? AppTheme.accentWarn.withValues(alpha: 0.08)
+                : i % 2 == 0
+                    ? Theme.of(context).colorScheme.surfaceContainerLow
+                    : Theme.of(context).colorScheme.surface;
             return Container(
               color: bg,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
               child: Row(children: [
-                _Cell('${e.month}',                flex: 1),
+                _Cell('${e.month}', flex: 1),
                 _Cell('${e.date.month}/${e.date.year}', flex: 2),
-                _Cell(fmt.format(e.payment),       flex: 2),
-                _Cell(fmt.format(e.principal),     flex: 2),
-                _Cell(fmt.format(e.interest),      flex: 2),
-                _Cell(fmt.format(e.balance),       flex: 2),
+                _Cell(fmt.format(e.payment), flex: 2),
+                _Cell(fmt.format(e.principal), flex: 2),
+                _Cell(fmt.format(e.interest), flex: 2),
+                _Cell(fmt.format(e.balance), flex: 2),
               ]),
             );
           }
@@ -558,9 +978,12 @@ class _MonthlyList extends StatelessWidget {
 // ── Premium lock banner ───────────────────────────────────────────────────────
 class _AmortLockBanner extends StatelessWidget {
   final bool isEs;
-  final int  lockedYears;
-  final int  lockedMonths;
-  const _AmortLockBanner({required this.isEs, required this.lockedYears, required this.lockedMonths});
+  final int lockedYears;
+  final int lockedMonths;
+  const _AmortLockBanner(
+      {required this.isEs,
+      required this.lockedYears,
+      required this.lockedMonths});
 
   @override
   Widget build(BuildContext context) {
@@ -568,10 +991,14 @@ class _AmortLockBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 80),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppTheme.primary.withValues(alpha: 0.08), AppTheme.primary.withValues(alpha: 0.02)],
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primary.withValues(alpha: 0.08),
+            AppTheme.primary.withValues(alpha: 0.02)
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
@@ -580,77 +1007,151 @@ class _AmortLockBanner extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           isEs ? 'Tabla completa bloqueada' : 'Full schedule locked',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+          style: const TextStyle(
+              fontSize: AppTextSize.bodyLg,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary),
         ),
         const SizedBox(height: 6),
         Text(
           isEs
               ? '+$lockedYears años · +$lockedMonths meses restantes'
               : '+$lockedYears years · +$lockedMonths months remaining',
-          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+          style: const TextStyle(
+              fontSize: AppTextSize.md, color: AppTheme.labelGray),
         ),
         const SizedBox(height: 20),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () => IAPService.instance.buy(),
-            icon: const Icon(Icons.workspace_premium, size: 18),
-            label: Text(
-              isEs ? 'Desbloquear Premium — \$4.99' : 'Unlock Premium — \$4.99',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+        GestureDetector(
+          onTap: () => IAPService.instance.buy(),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: AppTheme.primary,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.secondary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              const Icon(Icons.workspace_premium,
+                  size: 18, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                isEs
+                    ? 'Desbloquear Premium — \$4.99'
+                    : 'Unlock Premium — \$4.99',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ]),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          isEs ? 'Acceso único · Sin suscripción' : 'One-time purchase · No subscription',
-          style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+          isEs
+              ? 'Acceso único · Sin suscripción'
+              : 'One-time purchase · No subscription',
+          style: const TextStyle(
+              fontSize: AppTextSize.xs, color: AppTheme.labelGray),
         ),
       ]),
     );
   }
 }
 
-// ── Shared widgets ────────────────────────────────────────────────────────────
-class _Legend extends StatelessWidget {
-  final Color color; final String label;
-  const _Legend({required this.color, required this.label});
+// ── Metric chip (year tile subtitle) ─────────────────────────────────────────
+class _MetricChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  const _MetricChip(
+      {required this.label, required this.value, required this.color});
+
   @override
-  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-    Container(width: 13, height: 13,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3))),
-    const SizedBox(width: 6),
-    Text(label, style: const TextStyle(fontSize: 12)),
-  ]);
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label,
+                style: TextStyle(
+                    fontSize: 9, color: color.withValues(alpha: 0.8))),
+            Text(value,
+                style: TextStyle(
+                    fontSize: AppTextSize.xs,
+                    fontWeight: FontWeight.bold,
+                    color: color)),
+          ],
+        ),
+      );
 }
 
+// ── Legend row (donut chart) ──────────────────────────────────────────────────
+class _LegendRow extends StatelessWidget {
+  final Color color;
+  final String label;
+  final String value;
+  final Color? valueColor;
+  const _LegendRow({
+    required this.color,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(label,
+              style: const TextStyle(
+                  fontSize: AppTextSize.sm, color: AppTheme.labelGray)),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: AppTextSize.sm,
+            color: valueColor,
+          ),
+        ),
+      ]);
+}
+
+// ── Shared table cell widgets ─────────────────────────────────────────────────
 class _HCell extends StatelessWidget {
-  final String text; final int flex;
+  final String text;
+  final int flex;
   const _HCell(this.text, this.flex);
   @override
   Widget build(BuildContext context) => Expanded(
-    flex: flex,
-    child: Text(text,
-      style: const TextStyle(
-        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
-      textAlign: TextAlign.right),
-  );
+        flex: flex,
+        child: Text(text,
+            style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: AppTheme.tableHeaderSize),
+            textAlign: TextAlign.right),
+      );
 }
 
 class _Cell extends StatelessWidget {
-  final String text; final int flex;
+  final String text;
+  final int flex;
   const _Cell(this.text, {required this.flex});
   @override
   Widget build(BuildContext context) => Expanded(
-    flex: flex,
-    child: Text(text,
-      style: const TextStyle(fontSize: 10),
-      textAlign: TextAlign.right),
-  );
+        flex: flex,
+        child: Text(text,
+            style: const TextStyle(fontSize: AppTheme.tableBodySize),
+            textAlign: TextAlign.right),
+      );
 }

@@ -17,24 +17,25 @@ class MonthlyBreakdown {
     required this.pmi,
   });
 
-  double get piPayment   => principal + interest;
-  double get pitiPayment => principal + interest + propertyTax + homeInsurance + hoa + pmi;
+  double get piPayment => principal + interest;
+  double get pitiPayment =>
+      principal + interest + propertyTax + homeInsurance + hoa + pmi;
 }
 
 class MortgageResult {
-  final double             loanAmount;
-  final MonthlyBreakdown   monthly;
-  final double             totalInterest;
-  final double             totalCost;
-  final DateTime           payoffDate;
-  final double             currentLtv;
-  final bool               isJumbo;
-  final bool               hasPmi;
-  final bool               isUsda;       // USDA loan — annual fee, never drops
-  final int?               pmiDropMonth; // month number when PMI drops to 0 (null for USDA)
+  final double loanAmount;
+  final MonthlyBreakdown monthly;
+  final double totalInterest;
+  final double totalCost;
+  final DateTime payoffDate;
+  final double currentLtv;
+  final bool isJumbo;
+  final bool hasPmi;
+  final bool isUsda; // USDA loan — annual fee, never drops
+  final int? pmiDropMonth; // month number when PMI drops to 0 (null for USDA)
   final List<AmortizationEntry> schedule;
-  final double             stressTestRate;    // annualRatePct + 2.0
-  final double             stressTestMonthly; // P&I at stress rate
+  final double stressTestRate; // annualRatePct + 2.0
+  final double stressTestMonthly; // P&I at stress rate
 
   const MortgageResult({
     required this.loanAmount,

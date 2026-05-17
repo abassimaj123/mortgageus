@@ -1,54 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 
 class AppTheme {
-  static const Color primary          = Color(0xFF1B3A6B); // navy blue
-  static const Color primaryDark      = Color(0xFF2A5298); // gradient end
-  static const Color secondary        = Color(0xFFD4A017); // gold
-  static const Color accentGood       = Color(0xFF2E7D32); // dark green
-  static const Color accentGoodLight  = Color(0xFF43A047); // lighter green (gradient)
-  static const Color accentWarn       = Color(0xFFF57C00); // amber
-  static const Color background       = Color(0xFFF8F9FA);
+  AppTheme._();
+
+  static const Color primary = Color(0xFF1B3A6B); // navy blue
+  static const Color accent = Color(0xFFF59E0B); // amber
+  // Aliases and extra palette
+  static const Color secondary = accent; // compat alias used in main.dart
+  static const Color primaryDark = Color(0xFF2A5298); // gradient end
+  static const Color accentGood = Color(0xFF2E7D32); // dark green
+  static const Color accentGoodLight = Color(0xFF43A047); // lighter green
+  static const Color accentWarn = Color(0xFFF57C00); // amber-warn
+  static const Color background = Color(0xFFF8F9FA);
+  static const Color labelGray = Color(0xFF64748B); // slate-500
+  static const Color surfaceTint = Color(0xFFEFF3FA); // light navy tint
+  // Info box semantic colors
+  static const Color infoSurface = Color(0xFFEFF6FF);
+  static const Color infoBorder = Color(0xFFBFDBFE);
+  static const Color infoIcon = Color(0xFF1D4ED8);
+  static const Color infoText = Color(0xFF1E3A8A);
   // Tool icon colors
-  static const Color toolRefi         = Color(0xFF9B59B6); // purple
-  static const Color toolHistory      = Color(0xFF2ECC71); // emerald
-  static const Color toolPmi          = Color(0xFFE74C3C); // red
+  static const Color toolRefi = Color(0xFF9B59B6); // purple
+  static const Color toolHistory = Color(0xFF2ECC71); // emerald
+  static const Color toolPmi = Color(0xFFE74C3C); // red
+  // Chart geometry tokens — delegated to CalcwiseChartTokens
+  static const double chartCenterR = CalcwiseChartTokens.donutCenterR;
+  static const double chartSectionR = CalcwiseChartTokens.donutSectionR;
+  // Typography scale tokens
+  static const double tableBodySize = CalcwiseChartTokens.tableBodySize;
+  static const double tableHeaderSize = CalcwiseChartTokens.tableHeaderSize;
 
-  static ThemeData get light => ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primary,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary:   primary,
-      secondary: secondary,
-      surface:   background,
-    ),
-    fontFamily: 'Inter',
-    appBarTheme: const AppBarTheme(
-      backgroundColor: primary,
-      foregroundColor: Colors.white,
-      elevation: 0,
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    ),
-  );
-
-  static ThemeData get dark => ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primary,
-      brightness: Brightness.dark,
-    ).copyWith(secondary: secondary),
-    fontFamily: 'Inter',
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.grey[900],
-      foregroundColor: Colors.white,
-      elevation: 0,
-    ),
-  );
+  static ThemeData get light =>
+      CalcwiseThemeFactory.buildLight(primary: primary, accent: accent);
+  static ThemeData get dark =>
+      CalcwiseThemeFactory.buildDark(primary: primary, accent: accent);
 }

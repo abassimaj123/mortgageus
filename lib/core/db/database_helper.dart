@@ -13,7 +13,8 @@ class DatabaseHelper {
 
   Future<Database> _initDb() async {
     final p = join(await getDatabasesPath(), 'mortgage_us.db');
-    return openDatabase(p, version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return openDatabase(p,
+        version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -40,10 +41,14 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('ALTER TABLE mortgage_us ADD COLUMN term_years INTEGER NOT NULL DEFAULT 30');
-      await db.execute('ALTER TABLE mortgage_us ADD COLUMN tax_rate REAL NOT NULL DEFAULT 1.1');
-      await db.execute('ALTER TABLE mortgage_us ADD COLUMN insurance REAL NOT NULL DEFAULT 1750');
-      await db.execute('ALTER TABLE mortgage_us ADD COLUMN hoa REAL NOT NULL DEFAULT 0');
+      await db.execute(
+          'ALTER TABLE mortgage_us ADD COLUMN term_years INTEGER NOT NULL DEFAULT 30');
+      await db.execute(
+          'ALTER TABLE mortgage_us ADD COLUMN tax_rate REAL NOT NULL DEFAULT 1.1');
+      await db.execute(
+          'ALTER TABLE mortgage_us ADD COLUMN insurance REAL NOT NULL DEFAULT 1750');
+      await db.execute(
+          'ALTER TABLE mortgage_us ADD COLUMN hoa REAL NOT NULL DEFAULT 0');
     }
     if (oldVersion < 3) {
       await db.execute('ALTER TABLE mortgage_us ADD COLUMN comparison_id TEXT');
@@ -89,15 +94,18 @@ class DatabaseHelper {
     if (rows.isEmpty) return;
     final cid = rows.first['comparison_id'] as String?;
     if (cid != null && cid.isNotEmpty) {
-      await db.delete('mortgage_us', where: 'comparison_id = ?', whereArgs: [cid]);
+      await db
+          .delete('mortgage_us', where: 'comparison_id = ?', whereArgs: [cid]);
     } else {
-      await db.delete('mortgage_us', where: 'id = ?', whereArgs: [rows.first['id']]);
+      await db.delete('mortgage_us',
+          where: 'id = ?', whereArgs: [rows.first['id']]);
     }
   }
 
   /// Deletes all entries that share the given comparison_id.
   Future<void> deleteByComparisonId(String comparisonId) async {
     final db = await database;
-    await db.delete('mortgage_us', where: 'comparison_id = ?', whereArgs: [comparisonId]);
+    await db.delete('mortgage_us',
+        where: 'comparison_id = ?', whereArgs: [comparisonId]);
   }
 }

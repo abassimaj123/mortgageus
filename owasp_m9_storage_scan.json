@@ -1,0 +1,22 @@
+{
+  "total_files_scanned": 48,
+  "total_findings": 2,
+  "findings": [
+    {
+      "file": "D:\\mob\\MortgageUS\\lib\\core\\db\\database_helper.dart",
+      "line": 1,
+      "issue": "Unencrypted SQLite database",
+      "code": "import package:sqflite",
+      "severity": "HIGH",
+      "recommendation": "Consider using sqflite_sqlcipher for encrypted databases"
+    },
+    {
+      "file": "D:\\mob\\MortgageUS\\android\\app\\src\\main\\AndroidManifest.xml",
+      "line": 0,
+      "issue": "Backup not explicitly configured",
+      "code": "<application>",
+      "severity": "MEDIUM",
+      "recommendation": "Set android:allowBackup=\"false\" or configure android:fullBackupContent"
+    }
+  ]
+}

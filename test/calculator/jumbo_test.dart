@@ -5,21 +5,20 @@ import 'package:mortgage_us/domain/models/mortgage_input.dart';
 
 // Helper — builds minimal MortgageInput with a given loan amount
 MortgageInput _input(double homePrice, double downPayment) => MortgageInput(
-  homePrice:            homePrice,
-  downPayment:          downPayment,
-  annualRatePct:        6.5,
-  termYears:            30,
-  loanType:             LoanType.conventional,
-  propertyTaxRatePct:   1.1,
-  homeInsuranceAnnual:  1750,
-  hoaMonthly:           0,
-  pmiAnnualRatePct:     0.75,
-  startDate:            DateTime(2025, 1, 1),
-);
+      homePrice: homePrice,
+      downPayment: downPayment,
+      annualRatePct: 6.5,
+      termYears: 30,
+      loanType: LoanType.conventional,
+      propertyTaxRatePct: 1.1,
+      homeInsuranceAnnual: 1750,
+      hoaMonthly: 0,
+      pmiAnnualRatePct: 0.75,
+      startDate: DateTime(2025, 1, 1),
+    );
 
 void main() {
   group('Conforming loan limits 2026 (FHFA)', () {
-
     test('Conforming limit 1-unit = \$832,750', () {
       expect(MortgageConstants.conformingLimit1Unit, equals(832750.0));
     });
@@ -50,13 +49,13 @@ void main() {
   });
 
   group('High-cost area limit (FHFA 2026)', () {
-
     test('High-cost conforming limit = \$1,249,125', () {
       expect(MortgageConstants.conformingLimitHighCost, equals(1249125.0));
     });
 
     test('Loan at \$1,249,125 is within high-cost conforming limit', () {
-      expect(1249125.0, lessThanOrEqualTo(MortgageConstants.conformingLimitHighCost));
+      expect(1249125.0,
+          lessThanOrEqualTo(MortgageConstants.conformingLimitHighCost));
     });
 
     test('Loan at \$1,249,126 exceeds high-cost conforming limit', () {
@@ -65,19 +64,18 @@ void main() {
   });
 
   group('VA loan — no PMI regardless of LTV', () {
-
     test('VA loan requiresPmi = false even at 95% LTV', () {
       final va = MortgageInput(
-        homePrice:            500000,
-        downPayment:          25000, // 5% down → 95% LTV
-        annualRatePct:        6.5,
-        termYears:            30,
-        loanType:             LoanType.va,
-        propertyTaxRatePct:   1.1,
-        homeInsuranceAnnual:  1750,
-        hoaMonthly:           0,
-        pmiAnnualRatePct:     0.75,
-        startDate:            DateTime(2025, 1, 1),
+        homePrice: 500000,
+        downPayment: 25000, // 5% down → 95% LTV
+        annualRatePct: 6.5,
+        termYears: 30,
+        loanType: LoanType.va,
+        propertyTaxRatePct: 1.1,
+        homeInsuranceAnnual: 1750,
+        hoaMonthly: 0,
+        pmiAnnualRatePct: 0.75,
+        startDate: DateTime(2025, 1, 1),
       );
       expect(va.ltv, greaterThan(80.0));
       expect(va.requiresPmi, isFalse); // VA: never PMI

@@ -35,7 +35,8 @@ void main() {
                     Text('Monthly Payment', style: TextStyle(fontSize: 14)),
                     SizedBox(height: 8),
                     Text(r'$1,896.20',
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 28, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -109,10 +110,14 @@ void main() {
 
     test('RG-3: 15 ans coûte moins en intérêts totaux que 30 ans', () {
       final pay30 = MortgageCalculator.calcMonthlyPayment(
-        loanAmount: 300000, annualRatePct: 6.0, termYears: 30,
+        loanAmount: 300000,
+        annualRatePct: 6.0,
+        termYears: 30,
       );
       final pay15 = MortgageCalculator.calcMonthlyPayment(
-        loanAmount: 300000, annualRatePct: 6.0, termYears: 15,
+        loanAmount: 300000,
+        annualRatePct: 6.0,
+        termYears: 15,
       );
       expect(pay30 * 360, greaterThan(pay15 * 180));
     });

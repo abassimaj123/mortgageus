@@ -3,17 +3,16 @@ import 'package:mortgage_us/domain/usecases/mortgage_calculator.dart';
 
 List<dynamic> _schedule(double loan, double rateDecimal, int years) =>
     MortgageCalculator.buildSchedule(
-      loanAmount:       loan,
-      annualRatePct:    rateDecimal * 100,
-      termYears:        years,
-      homePrice:        0,
+      loanAmount: loan,
+      annualRatePct: rateDecimal * 100,
+      termYears: years,
+      homePrice: 0,
       pmiAnnualRatePct: 0,
-      startDate:        DateTime(2025, 1, 1),
+      startDate: DateTime(2025, 1, 1),
     );
 
 void main() {
   group('buildSchedule — month 1 breakdown', () {
-
     test('First month interest on \$320k at 6.5% = \$1,733.33', () {
       final s = _schedule(320000, 0.065, 30);
       expect(s[0].interest, closeTo(1733.33, 0.01));
@@ -42,7 +41,6 @@ void main() {
   });
 
   group('buildSchedule — totals', () {
-
     test('Total interest \$320k @ 6.5% / 30yr ≈ \$408,142', () {
       final s = _schedule(320000, 0.065, 30);
       final total = s.fold<double>(0, (sum, e) => sum + e.interest);
@@ -79,7 +77,6 @@ void main() {
   });
 
   group('buildSchedule — balance progression', () {
-
     test('Balance strictly decreases (principal always positive)', () {
       final s = _schedule(320000, 0.065, 30);
       for (int i = 1; i < s.length; i++) {

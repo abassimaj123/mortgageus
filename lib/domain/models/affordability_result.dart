@@ -1,6 +1,6 @@
 class AffordabilityResult {
   final double maxHomePriceConservative; // 28% front-end DTI
-  final double maxHomePriceStandard;     // 43% back-end DTI
+  final double maxHomePriceStandard; // 43% back-end DTI
   final double maxLoanConservative;
   final double maxLoanStandard;
   final double monthlyPI;

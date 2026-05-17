@@ -1,3 +1,16 @@
+import 'dart:async';
+import 'dart:math' show pow;
+import 'package:calcwise_core/calcwise_core.dart'
+    show
+        PaywallTrigger,
+        CalcwiseTheme,
+        CalcwiseStaggerItem,
+        CalcwisePageEntrance,
+        CalcwiseAdFooter,
+        RateWatchService,
+        CalcwiseReviewService,
+        ReverseSolveCard;
+import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,21 +21,25 @@ import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/pdf_export_service.dart';
-import '../../../core/services/review_service.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../domain/models/loan_type.dart';
+import '../../../domain/models/mortgage_input.dart';
+import '../../../domain/models/mortgage_result.dart';
+import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../core/ads/ad_footer.dart';
-import '../history/history_screen.dart' show HistoryScreen;
+import '../history/history_screen.dart' show paywallSession, HistoryScreen;
+import '../../../main.dart' show adService;
 import '../../../core/services/analytics_service.dart';
-import '../../../main.dart' show isSpanishNotifier, preFillNotifier;
-import '../../../core/freemium/paywall_service.dart';
+import '../../../main.dart'
+    show paywallSession, isSpanishNotifier, preFillNotifier;
 import '../../widgets/paywall_soft.dart';
 import '../../widgets/paywall_hard.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../../widgets/info_tooltip.dart';
+import '../../../core/utils/insight_engine.dart';
+import '../../widgets/insight_card.dart';
 
 class CalculatorScreen extends ConsumerStatefulWidget {
   const CalculatorScreen({super.key});
@@ -31,18 +48,24 @@ class CalculatorScreen extends ConsumerStatefulWidget {
 }
 
 class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _homePriceCtrl = TextEditingController(text: '400000');
-  final _downPayCtrl   = TextEditingController(text: '20');
-  final _rateCtrl      = TextEditingController(text: '6.5');
-  final _taxCtrl       = TextEditingController(text: '1.1');
+  final _downPayCtrl = TextEditingController(text: '20');
+  final _rateCtrl = TextEditingController(text: '6.8');
+  final _taxCtrl = TextEditingController(text: '1.1');
   final _insuranceCtrl = TextEditingController(text: '1750');
-  final _hoaCtrl       = TextEditingController(text: '0');
-  final _incomeCtrl    = TextEditingController();
+  final _hoaCtrl = TextEditingController(text: '0');
+  final _incomeCtrl = TextEditingController();
   double _monthlyIncome = 0.0;
   bool _advancedExpanded = false;
   String? _homePriceError;
 
-  final _fmt  = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
+  // Cached 15-yr comparison result — recomputed only when inputs change.
+  MortgageResult? _insightResult15yr;
+  String? _insightCacheKey;
+
+  final _fmt =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
   final _fmtK = NumberFormat.compactCurrency(locale: 'en_US', symbol: '\$');
 
   @override
@@ -53,7 +76,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       final n = ref.read(mortgageInputProvider.notifier);
       n.updateHomePrice(400000);
       n.updateDownPaymentPct(20);
-      n.updateRate(6.5);
+      n.updateRate(6.8);
       n.updatePropertyTaxRate(1.1);
       n.updateHomeInsurance(1750);
       n.updateHoa(0);
@@ -108,29 +131,42 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     if (result == null || result.loanAmount <= 0) return;
 
     final inputState = ref.read(mortgageInputProvider);
-    final label = '${inputState.homePrice ~/ 1000}K · ${inputState.annualRatePct.toStringAsFixed(2)}% · ${inputState.termYears}yr';
-    await DatabaseHelper.instance.insertHistory({
-      'home_price':      inputState.homePrice,
-      'down_percent':    inputState.downPaymentPct,
-      'annual_rate':     inputState.annualRatePct,
-      'monthly_payment': result.monthly.pitiPayment,
-      'total_interest':  result.totalInterest,
-      'loan_amount':     result.loanAmount,
-      'loan_type':       inputState.loanType.label,
-      'term_years':      inputState.termYears,
-      'tax_rate':        inputState.propertyTaxRatePct,
-      'insurance':       inputState.homeInsuranceAnnual,
-      'hoa':             inputState.hoaMonthly,
-      'created_at':      DateTime.now().toIso8601String(),
-      'label':           label,
-    });
+    final label =
+        '${inputState.homePrice ~/ 1000}K · ${inputState.annualRatePct.toStringAsFixed(2)}% · ${inputState.termYears}yr';
+    try {
+      await DatabaseHelper.instance.insertHistory({
+        'home_price': inputState.homePrice,
+        'down_percent': inputState.downPaymentPct,
+        'annual_rate': inputState.annualRatePct,
+        'monthly_payment': result.monthly.pitiPayment,
+        'total_interest': result.totalInterest,
+        'loan_amount': result.loanAmount,
+        'loan_type': inputState.loanType.label,
+        'term_years': inputState.termYears,
+        'tax_rate': inputState.propertyTaxRatePct,
+        'insurance': inputState.homeInsuranceAnnual,
+        'hoa': inputState.hoaMonthly,
+        'created_at': DateTime.now().toIso8601String(),
+        'label': label,
+      });
+    } catch (_) {}
+    try {
+      AnalyticsService.instance.logSave();
+    } catch (_) {}
+
+    // Emotional trigger: accessible monthly payment → ask for review
+    if (result.monthly.pitiPayment < 3000 && result.monthly.pitiPayment > 0) {
+      CalcwiseReviewService.instance.requestAfterPremium();
+    }
 
     // Refresh history tab immediately
     HistoryScreen.refreshNotifier.value++;
-    ReviewService.instance.requestAfterSave();
+    adService.onSave();
+    unawaited(RateWatchService.instance
+        .checkRate(inputState.annualRatePct, appLabel: 'MortgageUS'));
     AnalyticsService.instance.logHistorySaved();
     if (mounted) {
-      final trigger = paywallService.recordAction();
+      final trigger = await paywallSession.recordAction();
       if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
       if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
     }
@@ -138,8 +174,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     if (!mounted) return;
     final isEs = isSpanishNotifier.value;
 
-    // Free users: FIFO cap — remove oldest, show informative snackbar
-    if (!freemiumService.isPremium) {
+    // Free users: FIFO cap — remove oldest, show paywallSession, informative snackbar
+    if (!freemiumService.hasFullAccess) {
       final count = await DatabaseHelper.instance.countHistory();
       if (count > freemiumService.historyLimit) {
         await DatabaseHelper.instance.deleteOldestHistory();
@@ -172,271 +208,723 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final result     = ref.watch(mortgageResultProvider);
+    final result = ref.watch(mortgageResultProvider);
     final inputState = ref.watch(mortgageInputProvider);
-    final notifier   = ref.read(mortgageInputProvider.notifier);
+    final notifier = ref.read(mortgageInputProvider.notifier);
+
+    // Recompute 15-yr cached result when inputs change (no-ops when key is same).
+    if (result != null) _recompute15yr(inputState, result);
 
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
         final dynamic s = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
-          body: Column(
-            children: [
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    // ── Hero card ───────────────────────────────────────────
-                    SliverToBoxAdapter(
+          bottomNavigationBar: const CalcwiseAdFooter(),
+          body: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            behavior: HitTestBehavior.translucent,
+            child: SafeArea(
+              bottom: false,
+              child: CalcwisePageEntrance(
+                  child: CustomScrollView(
+                slivers: [
+                  // ── Hero card ──────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: CalcwiseStaggerItem(
+                      index: 0,
                       child: _HeroCard(result: result, s: s),
                     ),
-                    // ── Inputs ──────────────────────────────────────────────
-                    SliverToBoxAdapter(
+                  ),
+                  // ── Inputs + actions ───────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: CalcwiseStaggerItem(
+                      index: 1,
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                      // Home Price
-                      _buildField(s.homePrice, _homePriceCtrl, prefix: '\$',
-                        currency: true,
-                        errorText: _homePriceError,
-                        onChanged: (v) {
-                          final hp = double.tryParse(v.replaceAll(',', '')) ?? 0;
-                          notifier.updateHomePrice(hp);
-                          setState(() {
-                            _homePriceError = hp <= 0 ? (isEs ? 'Ingresa un precio válido' : 'Enter a valid home price') : null;
-                          });
-                        }),
-                      const SizedBox(height: 12),
-                      // Down Payment row
-                      _DownPaymentRow(
-                        ctrl: _downPayCtrl,
-                        notifier: notifier,
-                        inputState: inputState,
-                        s: s,
-                      ),
-                      const SizedBox(height: 12),
-                      // Interest Rate
-                      _buildField(s.interestRate, _rateCtrl, suffix: '%',
-                        onChanged: (v) => notifier.updateRate(double.tryParse(v.replaceAll(',', '.')) ?? 6.5)),
-                      const SizedBox(height: 12),
-                      // Term chips
-                      _TermSelector(inputState: inputState, notifier: notifier, s: s),
-                      const SizedBox(height: 12),
-                      // Loan type chips
-                      _LoanTypeSelector(inputState: inputState, notifier: notifier, s: s),
-                      const SizedBox(height: 16),
-                      // Advanced toggle
-                      InkWell(
-                        onTap: () => setState(() => _advancedExpanded = !_advancedExpanded),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(children: [
-                            Icon(
-                              _advancedExpanded ? Icons.expand_less : Icons.expand_more,
-                              color: AppTheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(s.advancedOptions,
-                              style: const TextStyle(
-                                color: AppTheme.primary,
-                                fontWeight: FontWeight.w600,
-                              )),
-                          ]),
-                        ),
-                      ),
-                      if (_advancedExpanded) ...[
-                        const SizedBox(height: 8),
-                        _buildField(s.propertyTaxRate, _taxCtrl, suffix: '%',
-                          onChanged: (v) =>
-                            notifier.updatePropertyTaxRate(double.tryParse(v.replaceAll(',', '.')) ?? 1.1)),
-                        const SizedBox(height: 12),
-                        _buildField(s.homeInsurance, _insuranceCtrl,
-                          prefix: '\$', suffix: '/yr',
-                          onChanged: (v) =>
-                            notifier.updateHomeInsurance(double.tryParse(v.replaceAll(',', '.')) ?? 1750)),
-                        const SizedBox(height: 12),
-                        _buildField(s.hoaFees, _hoaCtrl, prefix: '\$', suffix: '/mo',
-                          onChanged: (v) => notifier.updateHoa(double.tryParse(v.replaceAll(',', '.')) ?? 0)),
-                        const SizedBox(height: 12),
-                        _buildField(
-                          isEs
-                              ? 'Ingreso Mensual Bruto (opcional)'
-                              : 'Monthly Gross Income (optional)',
-                          _incomeCtrl,
-                          prefix: '\$',
-                          onChanged: (v) => setState(() {
-                            _monthlyIncome = double.tryParse(v.replaceAll(',', '')) ?? 0.0;
-                          }),
-                          currency: true,
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      // Breakdown card
-                      if (result != null)
-                        _BreakdownCard(result: result, fmt: _fmt, fmtK: _fmtK, s: s, isEs: isEs),
-                      // ── Stress Test Banner ──────────────────────────────
-                      if (result != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accentWarn.withValues(alpha: 0.08),
-                            border: Border.all(color: AppTheme.accentWarn.withValues(alpha: 0.4)),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 16),
+                        child: Form(
+                          key: _formKey,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(children: [
-                                const Icon(Icons.warning_amber_rounded,
-                                    color: AppTheme.accentWarn, size: 18),
-                                const SizedBox(width: 6),
-                                Text(
-                                  isEs ? 'Prueba de Estrés (+2%)' : 'Stress Test (+2%)',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.accentWarn,
-                                    fontSize: 14,
+                              // Home Price
+                              _buildField(s.homePrice, _homePriceCtrl,
+                                  prefix: '\$',
+                                  required: true,
+                                  currency: true,
+                                  errorText: _homePriceError, onChanged: (v) {
+                                final hp =
+                                    double.tryParse(v.replaceAll(',', '')) ?? 0;
+                                notifier.updateHomePrice(hp);
+                                setState(() {
+                                  _homePriceError = hp <= 0
+                                      ? (isEs
+                                          ? 'Ingresa un precio válido'
+                                          : 'Enter a valid home price')
+                                      : null;
+                                });
+                              }),
+                              const SizedBox(height: 12),
+                              // Down Payment row
+                              _DownPaymentRow(
+                                ctrl: _downPayCtrl,
+                                notifier: notifier,
+                                inputState: inputState,
+                                s: s,
+                              ),
+                              const SizedBox(height: 12),
+                              // Interest Rate
+                              _buildField(s.interestRate, _rateCtrl,
+                                  suffix: '%',
+                                  required: true,
+                                  helperText: isEs
+                                      ? 'Tasa predeterminada de 2026 — actualiza con tu tasa real'
+                                      : 'Default rate as of 2026 — update to your actual rate',
+                                  onChanged: (v) => notifier.updateRate(
+                                      double.tryParse(v.replaceAll(',', '.')) ??
+                                          6.8)),
+                              const SizedBox(height: 12),
+                              // Term chips
+                              _TermSelector(
+                                  inputState: inputState,
+                                  notifier: notifier,
+                                  s: s),
+                              const SizedBox(height: 12),
+                              // Loan type chips
+                              _LoanTypeSelector(
+                                  inputState: inputState,
+                                  notifier: notifier,
+                                  s: s),
+                              const SizedBox(height: 16),
+                              const Divider(height: 1),
+                              // Advanced toggle
+                              InkWell(
+                                onTap: () => setState(() =>
+                                    _advancedExpanded = !_advancedExpanded),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.md),
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  child: Row(children: [
+                                    Icon(
+                                      _advancedExpanded
+                                          ? Icons.expand_less
+                                          : Icons.expand_more,
+                                      color: AppTheme.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(s.advancedOptions,
+                                          style: const TextStyle(
+                                            color: AppTheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                    ),
+                                    if (_advancedExpanded)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primary
+                                              .withValues(alpha: 0.10),
+                                          borderRadius: BorderRadius.circular(
+                                              AppRadius.mdPlus),
+                                        ),
+                                        child: Text(
+                                          isEs ? 'Ocultar' : 'Hide',
+                                          style: const TextStyle(
+                                            fontSize: AppTextSize.xs,
+                                            color: AppTheme.primary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                  ]),
+                                ),
+                              ),
+                              if (_advancedExpanded) ...[
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color:
+                                        CalcwiseTheme.of(context).surfaceHigh,
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.lg),
+                                  ),
+                                  padding: const EdgeInsets.all(AppSpacing.md),
+                                  child: Column(children: [
+                                    _buildField(s.propertyTaxRate, _taxCtrl,
+                                        suffix: '%',
+                                        onChanged: (v) =>
+                                            notifier.updatePropertyTaxRate(
+                                                double.tryParse(v.replaceAll(
+                                                        ',', '.')) ??
+                                                    1.1)),
+                                    const SizedBox(height: 12),
+                                    _buildField(s.homeInsurance, _insuranceCtrl,
+                                        prefix: '\$',
+                                        suffix: '/yr',
+                                        onChanged: (v) =>
+                                            notifier.updateHomeInsurance(
+                                                double.tryParse(v.replaceAll(
+                                                        ',', '.')) ??
+                                                    1750)),
+                                    const SizedBox(height: 12),
+                                    _buildField(s.hoaFees, _hoaCtrl,
+                                        prefix: '\$',
+                                        suffix: '/mo',
+                                        onChanged: (v) => notifier.updateHoa(
+                                            double.tryParse(
+                                                    v.replaceAll(',', '.')) ??
+                                                0)),
+                                    const SizedBox(height: 12),
+                                    _buildField(
+                                      isEs
+                                          ? 'Ingreso Mensual Bruto (opcional)'
+                                          : 'Monthly Gross Income (optional)',
+                                      _incomeCtrl,
+                                      prefix: '\$',
+                                      onChanged: (v) => setState(() {
+                                        _monthlyIncome = double.tryParse(
+                                                v.replaceAll(',', '')) ??
+                                            0.0;
+                                      }),
+                                      currency: true,
+                                    ),
+                                  ]),
+                                ),
+                                const SizedBox(height: 4),
+                              ],
+                              const SizedBox(height: 16),
+                              // ── AnimatedSwitcher for results ────────────
+                              AnimatedSwitcher(
+                                duration: AppDuration.base,
+                                transitionBuilder: (child, animation) =>
+                                    FadeTransition(
+                                  opacity: animation,
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0, 0.04),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
                                   ),
                                 ),
-                                InfoTooltip(
-                                  title: isEs ? 'Prueba de Estrés' : 'Stress Test',
-                                  body: isEs
-                                      ? 'Su tasa de calificación es su tasa contractual + 2%. Los prestamistas usan esto para asegurarse de que pueda pagar si suben las tasas.'
-                                      : 'Your qualifying rate is your contract rate + 2%. Lenders use this to ensure you can still afford payments if interest rates rise.',
-                                ),
-                              ]),
-                              const SizedBox(height: 6),
-                              Text(
-                                isEs
-                                    ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${_fmt.format(result.stressTestMonthly)}'
-                                    : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${_fmt.format(result.stressTestMonthly)}',
-                                style: const TextStyle(
-                                  color: AppTheme.accentWarn,
-                                  fontSize: 13,
-                                  height: 1.4,
-                                ),
+                                child: result != null
+                                    ? KeyedSubtree(
+                                        key: const ValueKey('results'),
+                                        child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              // Breakdown card
+                                              _BreakdownCard(
+                                                  result: result,
+                                                  fmt: _fmt,
+                                                  fmtK: _fmtK,
+                                                  s: s,
+                                                  isEs: isEs),
+                                              // ── Reverse-Solve: max affordable home price ─
+                                              const SizedBox(height: 12),
+                                              ReverseSolveCard(
+                                                title: isEs
+                                                    ? '¿Qué precio puedo pagar?'
+                                                    : 'What home price can I afford?',
+                                                targetLabel: isEs
+                                                    ? 'Pago mensual objetivo'
+                                                    : 'Target monthly payment',
+                                                resultLabel: isEs
+                                                    ? 'Precio máximo'
+                                                    : 'Max home price',
+                                                prefix: '\$',
+                                                minBound: 50000,
+                                                maxBound: 2000000,
+                                                targetValue: 0,
+                                                compute: (homePrice) {
+                                                  // Monthly P&I for a candidate home price,
+                                                  // reusing the user's current down %, rate, term.
+                                                  final downPct =
+                                                      inputState.downPaymentPct;
+                                                  final loanAmount = homePrice *
+                                                      (1 - downPct / 100);
+                                                  final r =
+                                                      inputState.annualRatePct /
+                                                          100 /
+                                                          12;
+                                                  final n =
+                                                      inputState.termYears * 12;
+                                                  if (r == 0)
+                                                    return loanAmount / n;
+                                                  final f = pow(1 + r, n);
+                                                  return loanAmount *
+                                                      r *
+                                                      f /
+                                                      (f - 1);
+                                                },
+                                              ),
+                                              // ── Stress Test Banner ─────────────────────
+                                              const SizedBox(height: 8),
+                                              Container(
+                                                width: double.infinity,
+                                                padding: const EdgeInsets.all(
+                                                    AppSpacing.mdPlus),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.accentWarn
+                                                      .withValues(alpha: 0.08),
+                                                  border: Border.all(
+                                                      color: AppTheme.accentWarn
+                                                          .withValues(
+                                                              alpha: 0.4)),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          AppRadius.lg),
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(children: [
+                                                      const Icon(
+                                                          Icons
+                                                              .warning_amber_rounded,
+                                                          color: AppTheme
+                                                              .accentWarn,
+                                                          size: 18),
+                                                      const SizedBox(width: 6),
+                                                      Text(
+                                                        isEs
+                                                            ? 'Prueba de Estrés (+2%)'
+                                                            : 'Stress Test (+2%)',
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: AppTheme
+                                                              .accentWarn,
+                                                          fontSize:
+                                                              AppTextSize.body,
+                                                        ),
+                                                      ),
+                                                      InfoTooltip(
+                                                        title: isEs
+                                                            ? 'Prueba de Estrés'
+                                                            : 'Stress Test',
+                                                        body: isEs
+                                                            ? 'Su tasa de calificación es su tasa contractual + 2%. Los prestamistas usan esto para asegurarse de que pueda pagar si suben las tasas.'
+                                                            : 'Your qualifying rate is your contract rate + 2%. Lenders use this to ensure you can still afford payments if interest rates rise.',
+                                                      ),
+                                                    ]),
+                                                    const SizedBox(height: 6),
+                                                    Text(
+                                                      isEs
+                                                          ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${_fmt.format(result.stressTestMonthly)}'
+                                                          : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${_fmt.format(result.stressTestMonthly)}',
+                                                      style: const TextStyle(
+                                                        color:
+                                                            AppTheme.accentWarn,
+                                                        fontSize:
+                                                            AppTextSize.md,
+                                                        height: 1.4,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              // ── Smart Insights ─────────────────────────
+                                              const SizedBox(height: 12),
+                                              _buildInsightCard(
+                                                result: result,
+                                                inputState: inputState,
+                                                isEs: isEs,
+                                              ),
+                                              // ── Affordability badge ─────────────────────
+                                              if (_monthlyIncome > 0) ...[
+                                                const SizedBox(height: 12),
+                                                _AffordabilityBadge(
+                                                  pitiPayment: result
+                                                      .monthly.pitiPayment,
+                                                  monthlyIncome: _monthlyIncome,
+                                                  isEs: isEs,
+                                                ),
+                                              ],
+                                              const SizedBox(height: 12),
+                                              // Save button — primary CTA
+                                              ElevatedButton.icon(
+                                                onPressed: () {
+                                                  HapticFeedback.mediumImpact();
+                                                  _saveToHistory(
+                                                      showFeedback: true);
+                                                },
+                                                icon: const Icon(
+                                                    Icons.bookmark_add_rounded),
+                                                label: Text(s.saveCalc),
+                                                style: ElevatedButton.styleFrom(
+                                                  minimumSize: const Size(
+                                                      double.infinity, 52),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              // PDF + Share — secondary actions
+                                              Row(children: [
+                                                Expanded(
+                                                  child: ValueListenableBuilder<
+                                                      bool>(
+                                                    valueListenable:
+                                                        freemiumService
+                                                            .isPremiumNotifier,
+                                                    builder: (context,
+                                                        isPremium, _) {
+                                                      return TextButton.icon(
+                                                        onPressed: isPremium
+                                                            ? () async {
+                                                                try {
+                                                                  await PdfExportService
+                                                                      .exportMortgage(
+                                                                          context,
+                                                                          inputState,
+                                                                          result);
+                                                                  AnalyticsService
+                                                                      .instance
+                                                                      .logPdfExported();
+                                                                  if (context
+                                                                      .mounted) {
+                                                                    ScaffoldMessenger.of(
+                                                                            context)
+                                                                        .showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(isEs
+                                                                            ? 'PDF exportado con éxito'
+                                                                            : 'PDF exported successfully'),
+                                                                        behavior:
+                                                                            SnackBarBehavior.floating,
+                                                                        duration:
+                                                                            const Duration(seconds: 2),
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                } catch (_) {
+                                                                  if (context
+                                                                      .mounted) {
+                                                                    ScaffoldMessenger.of(
+                                                                            context)
+                                                                        .showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(isEs
+                                                                            ? 'Error al exportar PDF'
+                                                                            : 'Export failed'),
+                                                                        behavior:
+                                                                            SnackBarBehavior.floating,
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                }
+                                                              }
+                                                            : () {
+                                                                PdfExportService
+                                                                    .showUnlockOrPay(
+                                                                        context,
+                                                                        () async {
+                                                                  try {
+                                                                    await PdfExportService.exportMortgage(
+                                                                        context,
+                                                                        inputState,
+                                                                        result);
+                                                                    await AnalyticsService
+                                                                        .instance
+                                                                        .logPdfExported();
+                                                                    if (context
+                                                                        .mounted) {
+                                                                      ScaffoldMessenger.of(
+                                                                              context)
+                                                                          .showSnackBar(
+                                                                        SnackBar(
+                                                                          content: Text(isEs
+                                                                              ? 'PDF exportado con éxito'
+                                                                              : 'PDF exported successfully'),
+                                                                          behavior:
+                                                                              SnackBarBehavior.floating,
+                                                                          duration:
+                                                                              const Duration(seconds: 2),
+                                                                        ),
+                                                                      );
+                                                                    }
+                                                                  } catch (_) {
+                                                                    if (context
+                                                                        .mounted) {
+                                                                      ScaffoldMessenger.of(
+                                                                              context)
+                                                                          .showSnackBar(
+                                                                        SnackBar(
+                                                                          content: Text(isEs
+                                                                              ? 'Error al exportar PDF'
+                                                                              : 'Export failed'),
+                                                                          behavior:
+                                                                              SnackBarBehavior.floating,
+                                                                        ),
+                                                                      );
+                                                                    }
+                                                                  }
+                                                                });
+                                                              },
+                                                        icon: Icon(
+                                                            isPremium
+                                                                ? Icons
+                                                                    .picture_as_pdf_rounded
+                                                                : Icons
+                                                                    .lock_outline,
+                                                            size: 18),
+                                                        label: Text(
+                                                            isPremium
+                                                                ? s.exportPdf
+                                                                : s
+                                                                    .exportPdfPremium,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis),
+                                                        style: TextButton
+                                                            .styleFrom(
+                                                          minimumSize:
+                                                              const Size(0, 44),
+                                                          foregroundColor:
+                                                              isPremium
+                                                                  ? AppTheme
+                                                                      .primary
+                                                                  : AppTheme
+                                                                      .secondary,
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: TextButton.icon(
+                                                    onPressed: () async {
+                                                      final isEs =
+                                                          isSpanishNotifier
+                                                              .value;
+                                                      if (!freemiumService
+                                                          .hasFullAccess) {
+                                                        final trigger =
+                                                            await paywallSession
+                                                                .recordAction();
+                                                        if (trigger ==
+                                                            PaywallTrigger
+                                                                .soft) {
+                                                          PaywallSoft.show(
+                                                              context);
+                                                          return;
+                                                        }
+                                                        if (trigger ==
+                                                            PaywallTrigger
+                                                                .hard) {
+                                                          PaywallHard.show(
+                                                              context);
+                                                          return;
+                                                        }
+                                                      }
+                                                      final fmt =
+                                                          NumberFormat.currency(
+                                                              locale: 'en_US',
+                                                              symbol: r'$',
+                                                              decimalDigits: 0);
+                                                      final text = isEs
+                                                          ? '🏠 Resumen hipotecario\n'
+                                                              'Precio: ${fmt.format(inputState.homePrice)}\n'
+                                                              'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
+                                                              'Tasa: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
+                                                              'Mensual: ${fmt.format(result.monthly.pitiPayment)}\n'
+                                                              'Interés total: ${fmt.format(result.totalInterest)}\n'
+                                                              '— Calculado con Mortgage Calculator US'
+                                                          : '🏠 Mortgage Summary\n'
+                                                              'Price: ${fmt.format(inputState.homePrice)}\n'
+                                                              'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
+                                                              'Rate: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
+                                                              'Monthly: ${fmt.format(result.monthly.pitiPayment)}\n'
+                                                              'Total Interest: ${fmt.format(result.totalInterest)}\n'
+                                                              '— Calculated with Mortgage Calculator US';
+                                                      try {
+                                                        await Share.share(text);
+                                                        if (context.mounted) {
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(isEs
+                                                                  ? 'Compartido con éxito'
+                                                                  : 'Shared successfully'),
+                                                              behavior:
+                                                                  SnackBarBehavior
+                                                                      .floating,
+                                                              duration:
+                                                                  const Duration(
+                                                                      seconds:
+                                                                          2),
+                                                            ),
+                                                          );
+                                                        }
+                                                      } catch (_) {
+                                                        if (context.mounted) {
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(isEs
+                                                                  ? 'Error al compartir'
+                                                                  : 'Export failed'),
+                                                              behavior:
+                                                                  SnackBarBehavior
+                                                                      .floating,
+                                                            ),
+                                                          );
+                                                        }
+                                                      }
+                                                    },
+                                                    icon: const Icon(
+                                                        Icons.share_rounded,
+                                                        size: 18),
+                                                    label: Text(isEs
+                                                        ? 'Compartir'
+                                                        : 'Share'),
+                                                    style: TextButton.styleFrom(
+                                                      minimumSize:
+                                                          const Size(0, 44),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ]),
+                                              const SizedBox(height: 12),
+                                              Text(
+                                                isEs
+                                                    ? 'Solo para fines informativos. No es asesoramiento financiero.'
+                                                    : 'For informational purposes only. Not financial advice.',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withValues(alpha: 0.45),
+                                                ),
+                                              ),
+                                            ]),
+                                      )
+                                    : Padding(
+                                        key: const ValueKey('empty'),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 32),
+                                        child: Column(
+                                          children: [
+                                            Icon(Icons.home_rounded,
+                                                size: 48,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.3)),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              isEs
+                                                  ? 'Ingresa los valores para ver los resultados'
+                                                  : 'Enter values above to see results',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: AppTextSize.body,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.5),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                               ),
+                              const SizedBox(height: 80),
                             ],
                           ),
-                        ),
-                      ],
-                      // ── Affordability badge ────────────────────────────
-                      if (result != null && _monthlyIncome > 0) ...[
-                        const SizedBox(height: 12),
-                        _AffordabilityBadge(
-                          pitiPayment: result.monthly.pitiPayment,
-                          monthlyIncome: _monthlyIncome,
-                          isEs: isEs,
-                        ),
-                      ],
-                      if (result != null) ...[
-                        const SizedBox(height: 12),
-                        // Save button — always visible, triggers FIFO at limit
-                        OutlinedButton.icon(
-                          onPressed: () => _saveToHistory(showFeedback: true),
-                          icon: const Icon(Icons.bookmark_add_outlined),
-                          label: Text(s.saveCalc),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 48),
-                            foregroundColor: AppTheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // PDF button — visible for all, locked for non-premium
-                        ValueListenableBuilder<bool>(
-                          valueListenable: freemiumService.isPremiumNotifier,
-                          builder: (context, isPremium, _) {
-                            return OutlinedButton.icon(
-                              onPressed: isPremium
-                                  ? () {
-                                      PdfExportService.exportMortgage(context, inputState, result);
-                                      AnalyticsService.instance.logPdfExported();
-                                    }
-                                  : () { PdfExportService.showUnlockOrPay(
-                                        context,
-                                        () async {
-                                          PdfExportService.exportMortgage(context, inputState, result);
-                                          await AnalyticsService.instance.logPdfExported();
-                                        }); },
-                              icon: Icon(isPremium
-                                  ? Icons.picture_as_pdf_outlined
-                                  : Icons.lock_outline),
-                              label: Text(isPremium ? s.exportPdf : s.exportPdfPremium),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size(double.infinity, 48),
-                                foregroundColor: isPremium
-                                    ? AppTheme.primary
-                                    : AppTheme.secondary,
-                                side: BorderSide(
-                                  color: isPremium
-                                      ? AppTheme.primary
-                                      : AppTheme.secondary,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        // Share button — free users: PaywallSoft if session threshold reached
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            final isEs = isSpanishNotifier.value;
-                            // PaywallSoft check for free users at threshold
-                            if (!freemiumService.isPremium) {
-                              final trigger = paywallService.recordAction();
-                              if (trigger == PaywallTrigger.soft) {
-                                PaywallSoft.show(context);
-                                return;
-                              }
-                              if (trigger == PaywallTrigger.hard) {
-                                PaywallHard.show(context);
-                                return;
-                              }
-                            }
-                            final fmt = NumberFormat.currency(locale: 'en_US', symbol: r'$', decimalDigits: 0);
-                            final text = isEs
-                                ? '🏠 Resumen hipotecario\n'
-                                  'Precio: ${fmt.format(inputState.homePrice)}\n'
-                                  'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
-                                  'Tasa: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                  'Mensual: ${fmt.format(result.monthly.pitiPayment)}\n'
-                                  'Interés total: ${fmt.format(result.totalInterest)}\n'
-                                  '— Calculado con Mortgage Calculator US'
-                                : '🏠 Mortgage Summary\n'
-                                  'Price: ${fmt.format(inputState.homePrice)}\n'
-                                  'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
-                                  'Rate: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                  'Monthly: ${fmt.format(result.monthly.pitiPayment)}\n'
-                                  'Total Interest: ${fmt.format(result.totalInterest)}\n'
-                                  '— Calculated with Mortgage Calculator US';
-                            Share.share(text);
-                          },
-                          icon: const Icon(Icons.share_outlined),
-                          label: Text(isSpanishNotifier.value ? 'Compartir' : 'Share'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 48),
-                          ),
-                        ),
-                      ],
-                          const SizedBox(height: 80),
-                          ],
-                        ),
+                        ), // Form closes
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const AdFooter(),
-            ],
-          ),
+                  ),
+                ],
+              )), // CalcwisePageEntrance closes
+            ), // SafeArea closes
+          ), // GestureDetector closes
         );
       },
     );
+  }
+
+  /// Recomputes the 15-yr comparison result and caches it.
+  /// Call this whenever inputs change (outside build).
+  void _recompute15yr(MortgageInputState inputState, dynamic result) {
+    if (inputState.termYears != 30 || result.loanAmount <= 0) {
+      _insightResult15yr = null;
+      _insightCacheKey = null;
+      return;
+    }
+    final key = '${inputState.homePrice}_${inputState.downPaymentDollar}_'
+        '${inputState.annualRatePct}_${inputState.loanType}_'
+        '${inputState.propertyTaxRatePct}_${inputState.homeInsuranceAnnual}_'
+        '${inputState.hoaMonthly}';
+    if (key == _insightCacheKey) return; // already up to date
+    try {
+      final pmiRate = (inputState.homePrice > 0 &&
+              (inputState.downPaymentDollar / inputState.homePrice) < 0.20 &&
+              inputState.loanType != LoanType.va &&
+              inputState.loanType != LoanType.usda)
+          ? MortgageConstants.pmiDefaultAnnualRate * 100
+          : 0.0;
+      final now = DateTime.now();
+      _insightResult15yr = MortgageCalculator.calculate(MortgageInput(
+        homePrice: inputState.homePrice,
+        downPayment: inputState.downPaymentDollar,
+        annualRatePct: inputState.annualRatePct,
+        termYears: 15,
+        loanType: inputState.loanType,
+        propertyTaxRatePct: inputState.propertyTaxRatePct,
+        homeInsuranceAnnual: inputState.homeInsuranceAnnual,
+        hoaMonthly: inputState.hoaMonthly,
+        pmiAnnualRatePct: pmiRate,
+        startDate: DateTime(now.year, now.month + 1),
+      ));
+      _insightCacheKey = key;
+    } catch (_) {
+      _insightResult15yr = null;
+      _insightCacheKey = null;
+    }
+  }
+
+  /// Computes insights from the current calculation result and optional income.
+  Widget _buildInsightCard({
+    required dynamic result,
+    required MortgageInputState inputState,
+    required bool isEs,
+  }) {
+    // Use the cached 15-yr result (recomputed in build() before this call).
+    final double? totalInterest15yr = _insightResult15yr?.totalInterest;
+
+    // Front-end DTI: PITI / income (only when income entered)
+    final double? dti =
+        _monthlyIncome > 0 ? result.monthly.pitiPayment / _monthlyIncome : null;
+
+    final insights = InsightEngine.generate(
+      monthlyPITI: result.monthly.pitiPayment,
+      monthlyPI: result.monthly.piPayment,
+      totalInterest: result.totalInterest,
+      homePrice: inputState.homePrice,
+      loanAmount: result.loanAmount,
+      annualRatePct: inputState.annualRatePct,
+      termYears: inputState.termYears,
+      monthlyGrossIncome: _monthlyIncome > 0 ? _monthlyIncome : null,
+      totalInterest15yr: totalInterest15yr,
+      dti: dti,
+      isARM: false,
+      isEs: isEs,
+    );
+
+    return InsightCard(insights: insights, isSpanish: isEs);
   }
 
   Widget _buildField(
@@ -445,10 +933,12 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     String? prefix,
     String? suffix,
     bool currency = false,
+    bool required = false,
     String? errorText,
+    String? helperText,
     required Function(String) onChanged,
   }) {
-    return TextField(
+    return TextFormField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: currency
@@ -459,9 +949,23 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
         prefixText: prefix,
         suffixText: suffix,
         errorText: errorText,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        helperText: helperText,
+        helperStyle: const TextStyle(fontSize: 10),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
+      validator: (v) {
+        final raw = (v ?? '').trim();
+        if (raw.isEmpty) return required ? 'Required' : null;
+        final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
+        if (cleaned.isEmpty) return 'Invalid';
+        final n = double.tryParse(cleaned);
+        if (n == null) return 'Invalid';
+        if (n < 0) return 'Must be ≥ 0';
+        return null;
+      },
       onChanged: onChanged,
     );
   }
@@ -476,43 +980,47 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
+    final fmt =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: AppTheme.primary,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(24, 56, 24, 32),
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(s.monthlyPI,
-            style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              style: const TextStyle(
+                  color: Colors.white70, fontSize: AppTextSize.body)),
           const SizedBox(height: 8),
           Text(
             result != null ? fmt.format(result!.monthly.piPayment) : '--',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 42,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -1,
+              fontSize: AppTextSize.hero,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1.5,
             ),
           ),
           const SizedBox(height: 4),
           if (result != null) ...[
             Text(
               '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}',
-              style: const TextStyle(color: Colors.white70, fontSize: 16),
+              style: const TextStyle(
+                  color: Colors.white70, fontSize: AppTextSize.bodyLg),
             ),
             const SizedBox(height: 12),
             Wrap(spacing: 8, children: [
               _Badge(
                 label: result!.isJumbo ? s.jumbo : s.conforming,
-                color: result!.isJumbo ? AppTheme.accentWarn : AppTheme.accentGood,
+                color:
+                    result!.isJumbo ? AppTheme.accentWarn : AppTheme.accentGood,
               ),
               _Badge(
                 label: 'LTV ${result!.currentLtv.toStringAsFixed(1)}%',
@@ -537,33 +1045,34 @@ class _HeroCard extends StatelessWidget {
 
 class _Badge extends StatelessWidget {
   final String label;
-  final Color  color;
+  final Color color;
   const _Badge({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.2),
-      border: Border.all(color: color),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(label,
-      style: TextStyle(
-        color: color,
-        fontWeight: FontWeight.w600,
-        fontSize: 12,
-      )),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          border: Border.all(color: color),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: AppTextSize.sm,
+            )),
+      );
 }
 
 // ── Term selector ─────────────────────────────────────────────────────────────
 
 class _TermSelector extends ConsumerWidget {
-  final MortgageInputState    inputState;
+  final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
-  final dynamic               s;
-  const _TermSelector({required this.inputState, required this.notifier, required this.s});
+  final dynamic s;
+  const _TermSelector(
+      {required this.inputState, required this.notifier, required this.s});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -579,17 +1088,22 @@ class _TermSelector extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: Semantics(
-                  label: '$term year loan term, ${selected ? "selected" : "not selected"}',
+                  label:
+                      '$term year loan term, ${selected ? "selected" : "not selected"}',
                   child: ChoiceChip(
                     label: Text('${term}yr'),
                     selected: selected,
                     selectedColor: AppTheme.primary,
                     showCheckmark: false,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : null,
-                      fontWeight: FontWeight.w600,
+                      color: selected ? Colors.white : AppTheme.labelGray,
+                      fontWeight:
+                          selected ? FontWeight.bold : FontWeight.normal,
                     ),
-                    onSelected: (_) => notifier.updateTerm(term),
+                    onSelected: (_) {
+                      HapticFeedback.selectionClick();
+                      notifier.updateTerm(term);
+                    },
                   ),
                 ),
               ),
@@ -604,10 +1118,11 @@ class _TermSelector extends ConsumerWidget {
 // ── Loan type selector ────────────────────────────────────────────────────────
 
 class _LoanTypeSelector extends ConsumerWidget {
-  final MortgageInputState    inputState;
+  final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
-  final dynamic               s;
-  const _LoanTypeSelector({required this.inputState, required this.notifier, required this.s});
+  final dynamic s;
+  const _LoanTypeSelector(
+      {required this.inputState, required this.notifier, required this.s});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -621,13 +1136,20 @@ class _LoanTypeSelector extends ConsumerWidget {
           children: LoanType.values.map((type) {
             final selected = inputState.loanType == type;
             return Semantics(
-              label: '${type.label} loan type, ${selected ? "selected" : "not selected"}',
+              label:
+                  '${type.label} loan type, ${selected ? "selected" : "not selected"}',
               child: ChoiceChip(
                 label: Text(type.label),
                 selected: selected,
                 selectedColor: AppTheme.primary,
-                labelStyle: TextStyle(color: selected ? Colors.white : null),
-                onSelected: (_) => notifier.updateLoanType(type),
+                labelStyle: TextStyle(
+                  color: selected ? Colors.white : AppTheme.labelGray,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                ),
+                onSelected: (_) {
+                  HapticFeedback.selectionClick();
+                  notifier.updateLoanType(type);
+                },
               ),
             );
           }).toList(),
@@ -641,9 +1163,9 @@ class _LoanTypeSelector extends ConsumerWidget {
 
 class _DownPaymentRow extends ConsumerWidget {
   final TextEditingController ctrl;
-  final MortgageInputState    inputState;
+  final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
-  final dynamic               s;
+  final dynamic s;
   const _DownPaymentRow({
     required this.ctrl,
     required this.inputState,
@@ -655,16 +1177,28 @@ class _DownPaymentRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(children: [
       Expanded(
-        child: TextField(
+        child: TextFormField(
           controller: ctrl,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
             labelText: s.downPayment,
             suffixText: inputState.downPaymentAsDollar ? null : '%',
             prefixText: inputState.downPaymentAsDollar ? '\$' : null,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.lg)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
+          validator: (v) {
+            final raw = (v ?? '').trim();
+            if (raw.isEmpty) return null;
+            final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
+            if (cleaned.isEmpty) return 'Invalid';
+            final n = double.tryParse(cleaned);
+            if (n == null) return 'Invalid';
+            if (n < 0) return 'Must be ≥ 0';
+            return null;
+          },
           onChanged: (v) {
             if (inputState.downPaymentAsDollar) {
               final dollars = double.tryParse(v) ?? 0;
@@ -681,8 +1215,8 @@ class _DownPaymentRow extends ConsumerWidget {
       const SizedBox(width: 8),
       Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.labelGray.withValues(alpha: 0.4)),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           _ModeBtn(
@@ -706,7 +1240,7 @@ class _DownPaymentRow extends ConsumerWidget {
 class _AffordabilityBadge extends StatelessWidget {
   final double pitiPayment;
   final double monthlyIncome;
-  final bool   isEs;
+  final bool isEs;
   const _AffordabilityBadge({
     required this.pitiPayment,
     required this.monthlyIncome,
@@ -716,7 +1250,7 @@ class _AffordabilityBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ratio = pitiPayment / monthlyIncome;
-    final pct   = (ratio * 100).toStringAsFixed(1);
+    final pct = (ratio * 100).toStringAsFixed(1);
 
     final Color badgeColor;
     final String badgeLabel;
@@ -737,11 +1271,12 @@ class _AffordabilityBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.08),
         border: Border.all(color: badgeColor.withValues(alpha: 0.5)),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Row(
         children: [
-          Icon(Icons.account_balance_wallet_outlined, color: badgeColor, size: 20),
+          Icon(Icons.account_balance_wallet_rounded,
+              color: badgeColor, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -751,7 +1286,7 @@ class _AffordabilityBadge extends StatelessWidget {
               style: TextStyle(
                 color: badgeColor,
                 fontWeight: FontWeight.w600,
-                fontSize: 14,
+                fontSize: AppTextSize.body,
               ),
             ),
           ),
@@ -766,7 +1301,7 @@ class _AffordabilityBadge extends StatelessWidget {
               style: TextStyle(
                 color: badgeColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: AppTextSize.sm,
               ),
             ),
           ),
@@ -783,27 +1318,28 @@ class _AffordabilityBadge extends StatelessWidget {
 }
 
 class _ModeBtn extends StatelessWidget {
-  final String      label;
-  final bool        selected;
+  final String label;
+  final bool selected;
   final VoidCallback onTap;
-  const _ModeBtn({required this.label, required this.selected, required this.onTap});
+  const _ModeBtn(
+      {required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: selected ? AppTheme.primary : null,
-        borderRadius: BorderRadius.circular(11),
-      ),
-      child: Text(label,
-        style: TextStyle(
-          color: selected ? Colors.white : Colors.grey.shade600,
-          fontWeight: FontWeight.bold,
-        )),
-    ),
-  );
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.primary : null,
+            borderRadius: BorderRadius.circular(11),
+          ),
+          child: Text(label,
+              style: TextStyle(
+                color: selected ? Colors.white : AppTheme.labelGray,
+                fontWeight: FontWeight.bold,
+              )),
+        ),
+      );
 }
 
 // ── Breakdown card ────────────────────────────────────────────────────────────
@@ -814,49 +1350,60 @@ class _BreakdownCard extends StatelessWidget {
   final NumberFormat fmtK;
   final dynamic s;
   final bool isEs;
-  const _BreakdownCard({this.result, required this.fmt, required this.fmtK, required this.s, required this.isEs});
+  const _BreakdownCard(
+      {this.result,
+      required this.fmt,
+      required this.fmtK,
+      required this.s,
+      required this.isEs});
 
   @override
   Widget build(BuildContext context) {
     final m = result!.monthly;
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        side: BorderSide(color: Theme.of(context).dividerColor),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(children: [
-          _Row(s.principal,      fmt.format(m.principal)),
-          _Row(s.interest,       fmt.format(m.interest)),
-          _Row(s.propertyTax,    fmt.format(m.propertyTax)),
-          _Row(s.homeInsurance,  fmt.format(m.homeInsurance)),
+          _Row(s.principal, fmt.format(m.principal)),
+          _Row(s.interest, fmt.format(m.interest)),
+          _Row(s.propertyTax, fmt.format(m.propertyTax)),
+          _Row(s.homeInsurance, fmt.format(m.homeInsurance)),
           if (m.hoa > 0) _Row(s.hoa, fmt.format(m.hoa)),
-          if (m.pmi > 0) _Row(
-            result!.isUsda
-                ? s.usdaFeeLabel
-                : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
-            fmt.format(m.pmi),
-            color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
-            tooltip: result!.isUsda
-                ? InfoTooltip(
-                    title: isEs ? 'Cuota Anual USDA' : 'USDA Annual Fee',
-                    body: isEs
-                        ? 'Los préstamos USDA incluyen una cuota de garantía inicial del 1% (financiada) y una cuota anual del 0.35%. Nunca se cancela durante la vigencia del préstamo.'
-                        : 'USDA loans include a 1% upfront guarantee fee (financed) and 0.35% annual fee. It never drops for the life of the loan.',
-                  )
-                : InfoTooltip(
-                    title: isEs ? 'PMI — Seguro Hipotecario Privado' : 'PMI — Private Mortgage Insurance',
-                    body: isEs
-                        ? 'Requerido cuando el pago inicial es menor al 20%. Protege al prestamista, no a usted. Se cancela automáticamente cuando el saldo del préstamo llega al 78% del valor original.'
-                        : 'Required when your down payment is less than 20%. Protects the lender, not you. Automatically cancels when your loan balance reaches 78% of the original home value.',
-                  ),
-          ),
+          if (m.pmi > 0)
+            _Row(
+              result!.isUsda
+                  ? s.usdaFeeLabel
+                  : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
+              fmt.format(m.pmi),
+              color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
+              tooltip: result!.isUsda
+                  ? InfoTooltip(
+                      title: isEs ? 'Cuota Anual USDA' : 'USDA Annual Fee',
+                      body: isEs
+                          ? 'Los préstamos USDA incluyen una cuota de garantía inicial del 1% (financiada) y una cuota anual del 0.35%. Nunca se cancela durante la vigencia del préstamo.'
+                          : 'USDA loans include a 1% upfront guarantee fee (financed) and 0.35% annual fee. It never drops for the life of the loan.',
+                    )
+                  : InfoTooltip(
+                      title: isEs
+                          ? 'PMI — Seguro Hipotecario Privado'
+                          : 'PMI — Private Mortgage Insurance',
+                      body: isEs
+                          ? 'Requerido cuando el pago inicial es menor al 20%. Protege al prestamista, no a usted. Se cancela automáticamente cuando el saldo del préstamo llega al 78% del valor original.'
+                          : 'Required when your down payment is less than 20%. Protects the lender, not you. Automatically cancels when your loan balance reaches 78% of the original home value.',
+                    ),
+            ),
           const Divider(height: 24),
           _Row(s.totalPITI, fmt.format(m.pitiPayment), bold: true),
           const SizedBox(height: 8),
           _Row(s.totalInterest, fmtK.format(result!.totalInterest)),
-          _Row(s.totalCost,     fmtK.format(result!.totalCost)),
+          _Row(s.totalCost, fmtK.format(result!.totalCost)),
           _Row(s.payoffDate,
-            '${result!.payoffDate.month}/${result!.payoffDate.year}'),
+              '${result!.payoffDate.month}/${result!.payoffDate.year}'),
           _Row(
             isEs ? 'LTV' : 'LTV',
             '${result!.currentLtv.toStringAsFixed(1)}%',
@@ -874,30 +1421,33 @@ class _BreakdownCard extends StatelessWidget {
 }
 
 class _Row extends StatelessWidget {
-  final String   label, value;
-  final bool     bold;
-  final Color?   color;
-  final Widget?  tooltip;
-  const _Row(this.label, this.value, {this.bold = false, this.color, this.tooltip});
+  final String label, value;
+  final bool bold;
+  final Color? color;
+  final Widget? tooltip;
+  const _Row(this.label, this.value,
+      {this.bold = false, this.color, this.tooltip});
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: TextStyle(color: color ?? Colors.grey.shade700)),
-            if (tooltip != null) tooltip!,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(label,
+                    style: TextStyle(color: color ?? AppTheme.labelGray)),
+                if (tooltip != null) tooltip!,
+              ],
+            ),
+            Text(value,
+                style: TextStyle(
+                  fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+                  color: color ?? (bold ? AppTheme.primary : null),
+                )),
           ],
         ),
-        Text(value, style: TextStyle(
-          fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-          color: color ?? (bold ? AppTheme.primary : null),
-        )),
-      ],
-    ),
-  );
+      );
 }

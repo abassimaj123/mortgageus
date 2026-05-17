@@ -10,7 +10,6 @@ import '../models/refinance_result.dart';
 import '../../core/constants/mortgage_constants.dart';
 
 class MortgageCalculator {
-
   // ── P&I monthly payment ───────────────────────────────────────────────────
 
   /// Calculate monthly principal + interest payment.
@@ -19,11 +18,11 @@ class MortgageCalculator {
   static double calcMonthlyPayment({
     required double loanAmount,
     required double annualRatePct,
-    required int    termYears,
+    required int termYears,
   }) {
-    if (loanAmount < 0)  throw ArgumentError('Loan amount must be >= 0');
+    if (loanAmount < 0) throw ArgumentError('Loan amount must be >= 0');
     if (annualRatePct < 0) throw ArgumentError('Rate must be >= 0');
-    if (termYears <= 0)    throw ArgumentError('Term must be > 0');
+    if (termYears <= 0) throw ArgumentError('Term must be > 0');
 
     if (loanAmount == 0) return 0.0;
 
@@ -39,13 +38,13 @@ class MortgageCalculator {
   // ── Full amortization schedule ────────────────────────────────────────────
 
   static List<AmortizationEntry> buildSchedule({
-    required double   loanAmount,
-    required double   annualRatePct,
-    required int      termYears,
-    required double   homePrice,
-    required double   pmiAnnualRatePct,
+    required double loanAmount,
+    required double annualRatePct,
+    required int termYears,
+    required double homePrice,
+    required double pmiAnnualRatePct,
     required DateTime startDate,
-    bool              pmiNeverDrops = false,
+    bool pmiNeverDrops = false,
   }) {
     if (loanAmount < 0 || annualRatePct < 0 || termYears <= 0) {
       throw ArgumentError('Invalid inputs for amortization');
@@ -60,16 +59,17 @@ class MortgageCalculator {
     final n = termYears * 12;
 
     final entries = <AmortizationEntry>[];
-    double balance        = loanAmount;
-    double cumInterest    = 0.0;
-    double cumPrincipal   = 0.0;
-    bool   pmiActive      = (homePrice > 0) &&
-        (loanAmount / homePrice) > MortgageConstants.pmiLtvThreshold; // activate at >80% LTV
-    bool   pmiEverDropped = false;
+    double balance = loanAmount;
+    double cumInterest = 0.0;
+    double cumPrincipal = 0.0;
+    bool pmiActive = (homePrice > 0) &&
+        (loanAmount / homePrice) >
+            MortgageConstants.pmiLtvThreshold; // activate at >80% LTV
+    bool pmiEverDropped = false;
 
     for (int month = 1; month <= n; month++) {
-      final interest  = balance * r;
-      var   principal = payment - interest;
+      final interest = balance * r;
+      var principal = payment - interest;
 
       // Last payment: clear remaining balance (floating point cleanup)
       if (month == n) principal = balance;
@@ -77,20 +77,20 @@ class MortgageCalculator {
       final newBalance = (balance - principal).clamp(0.0, double.infinity);
 
       // PMI: check if LTV crossed 78% threshold
-      double pmiAmt  = 0.0;
-      bool   dropped = false;
+      double pmiAmt = 0.0;
+      bool dropped = false;
       if (pmiActive && homePrice > 0) {
         final ltv = newBalance / homePrice;
         if (!pmiNeverDrops && ltv <= MortgageConstants.pmiAutoCancelLtv) {
-          pmiActive      = false;
-          dropped        = !pmiEverDropped;
+          pmiActive = false;
+          dropped = !pmiEverDropped;
           pmiEverDropped = true;
         } else {
           pmiAmt = (loanAmount * pmiAnnualRatePct / 100.0) / 12.0;
         }
       }
 
-      cumInterest  += interest;
+      cumInterest += interest;
       cumPrincipal += principal;
 
       final entryDate = DateTime(
@@ -99,16 +99,16 @@ class MortgageCalculator {
       );
 
       entries.add(AmortizationEntry(
-        month:               month,
-        date:                entryDate,
-        payment:             payment,
-        principal:           principal,
-        interest:            interest,
-        balance:             newBalance,
-        cumulativeInterest:  cumInterest,
+        month: month,
+        date: entryDate,
+        payment: payment,
+        principal: principal,
+        interest: interest,
+        balance: newBalance,
+        cumulativeInterest: cumInterest,
         cumulativePrincipal: cumPrincipal,
-        pmiAmount:           pmiAmt,
-        pmiDropped:          dropped,
+        pmiAmount: pmiAmt,
+        pmiDropped: dropped,
       ));
 
       balance = newBalance;
@@ -123,12 +123,12 @@ class MortgageCalculator {
   static MortgageResult calculate(MortgageInput input) {
     final loan = input.loanAmount;
     if (input.homePrice <= 0) throw ArgumentError('Home price must be > 0');
-    if (loan < 0)             throw ArgumentError('Loan amount must be >= 0');
+    if (loan < 0) throw ArgumentError('Loan amount must be >= 0');
     if (input.annualRatePct < 0) throw ArgumentError('Rate must be >= 0');
-    if (input.termYears <= 0)    throw ArgumentError('Term must be > 0');
+    if (input.termYears <= 0) throw ArgumentError('Term must be > 0');
 
     final isUsda = input.loanType == LoanType.usda;
-    final isVa   = input.loanType == LoanType.va;
+    final isVa = input.loanType == LoanType.va;
 
     // USDA: 1% upfront guarantee fee is financed into the loan
     final effectiveLoan = isUsda ? loan * 1.01 : loan;
@@ -139,33 +139,37 @@ class MortgageCalculator {
       termYears: input.termYears,
     );
 
-    final propertyTaxMonthly = (input.homePrice * input.propertyTaxRatePct / 100.0) / 12.0;
-    final insuranceMonthly   = input.homeInsuranceAnnual / 12.0;
-    final ltv                = input.ltv;
+    final propertyTaxMonthly =
+        (input.homePrice * input.propertyTaxRatePct / 100.0) / 12.0;
+    final insuranceMonthly = input.homeInsuranceAnnual / 12.0;
+    final ltv = input.ltv;
 
     // PMI / USDA annual fee (0.35% — never drops)
-    final hasPmi     = isUsda || (ltv > 80.0 && !isVa);
-    final pmiRate    = isUsda ? 0.35 : input.pmiAnnualRatePct;
+    final hasPmi = isUsda || (ltv > 80.0 && !isVa);
+    final pmiRate = isUsda ? 0.35 : input.pmiAnnualRatePct;
     final pmiMonthly = hasPmi ? (effectiveLoan * pmiRate / 100.0) / 12.0 : 0.0;
 
     final schedule = buildSchedule(
-      loanAmount:       effectiveLoan,
-      annualRatePct:    input.annualRatePct,
-      termYears:        input.termYears,
-      homePrice:        input.homePrice,
+      loanAmount: effectiveLoan,
+      annualRatePct: input.annualRatePct,
+      termYears: input.termYears,
+      homePrice: input.homePrice,
       pmiAnnualRatePct: pmiRate,
-      pmiNeverDrops:    isUsda,
-      startDate:        input.startDate,
+      pmiNeverDrops: isUsda,
+      startDate: input.startDate,
     );
 
     final totalInterest = schedule.last.cumulativeInterest;
-    final totalCost     = loan + totalInterest;
-    final payoffDate    = schedule.last.date;
+    final totalCost = loan + totalInterest;
+    final payoffDate = schedule.last.date;
 
     // Find PMI drop month
     int? pmiDropMonth;
     for (final e in schedule) {
-      if (e.pmiDropped) { pmiDropMonth = e.month; break; }
+      if (e.pmiDropped) {
+        pmiDropMonth = e.month;
+        break;
+      }
     }
 
     // Stress test: +2% rate scenario
@@ -178,29 +182,29 @@ class MortgageCalculator {
 
     // First month PI decomposition using effectiveLoan
     final rEff = input.annualRatePct / 100.0 / 12.0;
-    final firstInterestEff  = rEff > 0 ? effectiveLoan * rEff : 0.0;
+    final firstInterestEff = rEff > 0 ? effectiveLoan * rEff : 0.0;
     final firstPrincipalEff = pi - firstInterestEff;
 
     return MortgageResult(
-      loanAmount:   effectiveLoan,
+      loanAmount: effectiveLoan,
       monthly: MonthlyBreakdown(
-        principal:     firstPrincipalEff,
-        interest:      firstInterestEff,
-        propertyTax:   propertyTaxMonthly,
+        principal: firstPrincipalEff,
+        interest: firstInterestEff,
+        propertyTax: propertyTaxMonthly,
         homeInsurance: insuranceMonthly,
-        hoa:           input.hoaMonthly,
-        pmi:           pmiMonthly,
+        hoa: input.hoaMonthly,
+        pmi: pmiMonthly,
       ),
-      totalInterest:     totalInterest,
-      totalCost:         totalCost,
-      payoffDate:        payoffDate,
-      currentLtv:        ltv,
-      isJumbo:           input.isJumbo,
-      hasPmi:            hasPmi,
-      isUsda:            isUsda,
-      pmiDropMonth:      pmiDropMonth,
-      schedule:          schedule,
-      stressTestRate:    stressRate,
+      totalInterest: totalInterest,
+      totalCost: totalCost,
+      payoffDate: payoffDate,
+      currentLtv: ltv,
+      isJumbo: input.isJumbo,
+      hasPmi: hasPmi,
+      isUsda: isUsda,
+      pmiDropMonth: pmiDropMonth,
+      schedule: schedule,
+      stressTestRate: stressRate,
       stressTestMonthly: stressMonthly,
     );
   }
@@ -210,15 +214,15 @@ class MortgageCalculator {
   static ExtraPaymentResult calcExtraPayments({
     required double loanAmount,
     required double annualRatePct,
-    required int    termYears,
+    required int termYears,
     required double extraMonthly,
-    double extraAnnual  = 0.0,
-    double lumpSum      = 0.0,
-    int    lumpSumMonth = 0,
+    double extraAnnual = 0.0,
+    double lumpSum = 0.0,
+    int lumpSumMonth = 0,
   }) {
-    if (loanAmount <= 0)   throw ArgumentError('Loan amount must be > 0');
+    if (loanAmount <= 0) throw ArgumentError('Loan amount must be > 0');
     if (annualRatePct < 0) throw ArgumentError('Rate must be >= 0');
-    if (termYears <= 0)    throw ArgumentError('Term must be > 0');
+    if (termYears <= 0) throw ArgumentError('Term must be > 0');
 
     final basePayment = calcMonthlyPayment(
       loanAmount: loanAmount,
@@ -232,7 +236,7 @@ class MortgageCalculator {
     double baseCumInterest = 0.0;
     double bal = loanAmount;
     for (int m = 1; m <= n; m++) {
-      final interest  = bal * r;
+      final interest = bal * r;
       final principal = m == n ? bal : (basePayment - interest);
       baseCumInterest += interest;
       bal = (bal - principal).clamp(0, double.infinity);
@@ -241,11 +245,11 @@ class MortgageCalculator {
 
     // With extra payments
     double extraCumInterest = 0.0;
-    int    payoffMonth      = n;
+    int payoffMonth = n;
     bal = loanAmount;
     for (int m = 1; m <= n; m++) {
       final interest = bal * r;
-      var   extra    = extraMonthly;
+      var extra = extraMonthly;
       if (m % 12 == 0) extra += extraAnnual;
       if (m == lumpSumMonth) extra += lumpSum;
 
@@ -262,12 +266,12 @@ class MortgageCalculator {
     }
 
     return ExtraPaymentResult(
-      originalPayoffMonths:  n,
-      newPayoffMonths:       payoffMonth,
-      monthsSaved:           n - payoffMonth,
+      originalPayoffMonths: n,
+      newPayoffMonths: payoffMonth,
+      monthsSaved: n - payoffMonth,
       originalTotalInterest: baseCumInterest,
-      newTotalInterest:      extraCumInterest,
-      interestSaved:         baseCumInterest - extraCumInterest,
+      newTotalInterest: extraCumInterest,
+      interestSaved: baseCumInterest - extraCumInterest,
     );
   }
 
@@ -276,46 +280,48 @@ class MortgageCalculator {
   static RefinanceResult calcRefinance({
     required double currentBalance,
     required double currentRatePct,
-    required int    currentYearsRemaining,
+    required int currentYearsRemaining,
     required double newRatePct,
-    required int    newTermYears,
+    required int newTermYears,
     required double closingCosts,
     double cashOut = 0.0,
   }) {
-    if (currentBalance <= 0)          throw ArgumentError('Balance must be > 0');
-    if (currentRatePct < 0 || newRatePct < 0) throw ArgumentError('Rates must be >= 0');
-    if (currentYearsRemaining <= 0 || newTermYears <= 0) throw ArgumentError('Terms must be > 0');
+    if (currentBalance <= 0) throw ArgumentError('Balance must be > 0');
+    if (currentRatePct < 0 || newRatePct < 0)
+      throw ArgumentError('Rates must be >= 0');
+    if (currentYearsRemaining <= 0 || newTermYears <= 0)
+      throw ArgumentError('Terms must be > 0');
 
     final oldPayment = calcMonthlyPayment(
-      loanAmount:    currentBalance,
+      loanAmount: currentBalance,
       annualRatePct: currentRatePct,
-      termYears:     currentYearsRemaining,
+      termYears: currentYearsRemaining,
     );
     final newLoanAmount = currentBalance + cashOut;
     final newPayment = calcMonthlyPayment(
-      loanAmount:    newLoanAmount,
+      loanAmount: newLoanAmount,
       annualRatePct: newRatePct,
-      termYears:     newTermYears,
+      termYears: newTermYears,
     );
 
     final monthlySavings = oldPayment - newPayment;
-    final breakEvenMonths = monthlySavings > 0
-        ? (closingCosts / monthlySavings).ceil()
-        : 999999;
+    final breakEvenMonths =
+        monthlySavings > 0 ? (closingCosts / monthlySavings).ceil() : 999999;
 
     final newTotalMonths = newTermYears * 12;
-    final totalSavings   = (monthlySavings * newTotalMonths.toDouble()) - closingCosts;
+    final totalSavings =
+        (monthlySavings * newTotalMonths.toDouble()) - closingCosts;
 
     // Makes sense if break-even < 7 years (84 months)
     final makesSense = breakEvenMonths <= 84 && monthlySavings > 0;
 
     return RefinanceResult(
-      oldMonthlyPayment:    oldPayment,
-      newMonthlyPayment:    newPayment,
-      monthlySavings:       monthlySavings,
-      breakEvenMonths:      breakEvenMonths,
+      oldMonthlyPayment: oldPayment,
+      newMonthlyPayment: newPayment,
+      monthlySavings: monthlySavings,
+      breakEvenMonths: breakEvenMonths,
       totalSavingsOverLife: totalSavings,
-      refinanceMakesSense:  makesSense,
+      refinanceMakesSense: makesSense,
     );
   }
 
@@ -340,25 +346,26 @@ class MortgageCalculator {
   static ARMResult calcARM({
     required double loanAmount,
     required double initialRatePct,
-    required int    fixedYears,
+    required int fixedYears,
     required double adjustedRatePct,
-    required int    totalTermYears,
+    required int totalTermYears,
   }) {
-    if (loanAmount <= 0)    throw ArgumentError('Loan amount must be > 0');
-    if (initialRatePct < 0 || adjustedRatePct < 0) throw ArgumentError('Rates must be >= 0');
+    if (loanAmount <= 0) throw ArgumentError('Loan amount must be > 0');
+    if (initialRatePct < 0 || adjustedRatePct < 0)
+      throw ArgumentError('Rates must be >= 0');
     if (fixedYears <= 0 || totalTermYears <= fixedYears) {
       throw ArgumentError('Invalid term split');
     }
 
-    final fixedMonths     = fixedYears * 12;
-    final remainingYears  = totalTermYears - fixedYears;
-    final totalMonths     = totalTermYears * 12;
+    final fixedMonths = fixedYears * 12;
+    final remainingYears = totalTermYears - fixedYears;
+    final totalMonths = totalTermYears * 12;
 
     // ARM phase-1 payment: amortized over full term at initial rate
     final payment1 = calcMonthlyPayment(
-      loanAmount:    loanAmount,
+      loanAmount: loanAmount,
       annualRatePct: initialRatePct,
-      termYears:     totalTermYears,
+      termYears: totalTermYears,
     );
 
     // Amortize phase 1 to find balance at reset
@@ -366,11 +373,14 @@ class MortgageCalculator {
     double balance = loanAmount;
     double armInterest = 0.0;
     for (int m = 1; m <= fixedMonths; m++) {
-      final interest  = balance * r1;
+      final interest = balance * r1;
       final principal = (payment1 - interest).clamp(0.0, balance);
       armInterest += interest;
-      balance     -= principal;
-      if (balance < 0.001) { balance = 0; break; }
+      balance -= principal;
+      if (balance < 0.001) {
+        balance = 0;
+        break;
+      }
     }
     final balanceAtReset = balance;
 
@@ -378,9 +388,9 @@ class MortgageCalculator {
     double payment2 = 0.0;
     if (balanceAtReset > 0.001) {
       payment2 = calcMonthlyPayment(
-        loanAmount:    balanceAtReset,
+        loanAmount: balanceAtReset,
         annualRatePct: adjustedRatePct,
-        termYears:     remainingYears,
+        termYears: remainingYears,
       );
     }
 
@@ -388,25 +398,25 @@ class MortgageCalculator {
     final r2 = adjustedRatePct / 100.0 / 12.0;
     balance = balanceAtReset;
     for (int m = 1; m <= remainingYears * 12; m++) {
-      final interest  = balance * r2;
+      final interest = balance * r2;
       final principal = (payment2 - interest).clamp(0.0, balance);
       armInterest += interest;
-      balance     -= principal;
+      balance -= principal;
       if (balance < 0.001) break;
     }
     final armTotalInterest = armInterest;
-    final armTotalCost     = loanAmount + armTotalInterest;
+    final armTotalCost = loanAmount + armTotalInterest;
 
     // Fixed 30yr baseline (at initial rate for apples-to-apples comparison)
     final fixedPayment = calcMonthlyPayment(
-      loanAmount:    loanAmount,
+      loanAmount: loanAmount,
       annualRatePct: initialRatePct,
-      termYears:     totalTermYears,
+      termYears: totalTermYears,
     );
     double fixedInterestTotal = 0.0;
     double fixedBal = loanAmount;
     for (int m = 1; m <= totalMonths; m++) {
-      final interest  = fixedBal * r1;
+      final interest = fixedBal * r1;
       final principal = (fixedPayment - interest).clamp(0.0, fixedBal);
       fixedInterestTotal += interest;
       fixedBal -= principal;
@@ -417,10 +427,10 @@ class MortgageCalculator {
     // (relevant when ARM resets to higher rate)
     int? breakEvenMonths;
     if (payment2 > fixedPayment) {
-      double armCum   = 0;
+      double armCum = 0;
       double fixedCum = 0;
       for (int m = 1; m <= totalMonths; m++) {
-        armCum   += m <= fixedMonths ? payment1 : payment2;
+        armCum += m <= fixedMonths ? payment1 : payment2;
         fixedCum += fixedPayment;
         if (armCum >= fixedCum && m > fixedMonths) {
           breakEvenMonths = m;
@@ -430,15 +440,15 @@ class MortgageCalculator {
     }
 
     return ARMResult(
-      payment1:            payment1,
-      payment2:            payment2,
-      balanceAtReset:      balanceAtReset,
-      totalInterest:       armTotalInterest,
-      totalCost:           armTotalCost,
-      fixedMonths:         fixedMonths,
-      fixedPayment:        fixedPayment,
-      fixedTotalInterest:  fixedInterestTotal,
-      breakEvenMonths:     breakEvenMonths,
+      payment1: payment1,
+      payment2: payment2,
+      balanceAtReset: balanceAtReset,
+      totalInterest: armTotalInterest,
+      totalCost: armTotalCost,
+      fixedMonths: fixedMonths,
+      fixedPayment: fixedPayment,
+      fixedTotalInterest: fixedInterestTotal,
+      breakEvenMonths: breakEvenMonths,
     );
   }
 
@@ -451,13 +461,13 @@ class MortgageCalculator {
     required double monthlyDebts,
     required double downPayment,
     required double annualRatePct,
-    required int    termYears,
-    double propertyTaxRatePct  = 1.1,
+    required int termYears,
+    double propertyTaxRatePct = 1.1,
     double homeInsuranceAnnual = 1750,
-    double hoaMonthly          = 0,
+    double hoaMonthly = 0,
   }) {
     if (annualIncome <= 0) throw ArgumentError('Income must be > 0');
-    if (termYears <= 0)    throw ArgumentError('Term must be > 0');
+    if (termYears <= 0) throw ArgumentError('Term must be > 0');
 
     final monthlyGross = annualIncome / 12.0;
 
@@ -465,12 +475,12 @@ class MortgageCalculator {
     final maxPITI_conservative = monthlyGross * 0.28;
     final maxHomeCons = _solveMaxHomePrice(
       maxAllowablePITI: maxPITI_conservative,
-      downPayment:       downPayment,
-      annualRatePct:     annualRatePct,
-      termYears:         termYears,
-      propertyTaxRatePct:  propertyTaxRatePct,
+      downPayment: downPayment,
+      annualRatePct: annualRatePct,
+      termYears: termYears,
+      propertyTaxRatePct: propertyTaxRatePct,
       homeInsuranceAnnual: homeInsuranceAnnual,
-      hoaMonthly:          hoaMonthly,
+      hoaMonthly: hoaMonthly,
     );
 
     // Standard: back-end DTI 43% (PITI + all monthly debts)
@@ -478,12 +488,12 @@ class MortgageCalculator {
     final maxHomeStd = maxPITI_standard > 0
         ? _solveMaxHomePrice(
             maxAllowablePITI: maxPITI_standard,
-            downPayment:       downPayment,
-            annualRatePct:     annualRatePct,
-            termYears:         termYears,
-            propertyTaxRatePct:  propertyTaxRatePct,
+            downPayment: downPayment,
+            annualRatePct: annualRatePct,
+            termYears: termYears,
+            propertyTaxRatePct: propertyTaxRatePct,
             homeInsuranceAnnual: homeInsuranceAnnual,
-            hoaMonthly:          hoaMonthly,
+            hoaMonthly: hoaMonthly,
           )
         : 0.0;
 
@@ -491,8 +501,11 @@ class MortgageCalculator {
     final displayHome = maxHomeStd > 0 ? maxHomeStd : maxHomeCons;
     final displayLoan = (displayHome - downPayment).clamp(0.0, double.infinity);
 
-    final pi  = displayLoan > 0
-        ? calcMonthlyPayment(loanAmount: displayLoan, annualRatePct: annualRatePct, termYears: termYears)
+    final pi = displayLoan > 0
+        ? calcMonthlyPayment(
+            loanAmount: displayLoan,
+            annualRatePct: annualRatePct,
+            termYears: termYears)
         : 0.0;
     final tax = (displayHome * propertyTaxRatePct / 100.0) / 12.0;
     final ins = homeInsuranceAnnual / 12.0;
@@ -503,15 +516,16 @@ class MortgageCalculator {
 
     return AffordabilityResult(
       maxHomePriceConservative: maxHomeCons,
-      maxHomePriceStandard:     maxHomeStd,
-      maxLoanConservative:      (maxHomeCons - downPayment).clamp(0.0, double.infinity),
-      maxLoanStandard:          (maxHomeStd  - downPayment).clamp(0.0, double.infinity),
-      monthlyPI:        pi,
-      monthlyTax:       tax,
+      maxHomePriceStandard: maxHomeStd,
+      maxLoanConservative:
+          (maxHomeCons - downPayment).clamp(0.0, double.infinity),
+      maxLoanStandard: (maxHomeStd - downPayment).clamp(0.0, double.infinity),
+      monthlyPI: pi,
+      monthlyTax: tax,
       monthlyInsurance: ins,
-      monthlyPMI:       pmi,
-      monthlyHOA:       hoaMonthly,
-      totalMonthly:     pi + tax + ins + pmi + hoaMonthly,
+      monthlyPMI: pmi,
+      monthlyHOA: hoaMonthly,
+      totalMonthly: pi + tax + ins + pmi + hoaMonthly,
       inputDownPayment: downPayment,
       monthlyGrossIncome: monthlyGross,
     );
@@ -521,7 +535,7 @@ class MortgageCalculator {
     required double maxAllowablePITI,
     required double downPayment,
     required double annualRatePct,
-    required int    termYears,
+    required int termYears,
     required double propertyTaxRatePct,
     required double homeInsuranceAnnual,
     required double hoaMonthly,
@@ -532,11 +546,15 @@ class MortgageCalculator {
     double hi = 5000000.0; // $5M ceiling
 
     for (int i = 0; i < 60; i++) {
-      final mid  = (lo + hi) / 2;
+      final mid = (lo + hi) / 2;
       final loan = (mid - downPayment).clamp(0.0, double.infinity);
-      if (loan <= 0) { lo = mid; continue; }
+      if (loan <= 0) {
+        lo = mid;
+        continue;
+      }
 
-      final pi  = calcMonthlyPayment(loanAmount: loan, annualRatePct: annualRatePct, termYears: termYears);
+      final pi = calcMonthlyPayment(
+          loanAmount: loan, annualRatePct: annualRatePct, termYears: termYears);
       final tax = (mid * propertyTaxRatePct / 100.0) / 12.0;
       final ins = homeInsuranceAnnual / 12.0;
       final ltv = loan / mid;

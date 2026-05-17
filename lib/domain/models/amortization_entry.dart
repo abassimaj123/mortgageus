@@ -1,14 +1,14 @@
 class AmortizationEntry {
-  final int     month;
+  final int month;
   final DateTime date;
-  final double  payment;
-  final double  principal;
-  final double  interest;
-  final double  balance;
-  final double  cumulativeInterest;
-  final double  cumulativePrincipal;
-  final double  pmiAmount;
-  final bool    pmiDropped; // true on the first month PMI hits 0
+  final double payment;
+  final double principal;
+  final double interest;
+  final double balance;
+  final double cumulativeInterest;
+  final double cumulativePrincipal;
+  final double pmiAmount;
+  final bool pmiDropped; // true on the first month PMI hits 0
 
   const AmortizationEntry({
     required this.month,

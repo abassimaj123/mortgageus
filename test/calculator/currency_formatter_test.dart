@@ -14,7 +14,6 @@ void main() {
   final fmt = CurrencyInputFormatter();
 
   group('CurrencyInputFormatter', () {
-
     test('Adds thousand separators correctly', () {
       expect(_apply(fmt, '300000').text, equals('300,000'));
     });
@@ -33,7 +32,6 @@ void main() {
   });
 
   group('parseCurrency', () {
-
     test('Removes commas and returns double', () {
       expect(parseCurrency('300,000'), equals(300000.0));
     });

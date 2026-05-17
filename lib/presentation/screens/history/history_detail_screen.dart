@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../core/ads/ad_config.dart';
-import '../../../core/ads/ad_service.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/pdf_export_service.dart';
@@ -11,9 +9,11 @@ import '../../../domain/models/loan_type.dart';
 import '../../../domain/models/mortgage_input.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
+import '../../../l10n/strings_en.dart';
+import '../../../l10n/strings_es.dart';
 import '../../../main.dart' show isSpanishNotifier;
 import 'history_screen.dart' show HistoryScreen;
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 
 class HistoryDetailScreen extends StatefulWidget {
   final Map<String, dynamic> row;
@@ -25,47 +25,22 @@ class HistoryDetailScreen extends StatefulWidget {
 }
 
 class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
-  BannerAd? _banner;
-  bool _bannerLoaded = false;
-
-  final _fmtUSD  = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
+  final _fmtUSD =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
   final _fmtDate = DateFormat('MMMM d, yyyy – HH:mm');
-
-  @override
-  void initState() {
-    super.initState();
-    if (!freemiumService.isPremium) _loadBanner();
-  }
-
-  void _loadBanner() {
-    if (!AdConfig.adsEnabled) return;
-    _banner = BannerAd(
-      adUnitId: AdService.bannerId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          if (mounted) setState(() => _bannerLoaded = true);
-        },
-        onAdFailedToLoad: (ad, _) => ad.dispose(),
-      ),
-    )..load();
-  }
-
-  @override
-  void dispose() {
-    _banner?.dispose();
-    super.dispose();
-  }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   LoanType _parseLoanType(String label) {
     switch (label) {
-      case 'FHA':   return LoanType.fha;
-      case 'VA':    return LoanType.va;
-      case 'Jumbo': return LoanType.jumbo;
-      default:      return LoanType.conventional;
+      case 'FHA':
+        return LoanType.fha;
+      case 'VA':
+        return LoanType.va;
+      case 'Jumbo':
+        return LoanType.jumbo;
+      default:
+        return LoanType.conventional;
     }
   }
 
@@ -100,45 +75,48 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
   Future<void> _exportPdf(BuildContext context, bool isEs) async {
     final row = widget.row;
-    final homePrice   = (row['home_price']   as num?)?.toDouble()  ?? 0.0;
-    final downPercent = (row['down_percent'] as num?)?.toDouble()  ?? 20.0;
-    final annualRate  = (row['annual_rate']  as num?)?.toDouble()  ?? 6.5;
-    final termYears   = (row['term_years']   as num?)?.toInt()     ?? 30;
-    final taxRate     = (row['tax_rate']     as num?)?.toDouble()  ?? MortgageConstants.defaultPropertyTaxRate;
-    final insurance   = (row['insurance']    as num?)?.toDouble()  ?? MortgageConstants.defaultHomeInsurance;
-    final hoa         = (row['hoa']          as num?)?.toDouble()  ?? 0.0;
-    final loanType    = _parseLoanType(row['loan_type'] as String? ?? 'Conventional');
+    final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
+    final downPercent = (row['down_percent'] as num?)?.toDouble() ?? 20.0;
+    final annualRate = (row['annual_rate'] as num?)?.toDouble() ?? 6.5;
+    final termYears = (row['term_years'] as num?)?.toInt() ?? 30;
+    final taxRate = (row['tax_rate'] as num?)?.toDouble() ??
+        MortgageConstants.defaultPropertyTaxRate;
+    final insurance = (row['insurance'] as num?)?.toDouble() ??
+        MortgageConstants.defaultHomeInsurance;
+    final hoa = (row['hoa'] as num?)?.toDouble() ?? 0.0;
+    final loanType =
+        _parseLoanType(row['loan_type'] as String? ?? 'Conventional');
 
     final downPayment = homePrice * downPercent / 100.0;
-    final loanAmount  = homePrice - downPayment;
-    final ltv         = homePrice > 0 ? loanAmount / homePrice * 100 : 0.0;
-    final pmiRate     = (ltv > 80.0 && loanType != LoanType.va)
+    final loanAmount = homePrice - downPayment;
+    final ltv = homePrice > 0 ? loanAmount / homePrice * 100 : 0.0;
+    final pmiRate = (ltv > 80.0 && loanType != LoanType.va)
         ? MortgageConstants.pmiDefaultAnnualRate * 100
         : 0.0;
 
     final inputState = MortgageInputState(
-      homePrice:           homePrice,
-      downPaymentPct:      downPercent,
-      annualRatePct:       annualRate,
-      termYears:           termYears,
-      loanType:            loanType,
-      propertyTaxRatePct:  taxRate,
+      homePrice: homePrice,
+      downPaymentPct: downPercent,
+      annualRatePct: annualRate,
+      termYears: termYears,
+      loanType: loanType,
+      propertyTaxRatePct: taxRate,
       homeInsuranceAnnual: insurance,
-      hoaMonthly:          hoa,
+      hoaMonthly: hoa,
     );
 
     final now = DateTime.now();
     final input = MortgageInput(
-      homePrice:            homePrice,
-      downPayment:          downPayment,
-      annualRatePct:        annualRate,
-      termYears:            termYears,
-      loanType:             loanType,
-      propertyTaxRatePct:   taxRate,
-      homeInsuranceAnnual:  insurance,
-      hoaMonthly:           hoa,
-      pmiAnnualRatePct:     pmiRate,
-      startDate:            DateTime(now.year, now.month + 1),
+      homePrice: homePrice,
+      downPayment: downPayment,
+      annualRatePct: annualRate,
+      termYears: termYears,
+      loanType: loanType,
+      propertyTaxRatePct: taxRate,
+      homeInsuranceAnnual: insurance,
+      hoaMonthly: hoa,
+      pmiAnnualRatePct: pmiRate,
+      startDate: DateTime(now.year, now.month + 1),
     );
 
     try {
@@ -148,8 +126,9 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       }
     } catch (e) {
       if (context.mounted) {
+        final dynamic s = isEs ? AppStringsES() : AppStringsEN();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+          SnackBar(content: Text('${s.exportFailed}: $e')),
         );
       }
     }
@@ -163,25 +142,29 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
         final row = widget.row;
-        final homePrice      = (row['home_price']      as num?)?.toDouble() ?? 0.0;
-        final downPercent    = (row['down_percent']    as num?)?.toDouble() ?? 20.0;
-        final annualRate     = (row['annual_rate']     as num?)?.toDouble() ?? 0.0;
-        final termYears      = (row['term_years']      as num?)?.toInt()    ?? 30;
-        final loanType       = row['loan_type']  as String? ?? 'Conventional';
-        final loanAmount     = (row['loan_amount']     as num?)?.toDouble() ?? 0.0;
-        final monthlyPayment = (row['monthly_payment'] as num?)?.toDouble() ?? 0.0;
-        final totalInterest  = (row['total_interest']  as num?)?.toDouble() ?? 0.0;
-        final taxRate        = (row['tax_rate']        as num?)?.toDouble() ?? 0.0;
-        final insurance      = (row['insurance']       as num?)?.toDouble() ?? 0.0;
-        final hoa            = (row['hoa']             as num?)?.toDouble() ?? 0.0;
-        final totalCost      = totalInterest + loanAmount;
-        final downAmount     = homePrice * downPercent / 100;
-        final createdAt      = DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now();
+        final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
+        final downPercent = (row['down_percent'] as num?)?.toDouble() ?? 20.0;
+        final annualRate = (row['annual_rate'] as num?)?.toDouble() ?? 0.0;
+        final termYears = (row['term_years'] as num?)?.toInt() ?? 30;
+        final loanType = row['loan_type'] as String? ?? 'Conventional';
+        final loanAmount = (row['loan_amount'] as num?)?.toDouble() ?? 0.0;
+        final monthlyPayment =
+            (row['monthly_payment'] as num?)?.toDouble() ?? 0.0;
+        final totalInterest =
+            (row['total_interest'] as num?)?.toDouble() ?? 0.0;
+        final taxRate = (row['tax_rate'] as num?)?.toDouble() ?? 0.0;
+        final insurance = (row['insurance'] as num?)?.toDouble() ?? 0.0;
+        final hoa = (row['hoa'] as num?)?.toDouble() ?? 0.0;
+        final totalCost = totalInterest + loanAmount;
+        final downAmount = homePrice * downPercent / 100;
+        final createdAt =
+            DateTime.tryParse(row['created_at'] as String? ?? '') ??
+                DateTime.now();
 
         return Scaffold(
           appBar: AppBar(
             title: Text(_fmtDate.format(createdAt.toLocal()),
-                style: const TextStyle(fontSize: 14)),
+                style: const TextStyle(fontSize: AppTextSize.body)),
             actions: [
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -190,111 +173,88 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               ),
             ],
           ),
-          body: Column(
+          body: ListView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    // ── Inputs card ───────────────────────────────────────
-                    _SectionCard(
-                      title: isEs ? 'Parámetros' : 'Inputs',
-                      icon: Icons.input_outlined,
-                      children: [
-                        _Row(isEs ? 'Precio de la casa' : 'Home Price',
-                            _fmtUSD.format(homePrice)),
-                        _Row(isEs ? 'Enganche' : 'Down Payment',
-                            '${downPercent.toStringAsFixed(1)}% (${_fmtUSD.format(downAmount)})'),
-                        _Row(isEs ? 'Tasa anual' : 'Annual Rate',
-                            '${annualRate.toStringAsFixed(2)}%'),
-                        _Row(isEs ? 'Plazo' : 'Loan Term',
-                            '$termYears ${isEs ? 'años' : 'years'}'),
-                        _Row(isEs ? 'Tipo de préstamo' : 'Loan Type', loanType),
-                        _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
-                            _fmtUSD.format(loanAmount)),
-                        if (taxRate > 0)
-                          _Row(isEs ? 'Impuesto predial' : 'Property Tax Rate',
-                              '${taxRate.toStringAsFixed(2)}%'),
-                        if (insurance > 0)
-                          _Row(isEs ? 'Seguro' : 'Home Insurance',
-                              _fmtUSD.format(insurance)),
-                        if (hoa > 0)
-                          _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
-                              _fmtUSD.format(hoa)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // ── Results card ──────────────────────────────────────
-                    _SectionCard(
-                      title: isEs ? 'Resultados' : 'Results',
-                      icon: Icons.bar_chart_outlined,
-                      children: [
-                        _Row(
-                          isEs ? 'Pago mensual (PITI)' : 'Monthly Payment (PITI)',
-                          _fmtUSD.format(monthlyPayment),
-                          highlight: AppTheme.primary,
-                          bold: true,
-                        ),
-                        _Row(isEs ? 'Interés total' : 'Total Interest',
-                            _fmtUSD.format(totalInterest)),
-                        _Row(isEs ? 'Costo total' : 'Total Cost',
-                            _fmtUSD.format(totalCost),
-                            bold: true),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── PDF export button ──────────────────────────────────
-                    ValueListenableBuilder<bool>(
-                      valueListenable: freemiumService.isPremiumNotifier,
-                      builder: (context, isPremium, _) => SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: isPremium
-                              ? () => _exportPdf(context, isEs)
-                              : () => PdfExportService.showUnlockOrPay(
-                                  context, () => _exportPdf(context, isEs)),
-                          icon: Icon(
-                              isPremium
-                                  ? Icons.picture_as_pdf_outlined
-                                  : Icons.lock_outline,
-                              size: 18),
-                          label: Text(isPremium
-                              ? (isEs ? 'Exportar PDF' : 'Export PDF')
-                              : (isEs
-                                  ? 'Exportar PDF — Premium'
-                                  : 'Export PDF — Premium')),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                isPremium ? AppTheme.primary : Colors.grey.shade200,
-                            foregroundColor:
-                                isPremium ? Colors.white : Colors.grey.shade600,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              // ── Inputs card ───────────────────────────────────────
+              _SectionCard(
+                title: isEs ? 'Parámetros' : 'Inputs',
+                icon: Icons.input_rounded,
+                children: [
+                  _Row(isEs ? 'Precio de la casa' : 'Home Price',
+                      _fmtUSD.format(homePrice)),
+                  _Row(isEs ? 'Enganche' : 'Down Payment',
+                      '${downPercent.toStringAsFixed(1)}% (${_fmtUSD.format(downAmount)})'),
+                  _Row(isEs ? 'Tasa anual' : 'Annual Rate',
+                      '${annualRate.toStringAsFixed(2)}%'),
+                  _Row(isEs ? 'Plazo' : 'Loan Term',
+                      '$termYears ${isEs ? 'años' : 'years'}'),
+                  _Row(isEs ? 'Tipo de préstamo' : 'Loan Type', loanType),
+                  _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
+                      _fmtUSD.format(loanAmount)),
+                  if (taxRate > 0)
+                    _Row(isEs ? 'Impuesto predial' : 'Property Tax Rate',
+                        '${taxRate.toStringAsFixed(2)}%'),
+                  if (insurance > 0)
+                    _Row(isEs ? 'Seguro' : 'Home Insurance',
+                        _fmtUSD.format(insurance)),
+                  if (hoa > 0)
+                    _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
+                        _fmtUSD.format(hoa)),
+                ],
               ),
+              const SizedBox(height: 12),
 
-              // ── Banner ad — free users only ──────────────────────────────
+              // ── Results card ──────────────────────────────────────
+              _SectionCard(
+                title: isEs ? 'Resultados' : 'Results',
+                icon: Icons.bar_chart_rounded,
+                children: [
+                  _Row(
+                    isEs ? 'Pago mensual (PITI)' : 'Monthly Payment (PITI)',
+                    _fmtUSD.format(monthlyPayment),
+                    highlight: AppTheme.primary,
+                    bold: true,
+                  ),
+                  _Row(isEs ? 'Interés total' : 'Total Interest',
+                      _fmtUSD.format(totalInterest)),
+                  _Row(isEs ? 'Costo total' : 'Total Cost',
+                      _fmtUSD.format(totalCost),
+                      bold: true),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ── PDF export button ──────────────────────────────────
               ValueListenableBuilder<bool>(
                 valueListenable: freemiumService.isPremiumNotifier,
-                builder: (context, isPremium, _) {
-                  if (isPremium || !_bannerLoaded || _banner == null) {
-                    return const SizedBox.shrink();
-                  }
-                  return SafeArea(
-                    top: false,
-                    child: SizedBox(
-                      width: _banner!.size.width.toDouble(),
-                      height: _banner!.size.height.toDouble(),
-                      child: AdWidget(ad: _banner!),
+                builder: (context, isPremium, _) => SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: isPremium
+                        ? () => _exportPdf(context, isEs)
+                        : () => PdfExportService.showUnlockOrPay(
+                            context, () => _exportPdf(context, isEs)),
+                    icon: Icon(
+                        isPremium
+                            ? Icons.picture_as_pdf_rounded
+                            : Icons.lock_outline,
+                        size: 18),
+                    label: Text(isPremium
+                        ? (isEs ? 'Exportar PDF' : 'Export PDF')
+                        : (isEs
+                            ? 'Exportar PDF — Premium'
+                            : 'Export PDF — Premium')),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isPremium
+                          ? AppTheme.primary
+                          : const Color(0xFFE2E8F0),
+                      foregroundColor:
+                          isPremium ? Colors.white : const Color(0xFF475569),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ],
           ),
@@ -320,10 +280,11 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -333,7 +294,7 @@ class _SectionCard extends StatelessWidget {
               Text(title,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: AppTextSize.bodyMd,
                       color: AppTheme.primary)),
             ]),
             const Divider(height: 16),
@@ -361,12 +322,13 @@ class _Row extends StatelessWidget {
           children: [
             Expanded(
               child: Text(label,
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+                  style: TextStyle(
+                      fontSize: AppTextSize.body, color: Color(0xFF475569))),
             ),
             const SizedBox(width: 8),
             Text(value,
                 style: TextStyle(
-                    fontSize: 14,
+                    fontSize: AppTextSize.body,
                     fontWeight: bold ? FontWeight.bold : FontWeight.w500,
                     color: highlight)),
           ],

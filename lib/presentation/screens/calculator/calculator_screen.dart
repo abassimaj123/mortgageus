@@ -745,6 +745,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                               'Total Interest: ${fmt.format(result.totalInterest)}\n'
                                                               '— Calculated with Mortgage Calculator US';
                                                       try {
+                                                        AnalyticsService.instance.logShareText();
                                                         await Share.share(text);
                                                         if (context.mounted) {
                                                           ScaffoldMessenger.of(

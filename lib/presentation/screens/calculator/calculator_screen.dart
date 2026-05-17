@@ -250,7 +250,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Home Price
-                              _buildField((s.homePrice as String), _homePriceCtrl,
+                              _buildField(
+                                  (s.homePrice as String), _homePriceCtrl,
                                   prefix: '\$',
                                   required: true,
                                   currency: true,
@@ -355,7 +356,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   ),
                                   padding: const EdgeInsets.all(AppSpacing.md),
                                   child: Column(children: [
-                                    _buildField((s.propertyTaxRate as String), _taxCtrl,
+                                    _buildField(
+                                        (s.propertyTaxRate as String), _taxCtrl,
                                         suffix: '%',
                                         onChanged: (v) =>
                                             notifier.updatePropertyTaxRate(
@@ -363,7 +365,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                         ',', '.')) ??
                                                     1.1)),
                                     const SizedBox(height: 12),
-                                    _buildField((s.homeInsurance as String), _insuranceCtrl,
+                                    _buildField((s.homeInsurance as String),
+                                        _insuranceCtrl,
                                         prefix: '\$',
                                         suffix: '/yr',
                                         onChanged: (v) =>
@@ -558,7 +561,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 },
                                                 icon: const Icon(
                                                     Icons.bookmark_add_rounded),
-                                                label: Text((s.saveCalc as String)),
+                                                label: Text(
+                                                    (s.saveCalc as String)),
                                                 style: ElevatedButton.styleFrom(
                                                   minimumSize: const Size(
                                                       double.infinity, 52),
@@ -676,8 +680,10 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                             size: 18),
                                                         label: Text(
                                                             isPremium
-                                                                ? (s.exportPdf as String)
-                                                                : (s.exportPdfPremium as String),
+                                                                ? (s.exportPdf
+                                                                    as String)
+                                                                : (s.exportPdfPremium
+                                                                    as String),
                                                             overflow:
                                                                 TextOverflow
                                                                     .ellipsis),
@@ -1020,7 +1026,9 @@ class _HeroCard extends StatelessWidget {
             const SizedBox(height: 12),
             Wrap(spacing: 8, children: [
               _Badge(
-                label: result!.isJumbo ? (s.jumbo as String) : (s.conforming as String),
+                label: result!.isJumbo
+                    ? (s.jumbo as String)
+                    : (s.conforming as String),
                 color:
                     result!.isJumbo ? AppTheme.accentWarn : AppTheme.accentGood,
               ),
@@ -1034,7 +1042,9 @@ class _HeroCard extends StatelessWidget {
               ),
               if (result!.hasPmi)
                 _Badge(
-                  label: result!.isUsda ? (s.usdaFee as String) : (s.pmi as String),
+                  label: result!.isUsda
+                      ? (s.usdaFee as String)
+                      : (s.pmi as String),
                   color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
                 ),
             ]),
@@ -1081,7 +1091,8 @@ class _TermSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text((s.loanTerm as String), style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text((s.loanTerm as String),
+            style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Row(
           children: MortgageConstants.termPresets.map((term) {
@@ -1131,7 +1142,8 @@ class _LoanTypeSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text((s.loanType as String), style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text((s.loanType as String),
+            style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,

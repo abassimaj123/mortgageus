@@ -7,11 +7,16 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  calcwise_core:
+    git:
+      url: https://github.com/abassimaj123/calcwise_core.git
+      ref: main
   flutter:
     sdk: flutter
+
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
-  intl: ^0.19.0
+  intl: ^0.20.0
   fl_chart: ^0.68.0
   pdf: ^3.11.1
   printing: ^5.13.1
@@ -27,21 +32,16 @@ dependencies:
   firebase_crashlytics: ^4.1.3
   collection: ^1.18.0
   url_launcher: ^6.3.0
+  flutter_local_notifications: ^18.0.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.3
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   build_runner: ^2.4.9
   riverpod_generator: ^2.4.0
-flutter_native_splash:
-  color: "#1B3A6B"
-  android_12:
-    color: "#1B3A6B"
-    icon_background_color: "#1B3A6B"
-  android: true
-  ios: false
 
 flutter:
   uses-material-design: true
@@ -66,3 +66,6 @@ flutter_launcher_icons:
     generate: false
   windows:
     generate: false
+
+
+

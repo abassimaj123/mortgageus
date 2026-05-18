@@ -35,6 +35,9 @@ dependencies:
   flutter_local_notifications: ^18.0.1
 
 dev_dependencies:
+  calcwise_lint:
+    path: ../packages/calcwise_lint
+  custom_lint: ">=0.6.0 <0.8.0"
   flutter_launcher_icons: ^0.14.1
   flutter_native_splash: ^2.4.3
   flutter_test:

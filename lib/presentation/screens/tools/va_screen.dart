@@ -263,13 +263,13 @@ class _VaScreenState extends State<VaScreen> {
                                       decoration: BoxDecoration(
                                         color: Colors.green.shade50,
                                         border: Border.all(
-                                            color: Colors.green.shade300),
+                                            color: CalcwiseSemanticColors.successBorder),
                                         borderRadius: BorderRadius.circular(
                                             AppRadius.mdPlus),
                                       ),
                                       child: Row(children: [
                                         Icon(Icons.check_circle_outline,
-                                            color: Colors.green.shade700,
+                                            color: CalcwiseSemanticColors.successDeep,
                                             size: 18),
                                         const SizedBox(width: 8),
                                         Text(
@@ -277,7 +277,7 @@ class _VaScreenState extends State<VaScreen> {
                                                 ? 'Sin PMI — beneficio VA'
                                                 : 'No PMI — VA benefit',
                                             style: TextStyle(
-                                                color: Colors.green.shade800,
+                                                color: CalcwiseSemanticColors.successDark,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: AppTextSize.md)),
                                       ]),

@@ -29,10 +29,8 @@ import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
 import '../history/history_screen.dart' show paywallSession, HistoryScreen;
-import '../../../main.dart' show adService;
+import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, preFillNotifier;
 import '../../../core/services/analytics_service.dart';
-import '../../../main.dart'
-    show paywallSession, isSpanishNotifier, preFillNotifier;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../../widgets/info_tooltip.dart';
@@ -1056,7 +1054,7 @@ class _Badge extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.15),
           border: Border.all(color: color),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.xxl),
         ),
         child: Text(label,
             style: TextStyle(
@@ -1296,7 +1294,7 @@ class _AffordabilityBadge extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: badgeColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppRadius.xxl),
             ),
             child: Text(
               badgeLabel,
@@ -1333,7 +1331,7 @@ class _ModeBtn extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
             color: selected ? AppTheme.primary : null,
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           child: Text(label,
               style: TextStyle(

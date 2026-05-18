@@ -229,8 +229,8 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                                 ? Icons.check_circle_outline
                                                 : Icons.warning_amber_rounded,
                                             color: (incomeOk && _rural)
-                                                ? Colors.green.shade700
-                                                : Colors.orange.shade800,
+                                                ? CalcwiseSemanticColors.successDeep
+                                                : CalcwiseSemanticColors.warnIcon,
                                             size: 18),
                                         const SizedBox(width: 8),
                                         Expanded(
@@ -248,8 +248,8 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                                           : 'Income exceeds ${fmtWhole.format(maxIncome)}'),
                                               style: TextStyle(
                                                   color: (incomeOk && _rural)
-                                                      ? Colors.green.shade800
-                                                      : Colors.orange.shade800,
+                                                      ? CalcwiseSemanticColors.successDark
+                                                      : CalcwiseSemanticColors.warnIcon,
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: AppTextSize.md)),
                                         ),

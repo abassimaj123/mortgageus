@@ -440,7 +440,7 @@ class _ResultsCard extends StatelessWidget {
                     '${fmtCur.format(result.monthlyCF)}',
                 color: result.monthlyCF >= 0
                     ? AppTheme.accentGood
-                    : Colors.red.shade700,
+                    : CalcwiseSemanticColors.errorDark,
                 bold: true,
               ),
               _Row(
@@ -473,7 +473,7 @@ class _ResultsCard extends StatelessWidget {
                 value: '${result.npv >= 0 ? '+' : ''}'
                     '${fmtCur.format(result.npv)}',
                 color:
-                    result.npv >= 0 ? AppTheme.accentGood : Colors.red.shade700,
+                    result.npv >= 0 ? AppTheme.accentGood : CalcwiseSemanticColors.errorDark,
                 bold: true,
               ),
               const Divider(height: 24),

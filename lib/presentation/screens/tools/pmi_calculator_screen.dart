@@ -233,15 +233,15 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                     padding:
                                         const EdgeInsets.all(AppSpacing.lg),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.shade50,
+                                      color: CalcwiseSemanticColors.successBg,
                                       border: Border.all(
-                                          color: Colors.green.shade300),
+                                          color: CalcwiseSemanticColors.successBorder),
                                       borderRadius:
                                           BorderRadius.circular(AppRadius.lg),
                                     ),
                                     child: Row(children: [
                                       Icon(Icons.check_circle_outline,
-                                          color: Colors.green.shade700,
+                                          color: CalcwiseSemanticColors.successDeep,
                                           size: 24),
                                       const SizedBox(width: 12),
                                       Text(
@@ -250,7 +250,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                               : 'No PMI Required',
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.green.shade800,
+                                              color: CalcwiseSemanticColors.successDark,
                                               fontSize: AppTextSize.bodyLg)),
                                     ]),
                                   )

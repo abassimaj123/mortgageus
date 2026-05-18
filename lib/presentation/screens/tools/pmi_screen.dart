@@ -262,20 +262,20 @@ class _NoPmiBadge extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: Colors.green.shade50,
-          border: Border.all(color: Colors.green.shade300),
+          color: CalcwiseSemanticColors.successBg,
+          border: Border.all(color: CalcwiseSemanticColors.successBorder),
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Row(
           children: [
             Icon(Icons.check_circle_outline,
-                color: Colors.green.shade700, size: 24),
+                color: CalcwiseSemanticColors.successDeep, size: 24),
             const SizedBox(width: 12),
             Text(
               isEs ? 'No se requiere PMI' : 'No PMI Required',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.green.shade800,
+                color: CalcwiseSemanticColors.successDark,
                 fontSize: AppTextSize.bodyLg,
               ),
             ),
@@ -323,9 +323,9 @@ class _PmiResultsCard extends StatelessWidget {
               label: isEs ? 'Relación LTV' : 'LTV Ratio',
               value: '${ltv.toStringAsFixed(1)}%',
               color: ltv > 95
-                  ? Colors.red
+                  ? CalcwiseSemanticColors.errorDark
                   : ltv > 80
-                      ? Colors.orange.shade700
+                      ? CalcwiseSemanticColors.warnIcon
                       : AppTheme.accentGood,
             ),
             _Row(
@@ -334,7 +334,7 @@ class _PmiResultsCard extends StatelessWidget {
                   : 'Est. Monthly PMI (0.80%)',
               value: fmt.format(monthlyPmi),
               bold: true,
-              color: Colors.orange.shade800,
+              color: CalcwiseSemanticColors.warnIcon,
             ),
             const Divider(height: 24),
             _Row(

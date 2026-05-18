@@ -707,7 +707,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             Row(children: [
                                               const Icon(Icons.lock_outline,
                                                   size: 14,
-                                                  color: Colors.amber),
+                                                  color: CalcwiseSemanticColors.warnIcon),
                                               const SizedBox(width: 6),
                                               Expanded(
                                                 child: Text(

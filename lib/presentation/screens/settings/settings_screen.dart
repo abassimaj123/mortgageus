@@ -85,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
                     ? [
                         ListTile(
                           leading:
-                              const Icon(Icons.verified, color: Colors.amber),
+                              const Icon(Icons.verified, color: CalcwiseSemanticColors.warnIcon),
                           title: Text(s.premiumActive),
                           subtitle: Text(s.premiumSubtitle),
                         ),

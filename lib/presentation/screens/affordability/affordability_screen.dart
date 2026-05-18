@@ -179,7 +179,8 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                               () => _advancedExpanded = !_advancedExpanded),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.sm),
                             child: Row(children: [
                               Icon(
                                 _advancedExpanded
@@ -295,8 +296,8 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
         errorText: errorText,
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
       validator: (v) {
         final raw = (v ?? '').trim();
@@ -409,7 +410,8 @@ class _ResultCard extends StatelessWidget {
             _Row(s.propertyTax, fmt.format(r.monthlyTax)),
             _Row(s.homeInsurance, fmt.format(r.monthlyInsurance)),
             if (r.monthlyPMI > 0)
-              _Row(s.pmi, fmt.format(r.monthlyPMI), color: CalcwiseSemanticColors.warnIcon),
+              _Row(s.pmi, fmt.format(r.monthlyPMI),
+                  color: CalcwiseSemanticColors.warnIcon),
             if (r.monthlyHOA > 0) _Row(s.hoa, fmt.format(r.monthlyHOA)),
             const Divider(height: 20),
             _Row(s.totalPITI, fmt.format(r.totalMonthly), bold: true),

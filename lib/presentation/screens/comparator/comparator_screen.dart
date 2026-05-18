@@ -284,8 +284,8 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                         context, s, r30, r15, isEs),
                                 child: Container(
                                   width: double.infinity,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.mdPlus),
                                   decoration: BoxDecoration(
                                     border: Border.all(color: AppTheme.primary),
                                     borderRadius:
@@ -495,7 +495,8 @@ class _ValueCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
           color: isWinner ? color.withValues(alpha: 0.12) : null,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -615,8 +616,8 @@ class _ArmControls extends StatelessWidget {
           suffixText: '%',
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
       ),
     ]);
@@ -686,12 +687,16 @@ class _ArmCompareTable extends StatelessWidget {
       ),
       const SizedBox(height: AppSpacing.lg),
       Card(
-        color: (armIsCheaper ? AppTheme.accentGood : CalcwiseSemanticColors.warnIcon)
+        color: (armIsCheaper
+                ? AppTheme.accentGood
+                : CalcwiseSemanticColors.warnIcon)
             .withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           side: BorderSide(
-              color: (armIsCheaper ? AppTheme.accentGood : CalcwiseSemanticColors.warnIcon)
+              color: (armIsCheaper
+                      ? AppTheme.accentGood
+                      : CalcwiseSemanticColors.warnIcon)
                   .withValues(alpha: 0.4)),
         ),
         child: Padding(

@@ -132,7 +132,8 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppRadius.lg)),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+                          horizontal: AppSpacing.lg,
+                          vertical: AppSpacing.mdPlus),
                     ),
                     onChanged: (_) {
                       setState(() {});

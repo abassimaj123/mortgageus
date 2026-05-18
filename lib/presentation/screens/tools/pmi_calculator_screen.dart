@@ -235,13 +235,15 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                     decoration: BoxDecoration(
                                       color: CalcwiseSemanticColors.successBg,
                                       border: Border.all(
-                                          color: CalcwiseSemanticColors.successBorder),
+                                          color: CalcwiseSemanticColors
+                                              .successBorder),
                                       borderRadius:
                                           BorderRadius.circular(AppRadius.lg),
                                     ),
                                     child: Row(children: [
                                       Icon(Icons.check_circle_outline,
-                                          color: CalcwiseSemanticColors.successDeep,
+                                          color: CalcwiseSemanticColors
+                                              .successDeep,
                                           size: 24),
                                       const SizedBox(width: AppSpacing.md),
                                       Text(
@@ -250,7 +252,8 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                               : 'No PMI Required',
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: CalcwiseSemanticColors.successDark,
+                                              color: CalcwiseSemanticColors
+                                                  .successDark,
                                               fontSize: AppTextSize.bodyLg)),
                                     ]),
                                   )
@@ -287,7 +290,8 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                                 : 'Monthly PMI',
                                             value: fmt.format(monthly),
                                             bold: true,
-                                            color: CalcwiseSemanticColors.alertText),
+                                            color: CalcwiseSemanticColors
+                                                .alertText),
                                         const Divider(height: 24),
                                         _Row(
                                             label: isEs

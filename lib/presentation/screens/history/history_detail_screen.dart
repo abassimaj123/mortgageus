@@ -61,7 +61,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(isEs ? 'Eliminar' : 'Delete',
-                style: const TextStyle(color: CalcwiseSemanticColors.errorDark)),
+                style:
+                    const TextStyle(color: CalcwiseSemanticColors.errorDark)),
           ),
         ],
       ),
@@ -167,7 +168,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 style: const TextStyle(fontSize: AppTextSize.body)),
             actions: [
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: CalcwiseSemanticColors.errorDark),
+                icon: const Icon(Icons.delete_outline,
+                    color: CalcwiseSemanticColors.errorDark),
                 tooltip: isEs ? 'Eliminar' : 'Delete',
                 onPressed: () => _delete(isEs),
               ),
@@ -251,7 +253,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                           : const Color(0xFFE2E8F0),
                       foregroundColor:
                           isPremium ? Colors.white : const Color(0xFF475569),
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.mdPlus),
                     ),
                   ),
                 ),

@@ -256,8 +256,8 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
         errorText: errorText,
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
     );
   }

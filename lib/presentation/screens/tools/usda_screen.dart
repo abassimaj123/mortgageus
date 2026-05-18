@@ -218,8 +218,10 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                             : CalcwiseSemanticColors.alertBg,
                                         border: Border.all(
                                             color: (incomeOk && _rural)
-                                                ? CalcwiseSemanticColors.successBorder
-                                                : CalcwiseSemanticColors.alertBorder),
+                                                ? CalcwiseSemanticColors
+                                                    .successBorder
+                                                : CalcwiseSemanticColors
+                                                    .alertBorder),
                                         borderRadius: BorderRadius.circular(
                                             AppRadius.mdPlus),
                                       ),
@@ -229,8 +231,10 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                                 ? Icons.check_circle_outline
                                                 : Icons.warning_amber_rounded,
                                             color: (incomeOk && _rural)
-                                                ? CalcwiseSemanticColors.successDeep
-                                                : CalcwiseSemanticColors.warnIcon,
+                                                ? CalcwiseSemanticColors
+                                                    .successDeep
+                                                : CalcwiseSemanticColors
+                                                    .warnIcon,
                                             size: 18),
                                         const SizedBox(width: AppSpacing.sm),
                                         Expanded(
@@ -248,8 +252,10 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                                           : 'Income exceeds ${fmtWhole.format(maxIncome)}'),
                                               style: TextStyle(
                                                   color: (incomeOk && _rural)
-                                                      ? CalcwiseSemanticColors.successDark
-                                                      : CalcwiseSemanticColors.warnIcon,
+                                                      ? CalcwiseSemanticColors
+                                                          .successDark
+                                                      : CalcwiseSemanticColors
+                                                          .warnIcon,
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: AppTextSize.md)),
                                         ),
@@ -271,7 +277,8 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                             ? 'Tarifa anual mensualizada (0.35%)'
                                             : 'Monthly Annual Fee (0.35%)',
                                         value: fmt.format(monthlyFee),
-                                        color: CalcwiseSemanticColors.alertText),
+                                        color:
+                                            CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs
                                             ? 'Capital + Interés'

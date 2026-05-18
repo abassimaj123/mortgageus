@@ -107,7 +107,8 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                           // Loan summary
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+                                horizontal: AppSpacing.lg,
+                                vertical: AppSpacing.lg),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.surface,
                               border:
@@ -257,8 +258,8 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
           suffixText: suffix,
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
       ),
     );

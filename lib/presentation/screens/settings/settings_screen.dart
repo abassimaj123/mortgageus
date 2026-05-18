@@ -43,8 +43,8 @@ class SettingsScreen extends StatelessWidget {
               title: s.language,
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
                   child: Row(
                     children: [
                       Expanded(
@@ -84,8 +84,8 @@ class SettingsScreen extends StatelessWidget {
                 children: isPremium
                     ? [
                         ListTile(
-                          leading:
-                              const Icon(Icons.verified, color: CalcwiseSemanticColors.warnIcon),
+                          leading: const Icon(Icons.verified,
+                              color: CalcwiseSemanticColors.warnIcon),
                           title: Text(s.premiumActive),
                           subtitle: Text(s.premiumSubtitle),
                         ),
@@ -156,7 +156,8 @@ class SettingsScreen extends StatelessWidget {
             ),
             const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
               child: Text(
                 s.disclaimer,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(

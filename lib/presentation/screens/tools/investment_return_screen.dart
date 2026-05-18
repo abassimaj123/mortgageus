@@ -286,8 +286,8 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
         suffixText: suffix,
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       );
 
   double _parseAmount(String text) =>
@@ -398,8 +398,8 @@ class _ResultsCard extends StatelessWidget {
               // ── Verdict badge ──────────────────────────────────────────
               Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppSpacing.mdPlus, vertical: AppSpacing.smPlus),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.mdPlus, vertical: AppSpacing.smPlus),
                 decoration: BoxDecoration(
                   color: verdictColor.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(AppRadius.mdPlus),
@@ -472,8 +472,9 @@ class _ResultsCard extends StatelessWidget {
                     : 'NPV (Net Present Value)',
                 value: '${result.npv >= 0 ? '+' : ''}'
                     '${fmtCur.format(result.npv)}',
-                color:
-                    result.npv >= 0 ? AppTheme.accentGood : CalcwiseSemanticColors.errorDark,
+                color: result.npv >= 0
+                    ? AppTheme.accentGood
+                    : CalcwiseSemanticColors.errorDark,
                 bold: true,
               ),
               const Divider(height: 24),

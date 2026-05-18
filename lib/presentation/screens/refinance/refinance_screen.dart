@@ -244,8 +244,8 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
           errorText: errorText,
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
         validator: (v) {
           final raw = (v ?? '').trim();

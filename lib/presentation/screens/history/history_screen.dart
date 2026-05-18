@@ -156,7 +156,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(isEs ? 'Eliminar' : 'Delete',
-                style: const TextStyle(color: CalcwiseSemanticColors.errorDark)),
+                style:
+                    const TextStyle(color: CalcwiseSemanticColors.errorDark)),
           ),
         ],
       ),
@@ -304,7 +305,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, controller) => Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
           child: ListView(
             controller: controller,
             children: [
@@ -436,7 +438,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ? AppTheme.primary
                                       : const Color(0xFF64748B))),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.md),
                             side: BorderSide(
                                 color: unlocked
                                     ? AppTheme.primary
@@ -471,7 +474,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ? AppTheme.accentGood
                                       : const Color(0xFF64748B))),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.md),
                             side: BorderSide(
                                 color: unlocked
                                     ? AppTheme.accentGood
@@ -497,10 +501,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       size: 18, color: CalcwiseSemanticColors.errorDark),
                   label: Text(
                       isEs ? 'Eliminar comparación' : 'Delete comparison',
-                      style: const TextStyle(color: CalcwiseSemanticColors.errorDark)),
+                      style: const TextStyle(
+                          color: CalcwiseSemanticColors.errorDark)),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    side: const BorderSide(color: CalcwiseSemanticColors.errorDark),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    side: const BorderSide(
+                        color: CalcwiseSemanticColors.errorDark),
                   ),
                 ),
               ),
@@ -588,8 +595,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             slivers: [
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+                                  padding: const EdgeInsets.fromLTRB(
+                                      AppSpacing.lg,
+                                      AppSpacing.lg,
+                                      AppSpacing.lg,
+                                      AppSpacing.sm),
                                   child: ValueListenableBuilder<bool>(
                                     valueListenable:
                                         freemiumService.isPremiumNotifier,
@@ -654,21 +664,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                 icon: const Icon(
                                                     Icons.delete_sweep,
                                                     size: 18,
-                                                    color: CalcwiseSemanticColors.errorDark),
+                                                    color:
+                                                        CalcwiseSemanticColors
+                                                            .errorDark),
                                                 label: Text(
                                                     isEs
                                                         ? 'Borrar todo'
                                                         : 'Clear all',
                                                     style: const TextStyle(
-                                                        color: CalcwiseSemanticColors.errorDark)),
+                                                        color:
+                                                            CalcwiseSemanticColors
+                                                                .errorDark)),
                                               ),
                                           ]),
                                           if (_compareMode) ...[
-                                            const SizedBox(height: AppRadius.sm),
+                                            const SizedBox(
+                                                height: AppRadius.sm),
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                      horizontal: AppSpacing.smPlus,
+                                                      horizontal:
+                                                          AppSpacing.smPlus,
                                                       vertical: AppSpacing.sm),
                                               decoration: BoxDecoration(
                                                 color: AppTheme.primary
@@ -686,7 +702,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                     Icons.touch_app_rounded,
                                                     size: 14,
                                                     color: AppTheme.primary),
-                                                const SizedBox(width: AppRadius.sm),
+                                                const SizedBox(
+                                                    width: AppRadius.sm),
                                                 Expanded(
                                                   child: Text(
                                                     isEs
@@ -703,12 +720,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             ),
                                           ],
                                           if (!isPremium) ...[
-                                            const SizedBox(height: AppRadius.sm),
+                                            const SizedBox(
+                                                height: AppRadius.sm),
                                             Row(children: [
                                               const Icon(Icons.lock_outline,
                                                   size: 14,
-                                                  color: CalcwiseSemanticColors.warnIcon),
-                                              const SizedBox(width: AppRadius.sm),
+                                                  color: CalcwiseSemanticColors
+                                                      .warnIcon),
+                                              const SizedBox(
+                                                  width: AppRadius.sm),
                                               Expanded(
                                                 child: Text(
                                                   isEs
@@ -848,7 +868,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                           Alignment.centerRight,
                                                       padding:
                                                           const EdgeInsets.only(
-                                                              right: AppSpacing.xxl),
+                                                              right: AppSpacing
+                                                                  .xxl),
                                                       child: const Icon(
                                                           Icons.delete_rounded,
                                                           color: Colors.white),
@@ -930,7 +951,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   transitionDuration: AppDuration.base,
                 )),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdPlus, vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.mdPlus, vertical: AppSpacing.md),
           child: Row(children: [
             Expanded(
               child: Column(
@@ -1037,7 +1059,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         onTap: () => _showComparisonDetail(context, pair, cid, isEs),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdPlus, vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.mdPlus, vertical: AppSpacing.md),
           child: Row(children: [
             Expanded(
               child: Column(
@@ -1140,7 +1163,8 @@ class _ScenarioPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
@@ -1551,8 +1575,8 @@ class _HistoryCompareScreen extends StatelessWidget {
                 Expanded(
                   flex: 4,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: AppSpacing.smPlus, horizontal: 6),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.smPlus, horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: AppTheme.primary,
@@ -1574,8 +1598,8 @@ class _HistoryCompareScreen extends StatelessWidget {
                 Expanded(
                   flex: 4,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: AppSpacing.smPlus, horizontal: 6),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.smPlus, horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: const Color(0xFF475569),
@@ -1688,7 +1712,8 @@ class _CellBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final isHighlighted = color != null;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: AppSpacing.sm),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 6, vertical: AppSpacing.sm),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isHighlighted ? color!.withValues(alpha: 0.08) : null,

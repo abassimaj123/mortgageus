@@ -192,7 +192,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                       onTap: () => tabSwitchNotifier.value = 0,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.xxl, vertical: AppSpacing.mdPlus),
+                            horizontal: AppSpacing.xxl,
+                            vertical: AppSpacing.mdPlus),
                         decoration: BoxDecoration(
                           color: AppTheme.primary,
                           borderRadius: BorderRadius.circular(AppRadius.mdPlus),
@@ -468,7 +469,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                           child: GestureDetector(
                         onTap: () => _setViewMode(true),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.smPlus),
                           decoration: BoxDecoration(
                             color: _yearlyView
                                 ? AppTheme.primary
@@ -505,7 +507,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                           child: GestureDetector(
                         onTap: () => _setViewMode(false),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.smPlus),
                           decoration: BoxDecoration(
                             color: !_yearlyView
                                 ? AppTheme.primary
@@ -584,7 +587,8 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+      margin: const EdgeInsets.fromLTRB(
+          AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
       decoration: BoxDecoration(
         color: AppTheme.primary,
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -698,8 +702,10 @@ class _YearTileState extends State<_YearTile> {
     final isCurrentYear = group.isCurrentYear;
 
     final badges = <Widget>[];
-    if (group.hasPmiDrop) badges.add(_Badge(s.pmiRemoved, CalcwiseSemanticColors.successDeep));
-    if (group.isHalfway) badges.add(_Badge(s.halfway, CalcwiseSemanticColors.infoIcon));
+    if (group.hasPmiDrop)
+      badges.add(_Badge(s.pmiRemoved, CalcwiseSemanticColors.successDeep));
+    if (group.isHalfway)
+      badges.add(_Badge(s.halfway, CalcwiseSemanticColors.infoIcon));
     if (group.isLastYear) badges.add(_Badge(s.paidOff, AppTheme.secondary));
 
     return Semantics(
@@ -707,7 +713,8 @@ class _YearTileState extends State<_YearTile> {
           '${s.balance}: ${fmt.format(group.endBalance)}. '
           '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
+        margin:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
         decoration: BoxDecoration(
           color:
               isCurrentYear ? AppTheme.secondary.withValues(alpha: 0.08) : null,
@@ -724,8 +731,8 @@ class _YearTileState extends State<_YearTile> {
               onTap: () => setState(() => _expanded = !_expanded),
               child: Container(
                 color: Colors.transparent,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -851,7 +858,8 @@ class _MonthSubTable extends StatelessWidget {
       // Sub-header
       Container(
         color: AppTheme.primary.withValues(alpha: 0.85),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
         child: Row(children: [
           _HCell(s.colMo, 1),
           _HCell(s.colDate, 2),
@@ -876,7 +884,8 @@ class _MonthSubTable extends StatelessWidget {
           label: 'Month ${e.month}, balance ${fmt.format(e.balance)}',
           child: Container(
             color: bg,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm, vertical: 6),
             child: Row(children: [
               _Cell('${e.month}', flex: 1),
               _Cell('${e.date.month}/${e.date.year}', flex: 2),
@@ -910,7 +919,8 @@ class _MonthlyHeader extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         child: Container(
           color: AppTheme.primary,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.smPlus),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm, vertical: AppSpacing.smPlus),
           child: Row(children: [
             _HCell(s.colMo, 1),
             _HCell(s.colDate, 2),
@@ -953,7 +963,8 @@ class _MonthlyList extends StatelessWidget {
                     : Theme.of(context).colorScheme.surface;
             return Container(
               color: bg,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 7),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl, vertical: 7),
               child: Row(children: [
                 _Cell('${e.month}', flex: 1),
                 _Cell('${e.date.month}/${e.date.year}', flex: 2),
@@ -989,7 +1000,8 @@ class _AmortLockBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 80),
+      margin: const EdgeInsets.fromLTRB(
+          AppSpacing.md, AppSpacing.sm, AppSpacing.md, 80),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -1002,7 +1014,8 @@ class _AmortLockBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.xxlPlus),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xxl, vertical: AppSpacing.xxlPlus),
       child: Column(children: [
         const Icon(Icons.lock_outline, color: AppTheme.secondary, size: 36),
         const SizedBox(height: AppSpacing.md),
@@ -1068,7 +1081,8 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(AppRadius.md),

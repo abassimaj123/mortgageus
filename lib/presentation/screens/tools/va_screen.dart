@@ -236,7 +236,8 @@ class _VaScreenState extends State<VaScreen> {
                                             ? 'Tarifa de financiación \$'
                                             : 'Funding Fee \$',
                                         value: fmtWhole.format(fundingFee),
-                                        color: CalcwiseSemanticColors.alertText),
+                                        color:
+                                            CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs
                                             ? 'Monto del préstamo (con tarifa)'
@@ -263,13 +264,15 @@ class _VaScreenState extends State<VaScreen> {
                                       decoration: BoxDecoration(
                                         color: CalcwiseSemanticColors.successBg,
                                         border: Border.all(
-                                            color: CalcwiseSemanticColors.successBorder),
+                                            color: CalcwiseSemanticColors
+                                                .successBorder),
                                         borderRadius: BorderRadius.circular(
                                             AppRadius.mdPlus),
                                       ),
                                       child: Row(children: [
                                         Icon(Icons.check_circle_outline,
-                                            color: CalcwiseSemanticColors.successDeep,
+                                            color: CalcwiseSemanticColors
+                                                .successDeep,
                                             size: 18),
                                         const SizedBox(width: AppSpacing.sm),
                                         Text(
@@ -277,7 +280,8 @@ class _VaScreenState extends State<VaScreen> {
                                                 ? 'Sin PMI — beneficio VA'
                                                 : 'No PMI — VA benefit',
                                             style: TextStyle(
-                                                color: CalcwiseSemanticColors.successDark,
+                                                color: CalcwiseSemanticColors
+                                                    .successDark,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: AppTextSize.md)),
                                       ]),

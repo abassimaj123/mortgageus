@@ -273,7 +273,8 @@ class _FhaScreenState extends State<FhaScreen> {
                                               ? 'MIP mensual (${(annualMipRate * 100).toStringAsFixed(2)}%)'
                                               : 'Monthly MIP (${(annualMipRate * 100).toStringAsFixed(2)}%)',
                                           value: fmt.format(monthlyMip),
-                                          color: CalcwiseSemanticColors.alertText),
+                                          color:
+                                              CalcwiseSemanticColors.alertText),
                                       _Row(
                                           label: isEs
                                               ? 'Capital + Interés'

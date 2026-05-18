@@ -107,7 +107,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                           // Loan summary
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 16),
+                                horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.surface,
                               border:
@@ -117,7 +117,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                             child: Row(children: [
                               const Icon(Icons.home_rounded,
                                   color: AppTheme.primary),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: AppSpacing.md),
                               Expanded(
                                   child: Column(
                                       crossAxisAlignment:
@@ -136,12 +136,12 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                   ])),
                             ]),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.lg),
                           Text(s.extraSection,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: AppTextSize.bodyLg)),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.md),
                           _field(s.extraMonthly, _extraMonthlyCtrl,
                               prefix: '\$', currency: true),
                           _field(s.extraAnnual, _extraAnnualCtrl,
@@ -149,7 +149,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                           _field(s.lumpSum, _lumpSumCtrl,
                               prefix: '\$', currency: true),
                           _field(s.lumpSumMonth, _lumpMonthCtrl),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.sm),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
@@ -163,7 +163,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                           ),
                           // Big CTA
                           if (r != null && extraMonthly > 0) ...[
-                            const SizedBox(height: 20),
+                            const SizedBox(height: AppSpacing.xl),
                             Container(
                               width: double.infinity,
                               padding: const EdgeInsets.all(AppSpacing.xl),
@@ -178,7 +178,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                               child: Column(children: [
                                 const Icon(Icons.savings,
                                     color: Colors.white, size: 36),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: AppSpacing.sm),
                                 Text(
                                   '${s.youCouldSave} ${_fmt.format(r.interestSaved)}',
                                   style: const TextStyle(
@@ -199,7 +199,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                             ),
                           ],
                           if (r != null) ...[
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppSpacing.lg),
                             Card(
                               shape: RoundedRectangleBorder(
                                   borderRadius:
@@ -246,7 +246,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
   Widget _field(String label, TextEditingController ctrl,
       {String? prefix, String? suffix, bool currency = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: TextFormField(
         controller: ctrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -258,7 +258,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
       ),
     );
@@ -273,7 +273,7 @@ class _ResultRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(label, style: const TextStyle(color: AppTheme.labelGray)),

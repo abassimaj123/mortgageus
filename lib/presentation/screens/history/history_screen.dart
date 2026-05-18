@@ -156,7 +156,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(isEs ? 'Eliminar' : 'Delete',
-                style: const TextStyle(color: Colors.red)),
+                style: const TextStyle(color: CalcwiseSemanticColors.errorDark)),
           ),
         ],
       ),
@@ -304,13 +304,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, controller) => Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
           child: ListView(
             controller: controller,
             children: [
               Center(
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
@@ -322,7 +322,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Row(children: [
                 const Icon(Icons.compare_arrows,
                     color: AppTheme.primary, size: 22),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     isEs ? 'Comparación guardada' : 'Saved comparison',
@@ -333,7 +333,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 ),
               ]),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 '${_fmtUSD.format(homePrice)} · $loanType · ${annualRate.toStringAsFixed(2)}%',
                 style: TextStyle(
@@ -351,13 +351,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     flex: 4,
                     child: _CompDetailHeader(
                         isEs ? '30 años' : '30-Year', AppTheme.primary)),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                     flex: 4,
                     child: _CompDetailHeader(
                         isEs ? '15 años' : '15-Year', AppTheme.accentGood)),
               ]),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.smPlus),
               _CompDetailRow(
                 label: isEs ? 'Mensual' : 'Monthly',
                 v30: _fmtUSD.format(m30),
@@ -376,7 +376,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 v15: _fmtUSD.format(i30 - i15),
                 winnerIs15: true,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
 
               // Savings callout
               Container(
@@ -397,11 +397,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       fontSize: AppTextSize.md, color: Color(0xFF334155)),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
 
               // PDF export — two buttons
               _SectionTitle(isEs ? 'Exportar PDF' : 'Export PDF'),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               ValueListenableBuilder<bool>(
                 valueListenable: freemiumService.isPremiumNotifier,
                 builder: (context, isPremium, _) =>
@@ -436,7 +436,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ? AppTheme.primary
                                       : const Color(0xFF64748B))),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                             side: BorderSide(
                                 color: unlocked
                                     ? AppTheme.primary
@@ -444,7 +444,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
@@ -471,7 +471,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ? AppTheme.accentGood
                                       : const Color(0xFF64748B))),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                             side: BorderSide(
                                 color: unlocked
                                     ? AppTheme.accentGood
@@ -484,7 +484,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -494,13 +494,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     if (context.mounted) _deleteComparison(cid, context);
                   },
                   icon: const Icon(Icons.delete_outline,
-                      size: 18, color: Colors.red),
+                      size: 18, color: CalcwiseSemanticColors.errorDark),
                   label: Text(
                       isEs ? 'Eliminar comparación' : 'Delete comparison',
-                      style: const TextStyle(color: Colors.red)),
+                      style: const TextStyle(color: CalcwiseSemanticColors.errorDark)),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    side: const BorderSide(color: CalcwiseSemanticColors.errorDark),
                   ),
                 ),
               ),
@@ -589,7 +589,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               SliverToBoxAdapter(
                                 child: Padding(
                                   padding:
-                                      const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                                      const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
                                   child: ValueListenableBuilder<bool>(
                                     valueListenable:
                                         freemiumService.isPremiumNotifier,
@@ -654,22 +654,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                 icon: const Icon(
                                                     Icons.delete_sweep,
                                                     size: 18,
-                                                    color: Colors.red),
+                                                    color: CalcwiseSemanticColors.errorDark),
                                                 label: Text(
                                                     isEs
                                                         ? 'Borrar todo'
                                                         : 'Clear all',
                                                     style: const TextStyle(
-                                                        color: Colors.red)),
+                                                        color: CalcwiseSemanticColors.errorDark)),
                                               ),
                                           ]),
                                           if (_compareMode) ...[
-                                            const SizedBox(height: 6),
+                                            const SizedBox(height: AppRadius.sm),
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 8),
+                                                      horizontal: AppSpacing.smPlus,
+                                                      vertical: AppSpacing.sm),
                                               decoration: BoxDecoration(
                                                 color: AppTheme.primary
                                                     .withValues(alpha: 0.08),
@@ -686,7 +686,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                     Icons.touch_app_rounded,
                                                     size: 14,
                                                     color: AppTheme.primary),
-                                                const SizedBox(width: 6),
+                                                const SizedBox(width: AppRadius.sm),
                                                 Expanded(
                                                   child: Text(
                                                     isEs
@@ -703,12 +703,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             ),
                                           ],
                                           if (!isPremium) ...[
-                                            const SizedBox(height: 6),
+                                            const SizedBox(height: AppRadius.sm),
                                             Row(children: [
                                               const Icon(Icons.lock_outline,
                                                   size: 14,
                                                   color: CalcwiseSemanticColors.warnIcon),
-                                              const SizedBox(width: 6),
+                                              const SizedBox(width: AppRadius.sm),
                                               Expanded(
                                                 child: Text(
                                                   isEs
@@ -753,7 +753,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         Icon(Icons.history,
                                             size: 64,
                                             color: const Color(0xFFCBD5E1)),
-                                        const SizedBox(height: 16),
+                                        const SizedBox(height: AppSpacing.lg),
                                         Text(
                                           isEs
                                               ? 'Sin historial aún'
@@ -762,7 +762,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               color: Color(0xFF64748B),
                                               fontSize: AppTextSize.bodyLg),
                                         ),
-                                        const SizedBox(height: 8),
+                                        const SizedBox(height: AppSpacing.sm),
                                         Text(
                                           isEs
                                               ? 'Haz un cálculo para comenzar'
@@ -771,7 +771,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               color: Color(0xFF94A3B8),
                                               fontSize: AppTextSize.md),
                                         ),
-                                        const SizedBox(height: 20),
+                                        const SizedBox(height: AppSpacing.xl),
                                         FilledButton.icon(
                                           onPressed: () =>
                                               Navigator.pop(context),
@@ -848,7 +848,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                           Alignment.centerRight,
                                                       padding:
                                                           const EdgeInsets.only(
-                                                              right: 24),
+                                                              right: AppSpacing.xxl),
                                                       child: const Icon(
                                                           Icons.delete_rounded,
                                                           color: Colors.white),
@@ -879,7 +879,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   ),
                                 ),
                               const SliverToBoxAdapter(
-                                  child: SizedBox(height: 16)),
+                                  child: SizedBox(height: AppSpacing.lg)),
                             ],
                           ),
                         ),
@@ -930,7 +930,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   transitionDuration: AppDuration.base,
                 )),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdPlus, vertical: AppSpacing.md),
           child: Row(children: [
             Expanded(
               child: Column(
@@ -950,7 +950,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 fontSize: AppTextSize.bodyMd,
                                 color: AppTheme.primary),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: AppSpacing.xs),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
@@ -968,7 +968,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                     ),
                   ]),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(_fmtDate.format(createdAt.toLocal()),
                       style: TextStyle(
                           fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
@@ -994,7 +994,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         isPremium ? AppTheme.primary : const Color(0xFF94A3B8),
                   ),
                   constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(AppRadius.sm),
                   tooltip: isPremium
                       ? (isEs ? 'Exportar PDF' : 'Export PDF')
                       : 'Premium',
@@ -1037,7 +1037,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         onTap: () => _showComparisonDetail(context, pair, cid, isEs),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdPlus, vertical: AppSpacing.md),
           child: Row(children: [
             Expanded(
               child: Column(
@@ -1047,7 +1047,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Row(children: [
                     const Icon(Icons.compare_arrows,
                         size: 16, color: AppTheme.primary),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AppRadius.sm),
                     Text(
                       _fmtUSD.format(homePrice),
                       style: const TextStyle(
@@ -1055,7 +1055,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           fontSize: AppTextSize.bodyMd,
                           color: AppTheme.primary),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
@@ -1069,19 +1069,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               color: AppTheme.primary)),
                     ),
                   ]),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppRadius.sm),
                   // Scenario comparison row
                   Row(children: [
                     _ScenarioPill(
                         label: isEs ? '30a' : '30yr',
                         value: _fmtUSD.format(m30),
                         color: AppTheme.primary),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     _ScenarioPill(
                         label: isEs ? '15a' : '15yr',
                         value: _fmtUSD.format(m15),
                         color: AppTheme.accentGood),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: Text(
                         '${isEs ? 'Ahorra' : 'Saves'} ${_fmtUSD.format(i30 - i15)}',
@@ -1093,7 +1093,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                     ),
                   ]),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(_fmtDate.format(createdAt.toLocal()),
                       style: TextStyle(
                           fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
@@ -1108,16 +1108,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   icon: const Icon(Icons.info_outline,
                       size: 20, color: AppTheme.primary),
                   constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(AppRadius.sm),
                   tooltip: isEs ? 'Ver detalle' : 'View detail',
                   onPressed: () =>
                       _showComparisonDetail(context, pair, cid, isEs),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline,
-                      color: Colors.red, size: 20),
+                      color: CalcwiseSemanticColors.errorDark, size: 20),
                   constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(AppRadius.sm),
                   onPressed: () => _deleteComparison(cid, context),
                 ),
               ],
@@ -1140,7 +1140,7 @@ class _ScenarioPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
@@ -1163,7 +1163,7 @@ class _CompDetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         alignment: Alignment.center,
         decoration: BoxDecoration(
             color: color, borderRadius: BorderRadius.circular(AppRadius.md)),
@@ -1187,7 +1187,7 @@ class _CompDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Row(children: [
           Expanded(
               flex: 3,
@@ -1199,7 +1199,7 @@ class _CompDetailRow extends StatelessWidget {
               child: _CellBox(v30,
                   isWinner: !winnerIs15 && v30 != '—',
                   color: AppTheme.primary)),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
               flex: 4,
               child: _CellBox(v15,
@@ -1297,7 +1297,7 @@ class _CompareBarChart extends StatelessWidget {
           Row(children: [
             const Icon(Icons.bar_chart_rounded,
                 size: 16, color: AppTheme.primary),
-            const SizedBox(width: 6),
+            const SizedBox(width: AppRadius.sm),
             Text(
               isEs ? 'Comparación visual' : 'Visual Comparison',
               style: const TextStyle(
@@ -1306,7 +1306,7 @@ class _CompareBarChart extends StatelessWidget {
                   color: AppTheme.primary),
             ),
           ]),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
             height: 200,
             child: BarChart(
@@ -1335,7 +1335,7 @@ class _CompareBarChart extends StatelessWidget {
                         if (idx < 0 || idx >= groups.length)
                           return const SizedBox.shrink();
                         return Padding(
-                          padding: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.only(top: AppSpacing.xs),
                           child: Text(
                             groups[idx].$1,
                             style: const TextStyle(
@@ -1396,11 +1396,11 @@ class _CompareBarChart extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           // Legend
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             _BarLegendDot(color: colorA, label: labelA),
-            const SizedBox(width: 20),
+            const SizedBox(width: AppSpacing.xl),
             _BarLegendDot(color: colorB, label: labelB),
           ]),
         ]),
@@ -1552,7 +1552,7 @@ class _HistoryCompareScreen extends StatelessWidget {
                   flex: 4,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                        const EdgeInsets.symmetric(vertical: AppSpacing.smPlus, horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: AppTheme.primary,
@@ -1570,12 +1570,12 @@ class _HistoryCompareScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   flex: 4,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                        const EdgeInsets.symmetric(vertical: AppSpacing.smPlus, horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: const Color(0xFF475569),
@@ -1594,28 +1594,28 @@ class _HistoryCompareScreen extends StatelessWidget {
                   ),
                 ),
               ]),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               ...rows.map((r) => _CompareRowWidget(row: r)),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               // Color legend
               Row(children: [
                 const Icon(Icons.circle, size: 10, color: AppTheme.accentGood),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 Text(
                   isEs ? 'Mejor valor' : 'Better value',
                   style: const TextStyle(
                       fontSize: AppTextSize.sm, color: Color(0xFF64748B)),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpacing.lg),
                 const Icon(Icons.circle, size: 10, color: Color(0xFFEF4444)),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 Text(
                   isEs ? 'Valor más alto' : 'Higher value',
                   style: const TextStyle(
                       fontSize: AppTextSize.sm, color: Color(0xFF64748B)),
                 ),
               ]),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
 
               // ── Bar chart comparison ──
               _CompareBarChart(
@@ -1657,7 +1657,7 @@ class _CompareRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(children: [
         Expanded(
           flex: 3,
@@ -1669,7 +1669,7 @@ class _CompareRowWidget extends StatelessWidget {
           flex: 4,
           child: _CellBadge(value: row.v1, color: row.c1),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           flex: 4,
           child: _CellBadge(value: row.v2, color: row.c2),
@@ -1688,7 +1688,7 @@ class _CellBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final isHighlighted = color != null;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: AppSpacing.sm),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isHighlighted ? color!.withValues(alpha: 0.08) : null,

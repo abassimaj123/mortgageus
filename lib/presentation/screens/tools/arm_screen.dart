@@ -105,20 +105,20 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                       currency: true,
                       errorText: _loanError,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     // ── Initial rate ──────────────────────────────────────
                     _field(
                       isEs ? 'Tasa Inicial (%)' : 'Initial Rate (%)',
                       _initRateCtrl,
                       suffix: '%',
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     // ── Fixed period chips ────────────────────────────────
                     Text(
                       isEs ? 'Período Fijo' : 'Fixed Period',
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Row(
                         children: _fixedOptions.map((y) {
                       final sel = _fixedYears == y;
@@ -142,7 +142,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                         ),
                       ));
                     }).toList()),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     // ── Adjusted rate ─────────────────────────────────────
                     _field(
                       isEs
@@ -151,13 +151,13 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                       _adjRateCtrl,
                       suffix: '%',
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     // ── Total term ────────────────────────────────────────
                     Text(
                       isEs ? 'Plazo Total' : 'Total Term',
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Row(
                         children: _termOptions.map((y) {
                       final sel = _termYears == y;
@@ -181,7 +181,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                         ),
                       ));
                     }).toList()),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
                     // ── Info note ─────────────────────────────────────────
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
@@ -201,7 +201,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     // ── Calculate button ──────────────────────────────────
                     SizedBox(
                       width: double.infinity,
@@ -217,7 +217,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                     ),
                     // ── Results ───────────────────────────────────────────
                     if (r != null) ...[
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.xxl),
                       _ResultCard(
                           r: r,
                           fmt: _fmt,
@@ -257,7 +257,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg)),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
     );
   }
@@ -300,7 +300,7 @@ class _ResultCard extends StatelessWidget {
           value: fmt.format(r.payment1),
           color: AppTheme.primary,
         )),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
             child: _PhaseCard(
           label: isEs ? 'Pago después\ndel reset' : 'Payment after\nreset',
@@ -313,7 +313,7 @@ class _ResultCard extends StatelessWidget {
               : AppTheme.accentGood,
         )),
       ]),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpacing.lg),
       // ── Detail card ───────────────────────────────────────────────
       Card(
         shape: RoundedRectangleBorder(
@@ -401,12 +401,12 @@ class _PhaseCard extends StatelessWidget {
                   color: color,
                   fontSize: AppTextSize.xs,
                   fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(sublabel,
               textAlign: TextAlign.center,
               style:
                   TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(value,
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -425,7 +425,7 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Expanded(

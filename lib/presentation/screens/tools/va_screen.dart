@@ -110,7 +110,7 @@ class _VaScreenState extends State<VaScreen> {
                           _onInteraction();
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -136,7 +136,7 @@ class _VaScreenState extends State<VaScreen> {
                         onChanged: (v) => setState(() => _downPct = v),
                         onChangeEnd: (_) => _onInteraction(),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         value: _reserves,
@@ -179,7 +179,7 @@ class _VaScreenState extends State<VaScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: TextFormField(
                             controller: _insCtrl,
@@ -199,7 +199,7 @@ class _VaScreenState extends State<VaScreen> {
                           ),
                         ),
                       ]),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       AnimatedSwitcher(
                         duration: AppDuration.base,
                         child: price <= 0
@@ -255,7 +255,7 @@ class _VaScreenState extends State<VaScreen> {
                                         value: fmt.format(total),
                                         bold: true,
                                         color: AppTheme.primary),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: AppRadius.sm),
                                     Container(
                                       width: double.infinity,
                                       padding: const EdgeInsets.all(
@@ -271,7 +271,7 @@ class _VaScreenState extends State<VaScreen> {
                                         Icon(Icons.check_circle_outline,
                                             color: CalcwiseSemanticColors.successDeep,
                                             size: 18),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: AppSpacing.sm),
                                         Text(
                                             isEs
                                                 ? 'Sin PMI — beneficio VA'
@@ -286,7 +286,7 @@ class _VaScreenState extends State<VaScreen> {
                                 ),
                               ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppSpacing.mdPlus),
@@ -300,7 +300,7 @@ class _VaScreenState extends State<VaScreen> {
                           children: [
                             Icon(Icons.info_outline,
                                 color: AppTheme.infoIcon, size: 18),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: AppSpacing.smPlus),
                             Expanded(
                               child: Text(
                                 isEs
@@ -350,7 +350,7 @@ class _Row extends StatelessWidget {
                   style: const TextStyle(
                       color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value,
               style: TextStyle(

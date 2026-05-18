@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
                   child: Row(
                     children: [
                       Expanded(
@@ -54,7 +54,7 @@ class SettingsScreen extends StatelessWidget {
                           onTap: () => _setLang(false),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: _LangButton(
                           label: 'Español',
@@ -156,7 +156,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
               child: Text(
                 s.disclaimer,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -185,7 +185,7 @@ class _LangButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: AppDuration.fast,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         decoration: BoxDecoration(
           color: selected ? color : Colors.transparent,
           border: Border.all(color: selected ? color : const Color(0xFFCBD5E1)),

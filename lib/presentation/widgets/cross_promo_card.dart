@@ -58,7 +58,7 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
     if (!_checked || _dismissed || widget.isPremium)
       return const SizedBox.shrink();
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 6),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: _color.withValues(alpha: 0.06),
@@ -75,7 +75,7 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
           ),
           child: const Icon(Icons.attach_money, color: _color, size: 22),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.smPlus),
         Expanded(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -91,11 +91,11 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
                       fontSize: 9,
                       fontWeight: FontWeight.bold)),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: AppRadius.sm),
             const Text('Also from us',
                 style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
           ]),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           const Text(_targetName,
               style: TextStyle(
                   fontSize: AppTextSize.md,
@@ -105,18 +105,18 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
               style: TextStyle(
                   fontSize: AppTextSize.xs, color: Color(0xFF64748B))),
         ])),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Column(children: [
           GestureDetector(
               onTap: _dismiss,
               child: const Icon(Icons.close_rounded,
                   size: 16, color: Color(0xFF94A3B8))),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           GestureDetector(
               onTap: _open,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.smPlus, vertical: 5),
                 decoration: BoxDecoration(
                     color: _color,
                     borderRadius: BorderRadius.circular(AppRadius.md)),

@@ -43,7 +43,7 @@ class InfoTooltip extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(left: 4),
+          padding: const EdgeInsets.only(left: AppSpacing.xs),
           child: Icon(Icons.info_outline,
               size: iconSize, color: const Color(0xFF94A3B8)),
         ),

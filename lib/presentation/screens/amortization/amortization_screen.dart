@@ -167,7 +167,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                       child: const Icon(Icons.table_rows_rounded,
                           size: 40, color: AppTheme.primary),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
                     Text(
                       isEs
                           ? 'Tu tabla aparecerá aquí'
@@ -177,7 +177,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                           fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       isEs
                           ? 'Ingresa los datos de tu préstamo en la calculadora para ver el desglose mes a mes.'
@@ -187,12 +187,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                           color: AppTheme.labelGray),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xxl),
                     GestureDetector(
                       onTap: () => tabSwitchNotifier.value = 0,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
+                            horizontal: AppSpacing.xxl, vertical: AppSpacing.mdPlus),
                         decoration: BoxDecoration(
                           color: AppTheme.primary,
                           borderRadius: BorderRadius.circular(AppRadius.mdPlus),
@@ -200,7 +200,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                           const Icon(Icons.calculate_rounded,
                               color: Colors.white, size: 18),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                           Text(
                               isEs ? 'Ir a la calculadora' : 'Go to Calculator',
                               style: const TextStyle(
@@ -237,7 +237,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
             // ── Donut chart ────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
@@ -257,7 +257,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                               .textTheme
                               .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final isSmallScreen = constraints.maxWidth < 400;
@@ -345,9 +345,9 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                 ),
                               ), // Semantics
                               if (isSmallScreen)
-                                const SizedBox(height: 16)
+                                const SizedBox(height: AppSpacing.lg)
                               else
-                                const SizedBox(width: 16),
+                                const SizedBox(width: AppSpacing.lg),
                               if (isSmallScreen)
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,7 +357,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                       label: s.principal,
                                       value: fmt.format(result.loanAmount),
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: AppSpacing.smPlus),
                                     _LegendRow(
                                       color: AppTheme.secondary,
                                       label: s.interest,
@@ -370,7 +370,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                         color: AppTheme.labelGray,
                                         margin: const EdgeInsets.symmetric(
                                             horizontal: 0)),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: AppSpacing.sm),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -403,7 +403,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                         label: s.principal,
                                         value: fmt.format(result.loanAmount),
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: AppSpacing.smPlus),
                                       _LegendRow(
                                         color: AppTheme.secondary,
                                         label: s.interest,
@@ -416,7 +416,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                           color: AppTheme.labelGray,
                                           margin: const EdgeInsets.symmetric(
                                               horizontal: 0)),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: AppSpacing.sm),
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -449,12 +449,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
 
             // ── View toggle ────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Semantics(
                   label: 'View mode toggle',
                   child: Container(
@@ -468,7 +468,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                           child: GestureDetector(
                         onTap: () => _setViewMode(true),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
                           decoration: BoxDecoration(
                             color: _yearlyView
                                 ? AppTheme.primary
@@ -486,7 +486,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                     color: _yearlyView
                                         ? Colors.white
                                         : AppTheme.primary),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: AppRadius.sm),
                                 Text(s.yearlyView,
                                     style: TextStyle(
                                         color: _yearlyView
@@ -505,7 +505,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                           child: GestureDetector(
                         onTap: () => _setViewMode(false),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
                           decoration: BoxDecoration(
                             color: !_yearlyView
                                 ? AppTheme.primary
@@ -523,7 +523,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                     color: !_yearlyView
                                         ? Colors.white
                                         : AppTheme.primary),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: AppRadius.sm),
                                 Text(s.monthlyView,
                                     style: TextStyle(
                                         color: !_yearlyView
@@ -540,7 +540,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
 
             // ── Content: yearly or monthly ─────────────────────────────────────
             if (_yearlyView)
@@ -584,7 +584,7 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      margin: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
       decoration: BoxDecoration(
         color: AppTheme.primary,
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -602,7 +602,7 @@ class _SummaryCard extends StatelessWidget {
                 .textTheme
                 .titleMedium
                 ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         // Show home price + down payment for clarity
         _SummaryRow(s.homePrice,
             '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
@@ -698,7 +698,7 @@ class _YearTileState extends State<_YearTile> {
     final isCurrentYear = group.isCurrentYear;
 
     final badges = <Widget>[];
-    if (group.hasPmiDrop) badges.add(_Badge(s.pmiRemoved, Colors.green));
+    if (group.hasPmiDrop) badges.add(_Badge(s.pmiRemoved, CalcwiseSemanticColors.successDeep));
     if (group.isHalfway) badges.add(_Badge(s.halfway, Colors.blue));
     if (group.isLastYear) badges.add(_Badge(s.paidOff, AppTheme.secondary));
 
@@ -707,7 +707,7 @@ class _YearTileState extends State<_YearTile> {
           '${s.balance}: ${fmt.format(group.endBalance)}. '
           '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
         decoration: BoxDecoration(
           color:
               isCurrentYear ? AppTheme.secondary.withValues(alpha: 0.08) : null,
@@ -725,7 +725,7 @@ class _YearTileState extends State<_YearTile> {
               child: Container(
                 color: Colors.transparent,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -733,7 +733,7 @@ class _YearTileState extends State<_YearTile> {
                         if (isCurrentYear) ...[
                           const Icon(Icons.star_rounded,
                               color: AppTheme.secondary, size: 18),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: AppRadius.sm),
                         ],
                         Expanded(
                           child: Row(children: [
@@ -752,14 +752,14 @@ class _YearTileState extends State<_YearTile> {
                               Wrap(spacing: 4, children: badges),
                           ]),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         Icon(
                           _expanded ? Icons.expand_less : Icons.expand_more,
                           color: AppTheme.labelGray,
                           size: 20,
                         ),
                       ]),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppRadius.sm),
                       Wrap(spacing: 6, runSpacing: 4, children: [
                         _MetricChip(
                             label: s.balance,
@@ -774,7 +774,7 @@ class _YearTileState extends State<_YearTile> {
                             value: fmt.format(group.yearlyPrincipal),
                             color: AppTheme.accentGood),
                       ]),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       // Custom progress bar — no Material LinearProgressIndicator
                       LayoutBuilder(
                         builder: (context, constraints) =>
@@ -803,7 +803,7 @@ class _YearTileState extends State<_YearTile> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xxs),
                       Text('${group.pctPaid.toStringAsFixed(1)}% ${s.paid}',
                           style: const TextStyle(fontSize: 10)),
                     ]),
@@ -851,7 +851,7 @@ class _MonthSubTable extends StatelessWidget {
       // Sub-header
       Container(
         color: AppTheme.primary.withValues(alpha: 0.85),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
         child: Row(children: [
           _HCell(s.colMo, 1),
           _HCell(s.colDate, 2),
@@ -876,7 +876,7 @@ class _MonthSubTable extends StatelessWidget {
           label: 'Month ${e.month}, balance ${fmt.format(e.balance)}',
           child: Container(
             color: bg,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
             child: Row(children: [
               _Cell('${e.month}', flex: 1),
               _Cell('${e.date.month}/${e.date.year}', flex: 2),
@@ -907,10 +907,10 @@ class _MonthlyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         child: Container(
           color: AppTheme.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.smPlus),
           child: Row(children: [
             _HCell(s.colMo, 1),
             _HCell(s.colDate, 2),
@@ -953,7 +953,7 @@ class _MonthlyList extends StatelessWidget {
                     : Theme.of(context).colorScheme.surface;
             return Container(
               color: bg,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 7),
               child: Row(children: [
                 _Cell('${e.month}', flex: 1),
                 _Cell('${e.date.month}/${e.date.year}', flex: 2),
@@ -989,7 +989,7 @@ class _AmortLockBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 80),
+      margin: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 80),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -1002,10 +1002,10 @@ class _AmortLockBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.xxlPlus),
       child: Column(children: [
         const Icon(Icons.lock_outline, color: AppTheme.secondary, size: 36),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Text(
           isEs ? 'Tabla completa bloqueada' : 'Full schedule locked',
           style: const TextStyle(
@@ -1013,7 +1013,7 @@ class _AmortLockBanner extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: AppTheme.primary),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppRadius.sm),
         Text(
           isEs
               ? '+$lockedYears años · +$lockedMonths meses restantes'
@@ -1021,12 +1021,12 @@ class _AmortLockBanner extends StatelessWidget {
           style: const TextStyle(
               fontSize: AppTextSize.md, color: AppTheme.labelGray),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
         GestureDetector(
           onTap: () => IAPService.instance.buy(),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
             decoration: BoxDecoration(
               color: AppTheme.primary,
               borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -1034,7 +1034,7 @@ class _AmortLockBanner extends StatelessWidget {
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Icon(Icons.workspace_premium,
                   size: 18, color: Colors.white),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 isEs
                     ? 'Desbloquear Premium — \$4.99'
@@ -1045,7 +1045,7 @@ class _AmortLockBanner extends StatelessWidget {
             ]),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           isEs
               ? 'Acceso único · Sin suscripción'
@@ -1068,7 +1068,7 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -1110,7 +1110,7 @@ class _LegendRow extends StatelessWidget {
           height: 10,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(label,
               style: const TextStyle(

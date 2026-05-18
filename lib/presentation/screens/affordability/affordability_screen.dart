@@ -156,30 +156,30 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                             prefix: '\$',
                             errorText: _incomeError,
                             required: true),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         _field(s.monthlyDebts, _debtsCtrl,
                             currency: true, prefix: '\$'),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         _field(s.availDown, _downCtrl,
                             currency: true, prefix: '\$', required: true),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         // Rate + term
                         _field(s.interestRate, _rateCtrl,
                             suffix: '%', required: true),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         _TermRow(
                           selected: _termYears,
                           onChanged: (y) => setState(() => _termYears = y),
                           s: s,
                         ),
                         // Advanced toggle
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         InkWell(
                           onTap: () => setState(
                               () => _advancedExpanded = !_advancedExpanded),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                             child: Row(children: [
                               Icon(
                                 _advancedExpanded
@@ -187,7 +187,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                                     : Icons.expand_more,
                                 color: AppTheme.primary,
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.sm),
                               Text(s.advancedOptions,
                                   style: const TextStyle(
                                       color: AppTheme.primary,
@@ -197,15 +197,15 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                         ),
                         if (_advancedExpanded) ...[
                           _field(s.propertyTaxRate, _taxCtrl, suffix: '%'),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.md),
                           _field(s.homeInsurance, _insuranceCtrl,
                               currency: true, prefix: '\$', suffix: '/yr'),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.md),
                           _field(s.hoaFees, _hoaCtrl,
                               currency: true, prefix: '\$', suffix: '/mo'),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.md),
                         ],
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.sm),
                         GestureDetector(
                           onTap: _calculate,
                           child: Container(
@@ -226,10 +226,10 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                         ),
                         // Results
                         if (r != null) ...[
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.xl),
                           _ResultCard(
                               r: r, fmt: _fmt, fmtK: _fmtK, s: s, isEs: isEs),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.md),
                           SizedBox(
                             width: double.infinity,
                             child: GestureDetector(
@@ -248,7 +248,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                                     children: [
                                       const Icon(Icons.calculate_rounded,
                                           color: Colors.white, size: 18),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: AppSpacing.sm),
                                       Text(s.affordUseCalc,
                                           style: const TextStyle(
                                               color: Colors.white,
@@ -258,7 +258,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                             ),
                           ),
                         ] else ...[
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSpacing.xxl),
                           Center(
                             child: Text(s.affordEnterIncome,
                                 textAlign: TextAlign.center,
@@ -296,7 +296,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg)),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
       validator: (v) {
         final raw = (v ?? '').trim();
@@ -326,7 +326,7 @@ class _TermRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(s.loanTerm, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Row(
               children: MortgageConstants.termPresets.map((t) {
             final sel = selected == t;
@@ -378,7 +378,7 @@ class _ResultCard extends StatelessWidget {
           fmt: fmt,
           color: AppTheme.accentGood,
         )),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
             child: _PriceCard(
           label: s.affordStandard,
@@ -389,7 +389,7 @@ class _ResultCard extends StatelessWidget {
           color: AppTheme.primary,
         )),
       ]),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpacing.lg),
       // Monthly breakdown
       Card(
         shape: RoundedRectangleBorder(
@@ -409,7 +409,7 @@ class _ResultCard extends StatelessWidget {
             _Row(s.propertyTax, fmt.format(r.monthlyTax)),
             _Row(s.homeInsurance, fmt.format(r.monthlyInsurance)),
             if (r.monthlyPMI > 0)
-              _Row(s.pmi, fmt.format(r.monthlyPMI), color: Colors.orange),
+              _Row(s.pmi, fmt.format(r.monthlyPMI), color: CalcwiseSemanticColors.warnIcon),
             if (r.monthlyHOA > 0) _Row(s.hoa, fmt.format(r.monthlyHOA)),
             const Divider(height: 20),
             _Row(s.totalPITI, fmt.format(r.totalMonthly), bold: true),
@@ -447,7 +447,7 @@ class _PriceCard extends StatelessWidget {
                   color: color,
                   fontSize: AppTextSize.xs,
                   fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(fmt.format(price),
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -467,7 +467,7 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(label,

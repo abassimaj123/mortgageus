@@ -111,7 +111,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                           _onInteraction();
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.mdPlus),
                       TextFormField(
                         controller: _incomeCtrl,
                         keyboardType: TextInputType.number,
@@ -130,7 +130,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                           _onInteraction();
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.mdPlus),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         value: _rural,
@@ -162,7 +162,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: TextFormField(
                             controller: _insCtrl,
@@ -182,7 +182,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                           ),
                         ),
                       ]),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       AnimatedSwitcher(
                         duration: AppDuration.base,
                         child: price <= 0
@@ -232,7 +232,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                                 ? CalcwiseSemanticColors.successDeep
                                                 : CalcwiseSemanticColors.warnIcon,
                                             size: 18),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: AppSpacing.sm),
                                         Expanded(
                                           child: Text(
                                               (incomeOk && _rural)
@@ -255,7 +255,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                         ),
                                       ]),
                                     ),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: AppSpacing.md),
                                     _Row(
                                         label: isEs
                                             ? 'Tarifa garantía inicial (1%)'
@@ -289,7 +289,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                 ),
                               ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppSpacing.mdPlus),
@@ -303,7 +303,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                           children: [
                             Icon(Icons.info_outline,
                                 color: AppTheme.infoIcon, size: 18),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: AppSpacing.smPlus),
                             Expanded(
                               child: Text(
                                 isEs
@@ -353,7 +353,7 @@ class _Row extends StatelessWidget {
                   style: const TextStyle(
                       color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value,
               style: TextStyle(

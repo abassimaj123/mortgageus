@@ -61,7 +61,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(isEs ? 'Eliminar' : 'Delete',
-                style: const TextStyle(color: Colors.red)),
+                style: const TextStyle(color: CalcwiseSemanticColors.errorDark)),
           ),
         ],
       ),
@@ -167,7 +167,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 style: const TextStyle(fontSize: AppTextSize.body)),
             actions: [
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                icon: const Icon(Icons.delete_outline, color: CalcwiseSemanticColors.errorDark),
                 tooltip: isEs ? 'Eliminar' : 'Delete',
                 onPressed: () => _delete(isEs),
               ),
@@ -203,7 +203,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         _fmtUSD.format(hoa)),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
 
               // ── Results card ──────────────────────────────────────
               _SectionCard(
@@ -223,7 +223,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       bold: true),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
 
               // ── PDF export button ──────────────────────────────────
               ValueListenableBuilder<bool>(
@@ -251,7 +251,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                           : const Color(0xFFE2E8F0),
                       foregroundColor:
                           isPremium ? Colors.white : const Color(0xFF475569),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
                     ),
                   ),
                 ),
@@ -290,7 +290,7 @@ class _SectionCard extends StatelessWidget {
           children: [
             Row(children: [
               Icon(icon, size: 18, color: AppTheme.primary),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(title,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
@@ -325,7 +325,7 @@ class _Row extends StatelessWidget {
                   style: TextStyle(
                       fontSize: AppTextSize.body, color: Color(0xFF475569))),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(value,
                 style: TextStyle(
                     fontSize: AppTextSize.body,

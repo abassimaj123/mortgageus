@@ -156,7 +156,7 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
                       _onInteraction();
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // ── Down payment slider ────────────────────────────────────
                   _SliderRow(
@@ -175,7 +175,7 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
                     onChanged: (v) => setState(() => _downPct = v),
                     onChangeEnd: (_) => _onInteraction(),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // ── Monthly rent ──────────────────────────────────────────
                   _SectionLabel(
@@ -195,7 +195,7 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
                       _onInteraction();
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // ── Appreciation slider ────────────────────────────────────
                   _SliderRow(
@@ -213,12 +213,12 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
                     onChanged: (v) => setState(() => _appreciation = v),
                     onChangeEnd: (_) => _onInteraction(),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // ── Hold period toggle ─────────────────────────────────────
                   _SectionLabel(
                       label: isEs ? 'Período de tenencia' : 'Hold Period'),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   _HoldPeriodToggle(
                     selected: _holdYears,
                     options: _holdOptions,
@@ -228,7 +228,7 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
                       _onInteraction();
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // ── Discount rate ─────────────────────────────────────────
                   TextFormField(
@@ -247,11 +247,11 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
                       _onInteraction();
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
 
                   // ── Assumptions note ───────────────────────────────────────
                   _AssumptionsBox(isEs: isEs),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // ── Results (premium-gated) ───────────────────────────────
                   if (result == null)
@@ -287,7 +287,7 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg)),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       );
 
   double _parseAmount(String text) =>
@@ -317,7 +317,7 @@ class _ResultsSection extends StatelessWidget {
               children: [
                 _ResultsCard(result: result, isEs: isEs, unlocked: unlocked),
                 if (!unlocked) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   _PremiumGateBanner(isEs: isEs),
                 ],
               ],
@@ -366,7 +366,7 @@ class _ResultsCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.lock_outline,
                           color: AppTheme.primary, size: 32),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         isEs ? 'Resultados — Premium' : 'Results — Premium',
                         style: const TextStyle(
@@ -399,7 +399,7 @@ class _ResultsCard extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.mdPlus, vertical: AppSpacing.smPlus),
                 decoration: BoxDecoration(
                   color: verdictColor.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(AppRadius.mdPlus),
@@ -409,7 +409,7 @@ class _ResultsCard extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(_verdictIcon(verdict), color: verdictColor, size: 22),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppSpacing.smPlus),
                     Expanded(
                       child: Text(
                         verdictLabel,
@@ -431,7 +431,7 @@ class _ResultsCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
 
               // ── Cash flow row ──────────────────────────────────────────
               _Row(
@@ -493,7 +493,7 @@ class _ResultsCard extends StatelessWidget {
                 value: '${result.equityMult.toStringAsFixed(2)}x',
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               // ── Legend ─────────────────────────────────────────────────
               _VerdictLegend(isEs: isEs),
             ],
@@ -527,7 +527,7 @@ class _PremiumGateBanner extends StatelessWidget {
             children: [
               const Icon(Icons.lock_open_rounded,
                   color: Colors.white, size: 22),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   isEs
@@ -567,7 +567,7 @@ class _AssumptionsBox extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Icon(Icons.info_outline, color: AppTheme.infoIcon, size: 18),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.smPlus),
             Expanded(
               child: Text(
                 isEs
@@ -620,7 +620,7 @@ class _VerdictLegend extends StatelessWidget {
                     decoration:
                         BoxDecoration(color: e.$3, shape: BoxShape.circle),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   Text('${e.$1} ${e.$2}',
                       style: const TextStyle(
                           fontSize: AppTextSize.xs, color: Color(0xFF64748B))),
@@ -681,7 +681,7 @@ class _ToggleChip extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: AppDuration.fast,
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
           decoration: BoxDecoration(
             color: selected ? AppTheme.primary : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(AppRadius.mdPlus),
@@ -779,7 +779,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Text(
           label,
           style: const TextStyle(
@@ -814,7 +814,7 @@ class _Row extends StatelessWidget {
                   style: const TextStyle(
                       color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value,
               style: TextStyle(

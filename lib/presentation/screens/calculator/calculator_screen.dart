@@ -9,7 +9,8 @@ import 'package:calcwise_core/calcwise_core.dart'
         CalcwiseAdFooter,
         RateWatchService,
         CalcwiseReviewService,
-        ReverseSolveCard;
+        ReverseSolveCard,
+        CalcwiseHeroCard;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -238,7 +239,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                       index: 1,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 16),
+                            horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
                         child: Form(
                           key: _formKey,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -262,7 +263,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                       : null;
                                 });
                               }),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               // Down Payment row
                               _DownPaymentRow(
                                 ctrl: _downPayCtrl,
@@ -270,7 +271,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                 inputState: inputState,
                                 s: s,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               // Interest Rate
                               _buildField(s.interestRate, _rateCtrl,
                                   suffix: '%',
@@ -281,19 +282,19 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   onChanged: (v) => notifier.updateRate(
                                       double.tryParse(v.replaceAll(',', '.')) ??
                                           6.8)),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               // Term chips
                               _TermSelector(
                                   inputState: inputState,
                                   notifier: notifier,
                                   s: s),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               // Loan type chips
                               _LoanTypeSelector(
                                   inputState: inputState,
                                   notifier: notifier,
                                   s: s),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: AppSpacing.lg),
                               const Divider(height: 1),
                               // Advanced toggle
                               InkWell(
@@ -303,7 +304,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                     BorderRadius.circular(AppRadius.md),
                                 child: Padding(
                                   padding:
-                                      const EdgeInsets.symmetric(vertical: 10),
+                                      const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
                                   child: Row(children: [
                                     Icon(
                                       _advancedExpanded
@@ -311,7 +312,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                           : Icons.expand_more,
                                       color: AppTheme.primary,
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: AppSpacing.sm),
                                     Expanded(
                                       child: Text(s.advancedOptions,
                                           style: const TextStyle(
@@ -322,7 +323,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                     if (_advancedExpanded)
                                       Container(
                                         padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
+                                            horizontal: AppSpacing.sm, vertical: 2),
                                         decoration: BoxDecoration(
                                           color: AppTheme.primary
                                               .withValues(alpha: 0.10),
@@ -358,7 +359,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 double.tryParse(v.replaceAll(
                                                         ',', '.')) ??
                                                     1.1)),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: AppSpacing.md),
                                     _buildField(s.homeInsurance, _insuranceCtrl,
                                         prefix: '\$',
                                         suffix: '/yr',
@@ -367,7 +368,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 double.tryParse(v.replaceAll(
                                                         ',', '.')) ??
                                                     1750)),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: AppSpacing.md),
                                     _buildField(s.hoaFees, _hoaCtrl,
                                         prefix: '\$',
                                         suffix: '/mo',
@@ -375,7 +376,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                             double.tryParse(
                                                     v.replaceAll(',', '.')) ??
                                                 0)),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: AppSpacing.md),
                                     _buildField(
                                       isEs
                                           ? 'Ingreso Mensual Bruto (opcional)'
@@ -391,9 +392,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                     ),
                                   ]),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xs),
                               ],
-                              const SizedBox(height: 16),
+                              const SizedBox(height: AppSpacing.lg),
                               // ── AnimatedSwitcher for results ────────────
                               AnimatedSwitcher(
                                 duration: AppDuration.base,
@@ -423,7 +424,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                   s: s,
                                                   isEs: isEs),
                                               // ── Reverse-Solve: max affordable home price ─
-                                              const SizedBox(height: 12),
+                                              const SizedBox(height: AppSpacing.md),
                                               ReverseSolveCard(
                                                 title: isEs
                                                     ? '¿Qué precio puedo pagar?'
@@ -461,7 +462,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 },
                                               ),
                                               // ── Stress Test Banner ─────────────────────
-                                              const SizedBox(height: 8),
+                                              const SizedBox(height: AppSpacing.sm),
                                               Container(
                                                 width: double.infinity,
                                                 padding: const EdgeInsets.all(
@@ -488,7 +489,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                           color: AppTheme
                                                               .accentWarn,
                                                           size: 18),
-                                                      const SizedBox(width: 6),
+                                                      const SizedBox(width: AppRadius.sm),
                                                       Text(
                                                         isEs
                                                             ? 'Prueba de Estrés (+2%)'
@@ -511,7 +512,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                             : 'Your qualifying rate is your contract rate + 2%. Lenders use this to ensure you can still afford payments if interest rates rise.',
                                                       ),
                                                     ]),
-                                                    const SizedBox(height: 6),
+                                                    const SizedBox(height: AppRadius.sm),
                                                     Text(
                                                       isEs
                                                           ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${_fmt.format(result.stressTestMonthly)}'
@@ -528,7 +529,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 ),
                                               ),
                                               // ── Smart Insights ─────────────────────────
-                                              const SizedBox(height: 12),
+                                              const SizedBox(height: AppSpacing.md),
                                               _buildInsightCard(
                                                 result: result!,
                                                 inputState: inputState,
@@ -536,7 +537,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               ),
                                               // ── Affordability badge ─────────────────────
                                               if (_monthlyIncome > 0) ...[
-                                                const SizedBox(height: 12),
+                                                const SizedBox(height: AppSpacing.md),
                                                 _AffordabilityBadge(
                                                   pitiPayment: result
                                                       .monthly.pitiPayment,
@@ -544,7 +545,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                   isEs: isEs,
                                                 ),
                                               ],
-                                              const SizedBox(height: 12),
+                                              const SizedBox(height: AppSpacing.md),
                                               // Save button — primary CTA
                                               ElevatedButton.icon(
                                                 onPressed: () {
@@ -560,7 +561,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                       double.infinity, 52),
                                                 ),
                                               ),
-                                              const SizedBox(height: 8),
+                                              const SizedBox(height: AppSpacing.sm),
                                               // PDF + Share — secondary actions
                                               Row(children: [
                                                 Expanded(
@@ -694,7 +695,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     },
                                                   ),
                                                 ),
-                                                const SizedBox(width: 8),
+                                                const SizedBox(width: AppSpacing.sm),
                                                 Expanded(
                                                   child: TextButton.icon(
                                                     onPressed: () async {
@@ -794,7 +795,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                   ),
                                                 ),
                                               ]),
-                                              const SizedBox(height: 12),
+                                              const SizedBox(height: AppSpacing.md),
                                               Text(
                                                 isEs
                                                     ? 'Solo para fines informativos. No es asesoramiento financiero.'
@@ -813,7 +814,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                     : Padding(
                                         key: const ValueKey('empty'),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 32),
+                                            vertical: AppSpacing.xxxl),
                                         child: Column(
                                           children: [
                                             Icon(Icons.home_rounded,
@@ -822,7 +823,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     .colorScheme
                                                     .onSurface
                                                     .withValues(alpha: 0.3)),
-                                            const SizedBox(height: 12),
+                                            const SizedBox(height: AppSpacing.md),
                                             Text(
                                               isEs
                                                   ? 'Ingresa los valores para ver los resultados'
@@ -954,7 +955,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg)),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
       validator: (v) {
         final raw = (v ?? '').trim();
@@ -982,63 +983,24 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fmt =
         NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AppTheme.primary,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(s.monthlyPI,
-              style: const TextStyle(
-                  color: Colors.white70, fontSize: AppTextSize.body)),
-          const SizedBox(height: 8),
-          Text(
-            result != null ? fmt.format(result!.monthly.piPayment) : '--',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: AppTextSize.hero,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          if (result != null) ...[
-            Text(
-              '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}',
-              style: const TextStyle(
-                  color: Colors.white70, fontSize: AppTextSize.bodyLg),
-            ),
-            const SizedBox(height: 12),
-            Wrap(spacing: 8, children: [
-              _Badge(
-                label: result!.isJumbo ? s.jumbo : s.conforming,
-                color:
-                    result!.isJumbo ? AppTheme.accentWarn : AppTheme.accentGood,
+    return CalcwiseHeroCard(
+      label: s.monthlyPI as String,
+      value: result != null ? fmt.format(result!.monthly.piPayment) : '--',
+      secondary: result != null
+          ? '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}'
+          : null,
+      stats: result == null
+          ? null
+          : [
+              (
+                label: 'Total Interest',
+                value: fmt.format(result!.totalInterest),
               ),
-              _Badge(
-                label: 'LTV ${result!.currentLtv.toStringAsFixed(1)}%',
-                color: result!.currentLtv < 80
-                    ? AppTheme.accentGood
-                    : result!.currentLtv < 95
-                        ? AppTheme.accentWarn
-                        : Colors.red,
+              (
+                label: 'Total Cost',
+                value: fmt.format(result!.totalCost),
               ),
-              if (result!.hasPmi)
-                _Badge(
-                  label: result!.isUsda ? s.usdaFee : s.pmi,
-                  color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
-                ),
-            ]),
-          ],
-        ],
-      ),
+            ],
     );
   }
 }
@@ -1050,7 +1012,7 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.15),
           border: Border.all(color: color),
@@ -1080,7 +1042,7 @@ class _TermSelector extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(s.loanTerm, style: const TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Row(
           children: MortgageConstants.termPresets.map((term) {
             final selected = inputState.termYears == term;
@@ -1130,7 +1092,7 @@ class _LoanTypeSelector extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(s.loanType, style: const TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: 8,
           children: LoanType.values.map((type) {
@@ -1187,7 +1149,7 @@ class _DownPaymentRow extends ConsumerWidget {
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.lg)),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
           ),
           validator: (v) {
             final raw = (v ?? '').trim();
@@ -1212,7 +1174,7 @@ class _DownPaymentRow extends ConsumerWidget {
           },
         ),
       ),
-      const SizedBox(width: 8),
+      const SizedBox(width: AppSpacing.sm),
       Container(
         decoration: BoxDecoration(
           border: Border.all(color: AppTheme.labelGray.withValues(alpha: 0.4)),
@@ -1261,13 +1223,13 @@ class _AffordabilityBadge extends StatelessWidget {
       badgeColor = AppTheme.accentWarn;
       badgeLabel = isEs ? 'Al Límite' : 'At the Limit';
     } else {
-      badgeColor = Colors.red;
+      badgeColor = CalcwiseSemanticColors.errorDark;
       badgeLabel = isEs ? 'Supera el Límite' : 'Over Limit';
     }
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.08),
         border: Border.all(color: badgeColor.withValues(alpha: 0.5)),
@@ -1277,7 +1239,7 @@ class _AffordabilityBadge extends StatelessWidget {
         children: [
           Icon(Icons.account_balance_wallet_rounded,
               color: badgeColor, size: 20),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.smPlus),
           Expanded(
             child: Text(
               isEs
@@ -1291,7 +1253,7 @@ class _AffordabilityBadge extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smPlus, vertical: AppSpacing.xs),
             decoration: BoxDecoration(
               color: badgeColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppRadius.xxl),
@@ -1328,7 +1290,7 @@ class _ModeBtn extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdPlus, vertical: AppSpacing.mdPlus),
           decoration: BoxDecoration(
             color: selected ? AppTheme.primary : null,
             borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -1380,7 +1342,7 @@ class _BreakdownCard extends StatelessWidget {
                   ? s.usdaFeeLabel
                   : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
               fmt.format(m.pmi),
-              color: result!.isUsda ? AppTheme.accentGood : Colors.orange,
+              color: result!.isUsda ? AppTheme.accentGood : CalcwiseSemanticColors.warnIcon,
               tooltip: result!.isUsda
                   ? InfoTooltip(
                       title: isEs ? 'Cuota Anual USDA' : 'USDA Annual Fee',
@@ -1399,7 +1361,7 @@ class _BreakdownCard extends StatelessWidget {
             ),
           const Divider(height: 24),
           _Row(s.totalPITI, fmt.format(m.pitiPayment), bold: true),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _Row(s.totalInterest, fmtK.format(result!.totalInterest)),
           _Row(s.totalCost, fmtK.format(result!.totalCost)),
           _Row(s.payoffDate,
@@ -1430,7 +1392,7 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

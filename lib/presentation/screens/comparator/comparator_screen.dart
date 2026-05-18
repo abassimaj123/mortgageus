@@ -86,7 +86,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
     messenger.showSnackBar(SnackBar(
       content: Row(children: [
         const Icon(Icons.compare_arrows, size: 18, color: Colors.white),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Text(isEs
             ? 'Comparación guardada en historial'
             : 'Comparison saved to history'),
@@ -171,7 +171,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       // Header info
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
+                            horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
                           border: Border.all(color: AppTheme.primary, width: 1),
@@ -180,7 +180,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                         child: Row(children: [
                           const Icon(Icons.home_rounded,
                               color: AppTheme.primary),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                               child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,7 +200,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                               ])),
                         ]),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                       // Mode toggle
                       Row(children: [
                         Expanded(
@@ -210,7 +210,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                           selected: !_armMode,
                           onTap: () => setState(() => _armMode = false),
                         )),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(
                             child: _ModeToggleBtn(
                           label: str.armMode,
@@ -227,19 +227,19 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                           },
                         )),
                       ]),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       // Standard mode
                       if (!_armMode) ...[
                         Text(str.scenarioComp,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: AppTextSize.subtitle)),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(str.scenarioDesc,
                             style: TextStyle(
                                 color: AppTheme.labelGray,
                                 fontSize: AppTextSize.md)),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
                         if (r30 == null || r15 == null)
                           Center(child: Text(str.enterValid))
                         else
@@ -255,7 +255,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                               setState(() => _fixedYears = y),
                           s: str,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
                         if (armRes == null)
                           Center(child: Text(str.enterValid))
                         else
@@ -269,7 +269,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                           ),
                       ],
                       if (canSave) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         ValueListenableBuilder<bool>(
                           valueListenable: freemiumService.isPremiumNotifier,
                           builder: (_, isPremium, __) =>
@@ -285,7 +285,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                 child: Container(
                                   width: double.infinity,
                                   padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
+                                      const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
                                   decoration: BoxDecoration(
                                     border: Border.all(color: AppTheme.primary),
                                     borderRadius:
@@ -308,7 +308,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                                     : Icons.lock_outline,
                                                 color: AppTheme.primary,
                                                 size: 18),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: AppSpacing.sm),
                                         Text(
                                             isEs
                                                 ? 'Guardar comparación'
@@ -323,7 +323,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                     ]),
               ),
             ),
@@ -354,10 +354,10 @@ class _CompareTable extends StatelessWidget {
       Row(children: [
         const Expanded(flex: 3, child: SizedBox()),
         Expanded(flex: 4, child: _ScenarioHeader(s.yr30, AppTheme.primary)),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(flex: 4, child: _ScenarioHeader(s.yr15, AppTheme.accentGood)),
       ]),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.md),
       _CompareRow(
         label: s.monthlyPILabel,
         val30: fmt.format(r30.monthly.piPayment),
@@ -388,7 +388,7 @@ class _CompareTable extends StatelessWidget {
         val15: '${r15.payoffDate.month}/${r15.payoffDate.year}',
         winner: 15, // 15yr payoff sooner
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpacing.lg),
       // Savings callout
       Card(
         color: AppTheme.accentGood.withValues(alpha: 0.08),
@@ -406,7 +406,7 @@ class _CompareTable extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   fontSize: AppTextSize.bodyMd,
                 )),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
                 '${s.interestSaved} ${fmtK.format(r30.totalInterest - r15.totalInterest)}',
                 style: const TextStyle(fontSize: AppTextSize.md)),
@@ -420,7 +420,7 @@ class _CompareTable extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   fontSize: AppTextSize.bodyMd,
                 )),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
                 '${s.monthlySavings} ${fmt.format(r15.monthly.piPayment - r30.monthly.piPayment)} ${s.lower}',
                 style: const TextStyle(fontSize: AppTextSize.md)),
@@ -438,7 +438,7 @@ class _ScenarioHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: color,
@@ -466,7 +466,7 @@ class _CompareRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(children: [
         Expanded(
             flex: 3,
@@ -477,7 +477,7 @@ class _CompareRow extends StatelessWidget {
             flex: 4,
             child: _ValueCell(val30,
                 isWinner: winner == 30, color: AppTheme.primary)),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
             flex: 4,
             child: _ValueCell(val15,
@@ -495,7 +495,7 @@ class _ValueCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
           color: isWinner ? color.withValues(alpha: 0.12) : null,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -505,7 +505,7 @@ class _ValueCell extends StatelessWidget {
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           if (isWinner) ...[
             Icon(Icons.check_circle, size: 14, color: color),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
           ],
           Flexible(
               child: Text(value,
@@ -538,7 +538,7 @@ class _ModeToggleBtn extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadius.mdPlus),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected
@@ -552,7 +552,7 @@ class _ModeToggleBtn extends StatelessWidget {
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(icon,
                 size: 16, color: selected ? Colors.white : AppTheme.labelGray),
-            const SizedBox(width: 6),
+            const SizedBox(width: AppRadius.sm),
             Text(label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
@@ -586,7 +586,7 @@ class _ArmControls extends StatelessWidget {
       Text(s.armFixedPeriod,
           style: const TextStyle(
               fontWeight: FontWeight.w600, fontSize: AppTextSize.body)),
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpacing.sm),
       Row(
           children: presets.map((y) {
         final sel = fixedYears == y;
@@ -606,7 +606,7 @@ class _ArmControls extends StatelessWidget {
           ),
         ));
       }).toList()),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.md),
       TextFormField(
         controller: rateCtrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -616,7 +616,7 @@ class _ArmControls extends StatelessWidget {
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
       ),
     ]);
@@ -653,12 +653,12 @@ class _ArmCompareTable extends StatelessWidget {
         const Expanded(flex: 3, child: SizedBox()),
         Expanded(
             flex: 4, child: _ScenarioHeader('Fixed 30yr', AppTheme.primary)),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
             flex: 4,
             child: _ScenarioHeader('ARM ${fixedYears}/1', AppTheme.accentGood)),
       ]),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.md),
       _CompareRow(
         label: s.armPaymentDuring,
         val30: fmt.format(arm.fixedPayment),
@@ -684,14 +684,14 @@ class _ArmCompareTable extends StatelessWidget {
         val15: fmtK.format(arm.totalCost),
         winner: armIsCheaper ? 15 : 30,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpacing.lg),
       Card(
-        color: (armIsCheaper ? AppTheme.accentGood : Colors.orange)
+        color: (armIsCheaper ? AppTheme.accentGood : CalcwiseSemanticColors.warnIcon)
             .withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           side: BorderSide(
-              color: (armIsCheaper ? AppTheme.accentGood : Colors.orange)
+              color: (armIsCheaper ? AppTheme.accentGood : CalcwiseSemanticColors.warnIcon)
                   .withValues(alpha: 0.4)),
         ),
         child: Padding(
@@ -706,7 +706,7 @@ class _ArmCompareTable extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     fontSize: AppTextSize.bodyMd),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppRadius.sm),
               if (arm.breakEvenMonths == null)
                 Text(s.armAlwaysBetter,
                     style: TextStyle(
@@ -720,11 +720,11 @@ class _ArmCompareTable extends StatelessWidget {
               Text(
                 '${s.armTotalInterest}: ${fmtK.format(armInterestSavings.abs())} more vs fixed',
                 style: const TextStyle(
-                    color: Colors.orange,
+                    color: CalcwiseSemanticColors.warnIcon,
                     fontWeight: FontWeight.bold,
                     fontSize: AppTextSize.bodyMd),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppRadius.sm),
               Text(
                 'Rate reset to ${adjRate.toStringAsFixed(2)}% increases long-term cost.',
                 style: const TextStyle(fontSize: AppTextSize.md),

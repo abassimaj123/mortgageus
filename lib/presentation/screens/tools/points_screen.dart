@@ -110,7 +110,7 @@ class _PointsScreenState extends State<PointsScreen> {
                           _onInteraction();
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.mdPlus),
                       TextFormField(
                         controller: _rateCtrl,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -128,7 +128,7 @@ class _PointsScreenState extends State<PointsScreen> {
                           _onInteraction();
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.mdPlus),
                       Text(
                           isEs
                               ? 'Puntos: ${_points.toStringAsFixed(2)}'
@@ -157,7 +157,7 @@ class _PointsScreenState extends State<PointsScreen> {
                             },
                           ),
                       ]),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       AnimatedSwitcher(
                         duration: AppDuration.base,
                         child: loan <= 0
@@ -224,12 +224,12 @@ class _PointsScreenState extends State<PointsScreen> {
                                         bold: true,
                                         color: lifetimeSav >= 0
                                             ? AppTheme.accentGood
-                                            : Colors.red),
+                                            : CalcwiseSemanticColors.errorDark),
                                   ]),
                                 ),
                               ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppSpacing.mdPlus),
@@ -243,7 +243,7 @@ class _PointsScreenState extends State<PointsScreen> {
                           children: [
                             Icon(Icons.info_outline,
                                 color: AppTheme.infoIcon, size: 18),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: AppSpacing.smPlus),
                             Expanded(
                               child: Text(
                                 isEs
@@ -293,7 +293,7 @@ class _Row extends StatelessWidget {
                   style: const TextStyle(
                       color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value,
               style: TextStyle(

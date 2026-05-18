@@ -162,7 +162,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                           _onInteraction();
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.mdPlus),
                       TextFormField(
                         controller: _rateCtrl,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -180,7 +180,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                           _onInteraction();
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.mdPlus),
                       Text(
                           isEs
                               ? 'Pago inicial: ${_downPct.toStringAsFixed(1)}%'
@@ -214,7 +214,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                             setState(() => _creditScore = v.round()),
                         onChangeEnd: (_) => _onInteraction(),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
                       AnimatedSwitcher(
                         duration: AppDuration.base,
                         child: price <= 0 || loan <= 0
@@ -243,7 +243,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                       Icon(Icons.check_circle_outline,
                                           color: CalcwiseSemanticColors.successDeep,
                                           size: 24),
-                                      const SizedBox(width: 12),
+                                      const SizedBox(width: AppSpacing.md),
                                       Text(
                                           isEs
                                               ? 'No se requiere PMI'
@@ -304,7 +304,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                     ),
                                   ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppSpacing.mdPlus),
@@ -318,7 +318,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                           children: [
                             Icon(Icons.info_outline,
                                 color: AppTheme.infoIcon, size: 18),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: AppSpacing.smPlus),
                             Expanded(
                               child: Text(
                                 isEs
@@ -368,7 +368,7 @@ class _Row extends StatelessWidget {
                   style: const TextStyle(
                       color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value,
               style: TextStyle(

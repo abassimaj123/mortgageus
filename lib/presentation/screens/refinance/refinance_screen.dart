@@ -119,7 +119,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                           _field(s.yearsRemaining, _curYearsCtrl,
                               suffix: s.years as String?, required: true),
                         ]),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
                         _Section(s.newLoan, [
                           _field(s.newRate, _newRateCtrl,
                               suffix: '%', required: true),
@@ -128,7 +128,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                           _field(s.closingCosts, _closingCtrl,
                               prefix: '\$', currency: true),
                         ]),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -141,7 +141,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                           ),
                         ),
                         if (r != null) ...[
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.xl),
                           Card(
                             shape: RoundedRectangleBorder(
                                 borderRadius:
@@ -157,7 +157,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                                     _fmt.format(r.monthlySavings),
                                     color: r.monthlySavings > 0
                                         ? AppTheme.accentGood
-                                        : Colors.red),
+                                        : CalcwiseSemanticColors.errorDark),
                                 const Divider(height: 24),
                                 _ResultRow(
                                     s.breakEven,
@@ -175,8 +175,8 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                                     _fmt.format(r.totalSavingsOverLife),
                                     color: r.totalSavingsOverLife > 0
                                         ? AppTheme.accentGood
-                                        : Colors.red),
-                                const SizedBox(height: 12),
+                                        : CalcwiseSemanticColors.errorDark),
+                                const SizedBox(height: AppSpacing.md),
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -190,7 +190,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                                     border: Border.all(
                                         color: r.refinanceMakesSense
                                             ? AppTheme.accentGood
-                                            : Colors.red),
+                                            : CalcwiseSemanticColors.errorDark),
                                   ),
                                   child: Text(
                                     r.refinanceMakesSense
@@ -204,7 +204,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                                     style: TextStyle(
                                       color: r.refinanceMakesSense
                                           ? AppTheme.accentGood
-                                          : Colors.red,
+                                          : CalcwiseSemanticColors.errorDark,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -232,7 +232,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
       String? errorText,
       bool required = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: TextFormField(
         controller: ctrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -245,7 +245,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
         validator: (v) {
           final raw = (v ?? '').trim();
@@ -274,7 +274,7 @@ class _Section extends StatelessWidget {
           Text(title,
               style: const TextStyle(
                   fontWeight: FontWeight.bold, fontSize: AppTextSize.bodyLg)),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           ...children,
         ],
       );
@@ -287,7 +287,7 @@ class _ResultRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(label, style: const TextStyle(color: AppTheme.labelGray)),

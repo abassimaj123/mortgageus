@@ -132,14 +132,14 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppRadius.lg)),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                          horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
                     ),
                     onChanged: (_) {
                       setState(() {});
                       _onInteraction();
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // ── Down Payment slider ────────────────────────────────────
                   Row(
@@ -184,7 +184,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                               fontSize: AppTextSize.sm)),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
 
                   // ── Results ────────────────────────────────────────────────
                   if (rawPrice <= 0)
@@ -209,7 +209,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                       fmtWhole: fmtWhole,
                     ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // ── Info box ───────────────────────────────────────────────
                   Container(
@@ -225,7 +225,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                       children: [
                         Icon(Icons.info_outline,
                             color: AppTheme.infoIcon, size: 18),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: AppSpacing.smPlus),
                         Expanded(
                           child: Text(
                             isEs
@@ -270,7 +270,7 @@ class _NoPmiBadge extends StatelessWidget {
           children: [
             Icon(Icons.check_circle_outline,
                 color: CalcwiseSemanticColors.successDeep, size: 24),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Text(
               isEs ? 'No se requiere PMI' : 'No PMI Required',
               style: TextStyle(
@@ -380,7 +380,7 @@ class _Row extends StatelessWidget {
                   style: TextStyle(
                       color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value,
               style: TextStyle(

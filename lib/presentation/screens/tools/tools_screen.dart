@@ -221,7 +221,7 @@ class ToolsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 ...tools.map((t) => _ToolCard(item: t)),
               ],
             ),
@@ -254,7 +254,7 @@ class _ToolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
         child: InkWell(
           onTap: item.onTap,
           borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -282,7 +282,7 @@ class _ToolCard extends StatelessWidget {
                   ),
                   child: Icon(item.icon, color: item.color, size: 24),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpacing.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,7 +291,7 @@ class _ToolCard extends StatelessWidget {
                           style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: AppTextSize.bodyMd)),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(item.subtitle,
                           style: TextStyle(
                               color: Color(0xFF64748B),

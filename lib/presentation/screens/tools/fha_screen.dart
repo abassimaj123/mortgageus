@@ -122,7 +122,7 @@ class _FhaScreenState extends State<FhaScreen> {
                             _onInteraction();
                           },
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.xl),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -148,7 +148,7 @@ class _FhaScreenState extends State<FhaScreen> {
                           onChanged: (v) => setState(() => _downPct = v),
                           onChangeEnd: (_) => _onInteraction(),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
                             isEs
                                 ? 'Puntaje crediticio: $_creditScore'
@@ -166,7 +166,7 @@ class _FhaScreenState extends State<FhaScreen> {
                               setState(() => _creditScore = v.round()),
                           onChangeEnd: (_) => _onInteraction(),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         Row(children: [
                           Expanded(
                             child: TextFormField(
@@ -199,7 +199,7 @@ class _FhaScreenState extends State<FhaScreen> {
                               },
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: TextFormField(
                               controller: _insCtrl,
@@ -231,7 +231,7 @@ class _FhaScreenState extends State<FhaScreen> {
                             ),
                           ),
                         ]),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.xl),
                         AnimatedSwitcher(
                           duration: AppDuration.base,
                           child: price <= 0
@@ -291,7 +291,7 @@ class _FhaScreenState extends State<FhaScreen> {
                                   ),
                                 ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(AppSpacing.mdPlus),
@@ -305,7 +305,7 @@ class _FhaScreenState extends State<FhaScreen> {
                             children: [
                               Icon(Icons.info_outline,
                                   color: AppTheme.infoIcon, size: 18),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: AppSpacing.smPlus),
                               Expanded(
                                 child: Text(
                                   isEs
@@ -356,7 +356,7 @@ class _Row extends StatelessWidget {
                   style: const TextStyle(
                       color: Color(0xFF334155), fontSize: AppTextSize.body)),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value,
               style: TextStyle(

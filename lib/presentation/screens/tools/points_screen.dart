@@ -188,7 +188,7 @@ class _PointsScreenState extends State<PointsScreen> {
                                             ? 'Costo de los puntos'
                                             : 'Points Cost',
                                         value: fmtWhole.format(pointsCost),
-                                        color: Colors.orange.shade800),
+                                        color: CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs ? 'Tasa nueva' : 'New Rate',
                                         value:

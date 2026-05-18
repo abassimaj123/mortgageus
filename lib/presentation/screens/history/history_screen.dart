@@ -1426,7 +1426,7 @@ class _BarLegendDot extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
             ),
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             label,
             maxLines: 1,

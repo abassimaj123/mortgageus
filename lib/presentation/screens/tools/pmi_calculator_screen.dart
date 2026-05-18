@@ -287,7 +287,7 @@ class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
                                                 : 'Monthly PMI',
                                             value: fmt.format(monthly),
                                             bold: true,
-                                            color: Colors.orange.shade800),
+                                            color: CalcwiseSemanticColors.alertText),
                                         const Divider(height: 24),
                                         _Row(
                                             label: isEs

@@ -214,12 +214,12 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                           AppSpacing.smPlus),
                                       decoration: BoxDecoration(
                                         color: (incomeOk && _rural)
-                                            ? Colors.green.shade50
-                                            : Colors.orange.shade50,
+                                            ? CalcwiseSemanticColors.successBg
+                                            : CalcwiseSemanticColors.alertBg,
                                         border: Border.all(
                                             color: (incomeOk && _rural)
-                                                ? Colors.green.shade300
-                                                : Colors.orange.shade300),
+                                                ? CalcwiseSemanticColors.successBorder
+                                                : CalcwiseSemanticColors.alertBorder),
                                         borderRadius: BorderRadius.circular(
                                             AppRadius.mdPlus),
                                       ),
@@ -271,7 +271,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                             ? 'Tarifa anual mensualizada (0.35%)'
                                             : 'Monthly Annual Fee (0.35%)',
                                         value: fmt.format(monthlyFee),
-                                        color: Colors.orange.shade800),
+                                        color: CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs
                                             ? 'Capital + Interés'

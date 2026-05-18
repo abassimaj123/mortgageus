@@ -184,7 +184,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                                     color: r.refinanceMakesSense
                                         ? AppTheme.accentGood
                                             .withValues(alpha: 0.1)
-                                        : Colors.red.shade50,
+                                        : CalcwiseSemanticColors.errorBg,
                                     borderRadius:
                                         BorderRadius.circular(AppRadius.lg),
                                     border: Border.all(

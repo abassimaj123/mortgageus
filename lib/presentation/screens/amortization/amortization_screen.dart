@@ -364,7 +364,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                       value: fmt.format(result.totalInterest),
                                       valueColor: AppTheme.secondary,
                                     ),
-                                    const SizedBox(height: 9),
+                                    const SizedBox(height: AppSpacing.smPlus),
                                     Container(
                                         height: 1,
                                         color: AppTheme.labelGray,
@@ -410,7 +410,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                         value: fmt.format(result.totalInterest),
                                         valueColor: AppTheme.secondary,
                                       ),
-                                      const SizedBox(height: 9),
+                                      const SizedBox(height: AppSpacing.smPlus),
                                       Container(
                                           height: 1,
                                           color: AppTheme.labelGray,
@@ -699,7 +699,7 @@ class _YearTileState extends State<_YearTile> {
 
     final badges = <Widget>[];
     if (group.hasPmiDrop) badges.add(_Badge(s.pmiRemoved, CalcwiseSemanticColors.successDeep));
-    if (group.isHalfway) badges.add(_Badge(s.halfway, Colors.blue));
+    if (group.isHalfway) badges.add(_Badge(s.halfway, CalcwiseSemanticColors.infoIcon));
     if (group.isLastYear) badges.add(_Badge(s.paidOff, AppTheme.secondary));
 
     return Semantics(

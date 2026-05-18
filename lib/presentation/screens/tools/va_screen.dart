@@ -236,7 +236,7 @@ class _VaScreenState extends State<VaScreen> {
                                             ? 'Tarifa de financiación \$'
                                             : 'Funding Fee \$',
                                         value: fmtWhole.format(fundingFee),
-                                        color: Colors.orange.shade800),
+                                        color: CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs
                                             ? 'Monto del préstamo (con tarifa)'
@@ -261,7 +261,7 @@ class _VaScreenState extends State<VaScreen> {
                                       padding: const EdgeInsets.all(
                                           AppSpacing.smPlus),
                                       decoration: BoxDecoration(
-                                        color: Colors.green.shade50,
+                                        color: CalcwiseSemanticColors.successBg,
                                         border: Border.all(
                                             color: CalcwiseSemanticColors.successBorder),
                                         borderRadius: BorderRadius.circular(

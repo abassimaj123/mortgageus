@@ -598,13 +598,13 @@ class _VerdictLegend extends StatelessWidget {
             ('Excelente', 'IRR > 15%', AppTheme.accentGood),
             ('Bueno', 'IRR 10–15%', const Color(0xFF2196F3)),
             ('Regular', 'IRR 6–10%', AppTheme.accentWarn),
-            ('Bajo', 'IRR < 6%', Colors.red.shade600),
+            ('Bajo', 'IRR < 6%', CalcwiseSemanticColors.errorDark),
           ]
         : [
             ('Excellent', 'IRR > 15%', AppTheme.accentGood),
             ('Good', 'IRR 10–15%', const Color(0xFF2196F3)),
             ('Fair', 'IRR 6–10%', AppTheme.accentWarn),
-            ('Poor', 'IRR < 6%', Colors.red.shade600),
+            ('Poor', 'IRR < 6%', CalcwiseSemanticColors.errorDark),
           ];
 
     return Wrap(
@@ -843,7 +843,7 @@ Color _verdictColor(_Verdict v) => switch (v) {
       _Verdict.excellent => AppTheme.accentGood,
       _Verdict.good => const Color(0xFF2196F3),
       _Verdict.fair => AppTheme.accentWarn,
-      _Verdict.poor => Colors.red.shade600,
+      _Verdict.poor => CalcwiseSemanticColors.errorDark,
     };
 
 IconData _verdictIcon(_Verdict v) => switch (v) {

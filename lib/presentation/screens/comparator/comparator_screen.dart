@@ -169,7 +169,11 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Header info
-                      Container(
+                      Semantics(
+                        label: isEs
+                            ? '${str.home} ${fmt.format(s.homePrice)}, ${str.down} ${fmt.format(s.downPaymentDollar)} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%'
+                            : '${str.home} ${fmt.format(s.homePrice)}, ${str.down} ${fmt.format(s.downPaymentDollar)} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%',
+                        child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
                         decoration: BoxDecoration(
@@ -199,6 +203,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                         fontSize: AppTextSize.sm)),
                               ])),
                         ]),
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       // Mode toggle
@@ -277,7 +282,12 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                             valueListenable: freemiumService.isRewardedNotifier,
                             builder: (_, isRewarded, __) {
                               final unlocked = isPremium || isRewarded;
-                              return GestureDetector(
+                              return Semantics(
+                                label: isEs
+                                    ? 'Guardar comparación'
+                                    : 'Save comparison',
+                                button: true,
+                                child: GestureDetector(
                                 onTap: _isSaving
                                     ? null
                                     : () => _saveComparison(
@@ -318,6 +328,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                                 fontWeight: FontWeight.w600)),
                                       ]),
                                 ),
+                              ),
                               );
                             },
                           ),
@@ -390,7 +401,10 @@ class _CompareTable extends StatelessWidget {
       ),
       const SizedBox(height: AppSpacing.lg),
       // Savings callout
-      Card(
+      Semantics(
+        label: '15-year advantage: saves ${fmtK.format(r30.totalInterest - r15.totalInterest)} in interest. '
+            '30-year advantage: ${fmt.format(r15.monthly.piPayment - r30.monthly.piPayment)} lower monthly payment.',
+        child: Card(
         color: AppTheme.accentGood.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -426,6 +440,7 @@ class _CompareTable extends StatelessWidget {
                 style: const TextStyle(fontSize: AppTextSize.md)),
           ]),
         ),
+      ),
       ),
     ]);
   }
@@ -465,24 +480,26 @@ class _CompareRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(children: [
-        Expanded(
-            flex: 3,
-            child: Text(label,
-                style: TextStyle(
-                    color: AppTheme.labelGray, fontSize: AppTextSize.md))),
-        Expanded(
-            flex: 4,
-            child: _ValueCell(val30,
-                isWinner: winner == 30, color: AppTheme.primary)),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-            flex: 4,
-            child: _ValueCell(val15,
-                isWinner: winner == 15, color: AppTheme.accentGood)),
-      ]),
+    return MergeSemantics(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: Row(children: [
+          Expanded(
+              flex: 3,
+              child: Text(label,
+                  style: TextStyle(
+                      color: AppTheme.labelGray, fontSize: AppTextSize.md))),
+          Expanded(
+              flex: 4,
+              child: _ValueCell(val30,
+                  isWinner: winner == 30, color: AppTheme.primary)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+              flex: 4,
+              child: _ValueCell(val15,
+                  isWinner: winner == 15, color: AppTheme.accentGood)),
+        ]),
+      ),
     );
   }
 }
@@ -535,7 +552,11 @@ class _ModeToggleBtn extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => Semantics(
+        label: label,
+        button: true,
+        selected: selected,
+        child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadius.mdPlus),
         child: Container(
@@ -562,7 +583,8 @@ class _ModeToggleBtn extends StatelessWidget {
                 )),
           ]),
         ),
-      );
+      ),
+    );
 }
 
 // ── ARM controls ──────────────────────────────────────────────────────────────
@@ -594,7 +616,9 @@ class _ArmControls extends StatelessWidget {
         return Expanded(
             child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 3),
-          child: ChoiceChip(
+          child: Semantics(
+            label: '${y}/1 ARM${sel ? ', selected' : ''}',
+            child: ChoiceChip(
             label: Text('${y}/1'),
             selected: sel,
             selectedColor: AppTheme.primary,
@@ -604,6 +628,7 @@ class _ArmControls extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             onSelected: (_) => onFixedYearsChanged(y),
+          ),
           ),
         ));
       }).toList()),
@@ -686,7 +711,11 @@ class _ArmCompareTable extends StatelessWidget {
         winner: armIsCheaper ? 15 : 30,
       ),
       const SizedBox(height: AppSpacing.lg),
-      Card(
+      Semantics(
+        label: armIsCheaper
+            ? 'ARM saves ${fmtK.format(armInterestSavings.abs())} in total interest vs fixed 30-year.'
+            : 'ARM costs ${fmtK.format(armInterestSavings.abs())} more in total interest vs fixed 30-year.',
+        child: Card(
         color: (armIsCheaper
                 ? AppTheme.accentGood
                 : CalcwiseSemanticColors.warnIcon)
@@ -737,6 +766,7 @@ class _ArmCompareTable extends StatelessWidget {
             ],
           ]),
         ),
+      ),
       ),
     ]);
   }

@@ -69,6 +69,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('calculator');
     // Push controller defaults to provider on first frame so all tabs are in sync
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final n = ref.read(mortgageInputProvider.notifier);
@@ -298,7 +299,12 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               const SizedBox(height: AppSpacing.lg),
                               const Divider(height: 1),
                               // Advanced toggle
-                              InkWell(
+                              Semantics(
+                                label: _advancedExpanded
+                                    ? (isEs ? 'Ocultar opciones avanzadas' : 'Hide advanced options')
+                                    : (isEs ? 'Mostrar opciones avanzadas' : 'Show advanced options'),
+                                button: true,
+                                child: InkWell(
                                 onTap: () => setState(() =>
                                     _advancedExpanded = !_advancedExpanded),
                                 borderRadius:
@@ -343,7 +349,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                       ),
                                   ]),
                                 ),
-                              ),
+                              )), // Semantics + InkWell
                               if (_advancedExpanded) ...[
                                 Container(
                                   decoration: BoxDecoration(
@@ -467,7 +473,11 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               // ── Stress Test Banner ─────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.sm),
-                                              Container(
+                                              Semantics(
+                                                label: isEs
+                                                    ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${_fmt.format(result.stressTestMonthly)}'
+                                                    : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${_fmt.format(result.stressTestMonthly)}',
+                                                child: Container(
                                                 width: double.infinity,
                                                 padding: const EdgeInsets.all(
                                                     AppSpacing.mdPlus),
@@ -533,7 +543,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     ),
                                                   ],
                                                 ),
-                                              ),
+                                              )), // Semantics (stress test)
                                               // ── Smart Insights ─────────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.md),
@@ -952,7 +962,10 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     String? helperText,
     required Function(String) onChanged,
   }) {
-    return TextFormField(
+    return Semantics(
+      label: label,
+      textField: true,
+      child: TextFormField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: currency
@@ -981,6 +994,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
         return null;
       },
       onChanged: onChanged,
+      ),
     );
   }
 }
@@ -996,9 +1010,17 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fmt =
         NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-    return CalcwiseHeroCard(
+    final piPayment = result != null ? fmt.format(result!.monthly.piPayment) : '--';
+    return Semantics(
+      label: result != null
+          ? 'Monthly principal and interest: $piPayment. '
+            'Total PITI: ${fmt.format(result!.monthly.pitiPayment)}. '
+            'Total interest: ${fmt.format(result!.totalInterest)}. '
+            'Total cost: ${fmt.format(result!.totalCost)}.'
+          : 'Monthly payment: enter values above to calculate',
+      child: CalcwiseHeroCard(
       label: s.monthlyPI as String,
-      value: result != null ? fmt.format(result!.monthly.piPayment) : '--',
+      value: piPayment,
       secondary: result != null
           ? '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}'
           : null,
@@ -1014,6 +1036,7 @@ class _HeroCard extends StatelessWidget {
                 value: fmt.format(result!.totalCost),
               ),
             ],
+      ),
     );
   }
 }
@@ -1303,7 +1326,11 @@ class _ModeBtn extends StatelessWidget {
       {required this.label, required this.selected, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => Semantics(
+        label: label == '\$' ? 'Dollar amount mode' : 'Percentage mode',
+        button: true,
+        selected: selected,
+        child: InkWell(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(
@@ -1318,6 +1345,7 @@ class _ModeBtn extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               )),
         ),
+      ),
       );
 }
 
@@ -1410,7 +1438,8 @@ class _Row extends StatelessWidget {
       {this.bold = false, this.color, this.tooltip});
 
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) => MergeSemantics(
+        child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1430,5 +1459,6 @@ class _Row extends StatelessWidget {
                 )),
           ],
         ),
+      ),
       );
 }

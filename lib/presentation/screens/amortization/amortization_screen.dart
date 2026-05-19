@@ -188,7 +188,10 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xxl),
-                    GestureDetector(
+                    Semantics(
+                      label: isEs ? 'Ir a la calculadora' : 'Go to Calculator',
+                      button: true,
+                      child: GestureDetector(
                       onTap: () => tabSwitchNotifier.value = 0,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -209,7 +212,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                   fontWeight: FontWeight.w600)),
                         ]),
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ),
@@ -466,7 +469,11 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                     ),
                     child: Row(children: [
                       Expanded(
-                          child: GestureDetector(
+                          child: Semantics(
+                        label: s.yearlyView,
+                        button: true,
+                        selected: _yearlyView,
+                        child: GestureDetector(
                         onTap: () => _setViewMode(true),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -498,13 +505,17 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                         fontSize: AppTextSize.md)),
                               ]),
                         ),
-                      )),
+                      ))),
                       Container(
                           width: 1,
                           height: 38,
                           color: AppTheme.primary.withValues(alpha: 0.5)),
                       Expanded(
-                          child: GestureDetector(
+                          child: Semantics(
+                        label: s.monthlyView,
+                        button: true,
+                        selected: !_yearlyView,
+                        child: GestureDetector(
                         onTap: () => _setViewMode(false),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -536,7 +547,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                         fontSize: AppTextSize.md)),
                               ]),
                         ),
-                      )),
+                      ))),
                     ]),
                   ),
                 ),
@@ -626,7 +637,8 @@ class _SummaryRow extends StatelessWidget {
   final String label, value;
   const _SummaryRow(this.label, this.value);
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) => MergeSemantics(
+        child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 3),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -639,6 +651,7 @@ class _SummaryRow extends StatelessWidget {
                   fontSize: AppTextSize.md,
                   fontWeight: FontWeight.w600)),
         ]),
+      ),
       );
 }
 

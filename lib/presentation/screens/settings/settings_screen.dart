@@ -85,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
                     ? [
                         ListTile(
                           leading: const Icon(Icons.verified,
-                              color: CalcwiseSemanticColors.warnIcon),
+                              color: AppTheme.accent),
                           title: Text(s.premiumActive),
                           subtitle: Text(s.premiumSubtitle),
                         ),
@@ -161,7 +161,7 @@ class SettingsScreen extends StatelessWidget {
               child: Text(
                 s.disclaimer,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF475569),
+                      color: CalcwiseTheme.of(context).textSecondary,
                       fontStyle: FontStyle.italic,
                     ),
               ),
@@ -189,13 +189,13 @@ class _LangButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         decoration: BoxDecoration(
           color: selected ? color : Colors.transparent,
-          border: Border.all(color: selected ? color : const Color(0xFFCBD5E1)),
+          border: Border.all(color: selected ? color : Theme.of(context).colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(AppRadius.mdPlus),
         ),
         alignment: Alignment.center,
         child: Text(label,
             style: TextStyle(
-              color: selected ? Colors.white : const Color(0xFF334155),
+              color: selected ? Colors.white : CalcwiseTheme.of(context).textSecondary,
               fontWeight: selected ? FontWeight.bold : FontWeight.normal,
             )),
       ),

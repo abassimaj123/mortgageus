@@ -156,16 +156,18 @@ packages:
   calcwise_core:
     dependency: "direct main"
     description:
-      path: "../packages/calcwise_core"
-      relative: true
-    source: path
+      path: "."
+      ref: "feat/analytics-user-property-widget-tests"
+      resolved-ref: c93220db5aabedb786040d57cf9f7a851caef732
+      url: "https://github.com/abassimaj123/calcwise_core.git"
+    source: git
     version: "1.0.0"
   calcwise_lint:
     dependency: "direct dev"
     description:
       path: calcwise_lint
       ref: "feat/analytics-user-property-widget-tests"
-      resolved-ref: "87eae5d804b6ca8216bad60b36c112eb6c2c595c"
+      resolved-ref: c93220db5aabedb786040d57cf9f7a851caef732
       url: "https://github.com/abassimaj123/calcwise_core.git"
     source: git
     version: "0.1.0"

@@ -277,6 +277,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               // Interest Rate
                               _buildField(s.interestRate, _rateCtrl,
                                   suffix: '%',
+                                  percent: true,
                                   required: true,
                                   helperText: isEs
                                       ? 'Tasa predeterminada de 2026 — actualiza con tu tasa real'
@@ -362,6 +363,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   child: Column(children: [
                                     _buildField(s.propertyTaxRate, _taxCtrl,
                                         suffix: '%',
+                                        percent: true,
                                         onChanged: (v) =>
                                             notifier.updatePropertyTaxRate(
                                                 double.tryParse(v.replaceAll(
@@ -957,6 +959,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     String? prefix,
     String? suffix,
     bool currency = false,
+    bool percent = false,
     bool required = false,
     String? errorText,
     String? helperText,
@@ -970,7 +973,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: currency
           ? [CurrencyInputFormatter()]
-          : [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
+          : percent
+              ? [PercentInputFormatter()]
+              : [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
       decoration: InputDecoration(
         labelText: label,
         prefixText: prefix,

@@ -12,7 +12,7 @@ import '../../../domain/models/mortgage_input.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../main.dart' show isSpanishNotifier;
+import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'history_detail_screen.dart';
@@ -766,43 +766,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               if (_items.isEmpty)
                                 SliverFillRemaining(
                                   hasScrollBody: false,
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.history,
-                                            size: 64,
-                                            color: const Color(0xFFCBD5E1)),
-                                        const SizedBox(height: AppSpacing.lg),
-                                        Text(
-                                          isEs
-                                              ? 'Sin historial aún'
-                                              : 'No history yet',
-                                          style: TextStyle(
-                                              color: Color(0xFF64748B),
-                                              fontSize: AppTextSize.bodyLg),
-                                        ),
-                                        const SizedBox(height: AppSpacing.sm),
-                                        Text(
-                                          isEs
-                                              ? 'Haz un cálculo para comenzar'
-                                              : 'Run a calculation to get started',
-                                          style: TextStyle(
-                                              color: Color(0xFF94A3B8),
-                                              fontSize: AppTextSize.md),
-                                        ),
-                                        const SizedBox(height: AppSpacing.xl),
-                                        FilledButton.icon(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          icon: const Icon(
-                                              Icons.calculate_rounded),
-                                          label: Text(isEs
-                                              ? 'Hacer mi primer cálculo'
-                                              : 'Run my first calculation'),
-                                        ),
-                                      ],
-                                    ),
+                                  child: CalcwiseEmptyState(
+                                    icon: Icons.history_rounded,
+                                    title: isEs
+                                        ? 'Sin cálculos aún'
+                                        : 'No calculations yet',
+                                    body: isEs
+                                        ? 'Guarda una hipoteca en la pestaña Calculadora para verla aquí.'
+                                        : 'Save a mortgage from the Calculator tab to see it here.',
+                                    actionLabel:
+                                        isEs ? 'Calcular ahora' : 'Calculate now',
+                                    onAction: () =>
+                                        tabSwitchNotifier.value = 0,
                                   ),
                                 )
                               else

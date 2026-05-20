@@ -87,6 +87,10 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
     final loan = inputState.homePrice - inputState.downPaymentDollar;
     final extraMonthly =
         double.tryParse(_extraMonthlyCtrl.text.replaceAll(',', '')) ?? 0;
+    final extraAnnual =
+        double.tryParse(_extraAnnualCtrl.text.replaceAll(',', '')) ?? 0;
+    final lumpSum =
+        double.tryParse(_lumpSumCtrl.text.replaceAll(',', '')) ?? 0;
 
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
@@ -164,7 +168,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                             ),
                           ),
                           // Big CTA
-                          if (r != null && extraMonthly > 0) ...[
+                          if ((extraMonthly > 0 || extraAnnual > 0 || lumpSum > 0) && r != null) ...[
                             const SizedBox(height: AppSpacing.xl),
                             Container(
                               width: double.infinity,
@@ -231,7 +235,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                 ]),
                               ),
                             ),
-                            if (extraMonthly > 0) ...[
+                            if (extraMonthly > 0 || extraAnnual > 0 || lumpSum > 0) ...[
                               const SizedBox(height: AppSpacing.lg),
                               SizedBox(
                                 width: double.infinity,

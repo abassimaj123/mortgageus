@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/extra_payment_result.dart';
@@ -230,6 +231,28 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                 ]),
                               ),
                             ),
+                            if (extraMonthly > 0) ...[
+                              const SizedBox(height: AppSpacing.lg),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
+                                    final text = isEs
+                                        ? '💰 Pagos Extra\n'
+                                          'Ahorro en intereses: ${_fmt.format(r.interestSaved)}\n'
+                                          'Tiempo ahorrado: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
+                                          '— MortgageUS'
+                                        : '💰 Extra Payments\n'
+                                          'Interest saved: ${_fmt.format(r.interestSaved)}\n'
+                                          'Time saved: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
+                                          '— MortgageUS';
+                                    await Share.share(text);
+                                  },
+                                  icon: const Icon(Icons.share_rounded),
+                                  label: Text(isEs ? 'Compartir resultados' : 'Share results'),
+                                ),
+                              ),
+                            ],
                           ],
                           const SizedBox(height: 80),
                         ]),

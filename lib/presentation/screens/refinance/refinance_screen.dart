@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
@@ -100,9 +101,12 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
           body: Column(
             children: [
               Expanded(
-                  child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Form(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Form(
                   key: _formKey,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: Column(
@@ -212,11 +216,34 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                               ]),
                             ),
                           ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Row(children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  final text = isEs
+                                      ? '📊 Refinanciamiento\n'
+                                        'Pago actual: ${_fmt.format(r!.oldMonthlyPayment)}/mes\n'
+                                        'Nuevo pago: ${_fmt.format(r!.newMonthlyPayment)}/mes\n'
+                                        'Ahorro mensual: ${_fmt.format(r!.monthlySavings)}\n'
+                                        '— MortgageUS'
+                                      : '📊 Refinance Summary\n'
+                                        'Current payment: ${_fmt.format(r!.oldMonthlyPayment)}/mo\n'
+                                        'New payment: ${_fmt.format(r!.newMonthlyPayment)}/mo\n'
+                                        'Monthly savings: ${_fmt.format(r!.monthlySavings)}\n'
+                                        '— MortgageUS';
+                                  await Share.share(text);
+                                },
+                                icon: const Icon(Icons.share_rounded),
+                                label: Text(isEs ? 'Compartir' : 'Share'),
+                              ),
+                            ),
+                          ]),
                         ],
                         const SizedBox(height: 80),
                       ]),
                 ), // Form closes
-              )),
+              )))),
               const CalcwiseAdFooter(),
             ],
           ),

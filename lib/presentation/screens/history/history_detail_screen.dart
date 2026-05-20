@@ -175,7 +175,9 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               ),
             ],
           ),
-          body: ListView(
+          body: SafeArea(
+            top: false, left: false, right: false,
+            child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
               // ── Inputs card ───────────────────────────────────────
@@ -260,6 +262,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 ),
               ),
             ],
+            ),
           ),
         );
       },

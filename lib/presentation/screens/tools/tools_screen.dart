@@ -91,7 +91,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.trending_up_rounded,
             iconSelected: Icons.trending_up,
-            color: const Color(0xFF0D9488), // teal-600
+            color: AppTheme.toolInvestment,
             title: s.toolInvestment,
             subtitle: s.toolInvestmentSub,
             onTap: () => Navigator.push(
@@ -106,7 +106,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.home_rounded,
             iconSelected: Icons.home_rounded,
-            color: const Color(0xFF1E3A8A), // FHA navy
+            color: AppTheme.toolFha,
             title: isEs ? 'Préstamo FHA' : 'FHA Loan',
             subtitle: isEs
                 ? 'Calcula MIP y pago total FHA'
@@ -124,7 +124,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.military_tech_rounded,
             iconSelected: Icons.military_tech,
-            color: const Color(0xFFB91C1C), // VA red
+            color: AppTheme.toolVa,
             title: isEs ? 'Préstamo VA' : 'VA Loan',
             subtitle: isEs
                 ? 'Tarifa de financiación y pago VA'
@@ -142,7 +142,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.agriculture_rounded,
             iconSelected: Icons.agriculture,
-            color: const Color(0xFF15803D), // USDA green
+            color: AppTheme.toolUsda,
             title: isEs ? 'Préstamo USDA' : 'USDA Loan',
             subtitle: isEs
                 ? 'Préstamo rural con 0% inicial'
@@ -160,7 +160,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.shield_rounded,
             iconSelected: Icons.shield,
-            color: const Color(0xFF7C3AED), // purple-600
+            color: AppTheme.toolPmiDetail,
             title: isEs ? 'PMI detallado' : 'PMI Detail',
             subtitle: isEs
                 ? 'Tasa por puntaje crediticio y LTV'
@@ -178,7 +178,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.percent_rounded,
             iconSelected: Icons.percent,
-            color: const Color(0xFFEA580C), // orange-600
+            color: AppTheme.toolPoints,
             title: isEs ? 'Puntos de descuento' : 'Discount Points',
             subtitle: isEs
                 ? 'Equilibrio y ahorro de comprar puntos'

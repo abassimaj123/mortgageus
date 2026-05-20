@@ -588,7 +588,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 Expanded(
                   child: _firstLoad
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const _HistorySkeleton()
                       : RefreshIndicator(
                           onRefresh: _load,
                           child: CustomScrollView(
@@ -1128,6 +1128,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
 }
 
 // ── Reusable widgets ─────────────────────────────────────────────────────────
+
+class _HistorySkeleton extends StatelessWidget {
+  const _HistorySkeleton();
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(children: List.generate(3, (i) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Container(height: 100, decoration: BoxDecoration(
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(16),
+        )),
+      ))),
+    );
+  }
+}
 
 class _ScenarioPill extends StatelessWidget {
   final String label;

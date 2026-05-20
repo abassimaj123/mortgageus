@@ -24,6 +24,12 @@ class AppTheme {
   static const Color toolRefi = Color(0xFF9B59B6); // purple
   static const Color toolHistory = Color(0xFF2ECC71); // emerald
   static const Color toolPmi = Color(0xFFE74C3C); // red
+  static const Color toolInvestment = Color(0xFF0D9488); // teal-600
+  static const Color toolFha = Color(0xFF1E3A8A); // FHA navy
+  static const Color toolVa = Color(0xFFB91C1C); // VA red
+  static const Color toolUsda = Color(0xFF15803D); // USDA green
+  static const Color toolPmiDetail = Color(0xFF7C3AED); // purple-600
+  static const Color toolPoints = Color(0xFFEA580C); // orange-600
   // Chart geometry tokens — delegated to CalcwiseChartTokens
   static const double chartCenterR = CalcwiseChartTokens.donutCenterR;
   static const double chartSectionR = CalcwiseChartTokens.donutSectionR;

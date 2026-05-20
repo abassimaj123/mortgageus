@@ -427,16 +427,21 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               // Breakdown card
-                                              _BreakdownCard(
-                                                  result: result,
-                                                  fmt: _fmt,
-                                                  fmtK: _fmtK,
-                                                  s: s,
-                                                  isEs: isEs),
+                                              CalcwiseStaggerItem(
+                                                index: 2,
+                                                child: _BreakdownCard(
+                                                    result: result,
+                                                    fmt: _fmt,
+                                                    fmtK: _fmtK,
+                                                    s: s,
+                                                    isEs: isEs),
+                                              ),
                                               // ── Reverse-Solve: max affordable home price ─
                                               const SizedBox(
                                                   height: AppSpacing.md),
-                                              ReverseSolveCard(
+                                              CalcwiseStaggerItem(
+                                                index: 3,
+                                                child: ReverseSolveCard(
                                                 title: isEs
                                                     ? '¿Qué precio puedo pagar?'
                                                     : 'What home price can I afford?',
@@ -471,11 +476,13 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                       f /
                                                       (f - 1);
                                                 },
-                                              ),
+                                              )),
                                               // ── Stress Test Banner ─────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.sm),
-                                              Semantics(
+                                              CalcwiseStaggerItem(
+                                                index: 4,
+                                                child: Semantics(
                                                 label: isEs
                                                     ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${_fmt.format(result.stressTestMonthly)}'
                                                     : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${_fmt.format(result.stressTestMonthly)}',
@@ -545,7 +552,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     ),
                                                   ],
                                                 ),
-                                              )), // Semantics (stress test)
+                                              ))), // Semantics (stress test) + CalcwiseStaggerItem
                                               // ── Smart Insights ─────────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.md),
@@ -568,7 +575,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               const SizedBox(
                                                   height: AppSpacing.md),
                                               // Save button — primary CTA
-                                              ElevatedButton.icon(
+                                              FilledButton.icon(
                                                 onPressed: () {
                                                   HapticFeedback.mediumImpact();
                                                   _saveToHistory(
@@ -577,9 +584,15 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 icon: const Icon(
                                                     Icons.bookmark_add_rounded),
                                                 label: Text(s.saveCalc),
-                                                style: ElevatedButton.styleFrom(
+                                                style: FilledButton.styleFrom(
+                                                  backgroundColor:
+                                                      AppTheme.primary,
                                                   minimumSize: const Size(
                                                       double.infinity, 52),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              AppRadius.lg)),
                                                 ),
                                               ),
                                               const SizedBox(

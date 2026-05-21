@@ -1646,7 +1646,7 @@ class _HistoryCompareScreen extends StatelessWidget {
                 labelB: col2,
                 isEs: isEs,
               ),
-              const SizedBox(height: 80),
+              const SizedBox(height: AppSpacing.listBottomInset),
             ]),
           ),
         ),

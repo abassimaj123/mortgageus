@@ -217,6 +217,7 @@ class ToolsScreen extends StatelessWidget {
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
           body: SingleChildScrollView(
+            key: const PageStorageKey('tools_hub'),
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

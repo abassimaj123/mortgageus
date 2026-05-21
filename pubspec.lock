@@ -157,8 +157,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "feat/analytics-user-property-widget-tests"
-      resolved-ref: c93220db5aabedb786040d57cf9f7a851caef732
+      ref: main
+      resolved-ref: de07dc28236caf30b6573e46c7a2993962ccf9e2
       url: "https://github.com/abassimaj123/calcwise_core.git"
     source: git
     version: "1.0.0"
@@ -166,8 +166,8 @@ packages:
     dependency: "direct dev"
     description:
       path: calcwise_lint
-      ref: "feat/analytics-user-property-widget-tests"
-      resolved-ref: c93220db5aabedb786040d57cf9f7a851caef732
+      ref: main
+      resolved-ref: "7fd312017a969bec80223e44098cc016ce526297"
       url: "https://github.com/abassimaj123/calcwise_core.git"
     source: git
     version: "0.1.0"
@@ -548,6 +548,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
+  google_fonts:
+    dependency: transitive
+    description:
+      name: google_fonts
+      sha256: ba03d03bcaa2f6cb7bd920e3b5027181db75ab524f8891c8bc3aa603885b8055
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.3.3"
   google_mobile_ads:
     dependency: "direct main"
     description:

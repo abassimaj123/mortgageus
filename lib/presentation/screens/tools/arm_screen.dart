@@ -227,7 +227,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                           fixedYears: _fixedYears,
                           termYears: _termYears),
                     ],
-                    const SizedBox(height: 80),
+                    const SizedBox(height: AppSpacing.listBottomInset),
                   ]),
             )),
             const CalcwiseAdFooter(),

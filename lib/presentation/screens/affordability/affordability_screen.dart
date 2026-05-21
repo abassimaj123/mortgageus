@@ -272,7 +272,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                                     fontSize: AppTextSize.md)),
                           ),
                         ],
-                        const SizedBox(height: 80),
+                        const SizedBox(height: AppSpacing.listBottomInset),
                       ]),
                 ), // Form closes
               ),

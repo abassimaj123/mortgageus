@@ -879,7 +879,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                         ),
                                       ),
                               ),
-                              const SizedBox(height: 80),
+                              const SizedBox(height: AppSpacing.listBottomInset),
                             ],
                           ),
                         ), // Form closes

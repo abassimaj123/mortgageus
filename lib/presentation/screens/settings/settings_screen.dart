@@ -38,6 +38,43 @@ class SettingsScreen extends StatelessWidget {
           title: s.settingsTitle,
           bottomNavigationBar: const CalcwiseAdFooter(),
           children: [
+            // ── Premium ────────────────────────────────────────
+            ValueListenableBuilder<bool>(
+              valueListenable: freemiumService.isPremiumNotifier,
+              builder: (context, isPremium, _) => CalcwiseSettingsSection(
+                title: 'Premium',
+                children: isPremium
+                    ? [
+                        ListTile(
+                          leading: const Icon(Icons.verified,
+                              color: AppTheme.accent),
+                          title: Text(s.premiumActive),
+                          subtitle: Text(s.premiumSubtitle),
+                        ),
+                      ]
+                    : [
+                        CalcwiseSettingsTile(
+                          icon: Icons.star_rounded,
+                          label: s.getPremium,
+                          subtitle: s.premiumSubtitle as String?,
+                          trailing: '\$2.99',
+                          onTap: () => IAPService.instance.buy(),
+                        ),
+                        CalcwiseSettingsTile(
+                          icon: Icons.restore,
+                          label: s.restorePurchase,
+                          onTap: () => IAPService.instance.restore(),
+                        ),
+                        if (kDebugMode)
+                          CalcwiseSettingsTile(
+                            icon: Icons.bug_report,
+                            label: 'Force Premium (DEV)',
+                            onTap: () => freemiumService.debugUnlockPremium(),
+                          ),
+                      ],
+              ),
+            ),
+            const Divider(height: 1),
             // ── Language ───────────────────────────────────────
             CalcwiseSettingsSection(
               title: s.language,
@@ -74,43 +111,6 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            const Divider(height: 1),
-            // ── Premium ────────────────────────────────────────
-            ValueListenableBuilder<bool>(
-              valueListenable: freemiumService.isPremiumNotifier,
-              builder: (context, isPremium, _) => CalcwiseSettingsSection(
-                title: 'Premium',
-                children: isPremium
-                    ? [
-                        ListTile(
-                          leading: const Icon(Icons.verified,
-                              color: AppTheme.accent),
-                          title: Text(s.premiumActive),
-                          subtitle: Text(s.premiumSubtitle),
-                        ),
-                      ]
-                    : [
-                        CalcwiseSettingsTile(
-                          icon: Icons.star_rounded,
-                          label: s.getPremium,
-                          subtitle: s.premiumSubtitle as String?,
-                          trailing: '\$2.99',
-                          onTap: () => IAPService.instance.buy(),
-                        ),
-                        CalcwiseSettingsTile(
-                          icon: Icons.restore,
-                          label: s.restorePurchase,
-                          onTap: () => IAPService.instance.restore(),
-                        ),
-                        if (kDebugMode)
-                          CalcwiseSettingsTile(
-                            icon: Icons.bug_report,
-                            label: 'Force Premium (DEV)',
-                            onTap: () => freemiumService.debugUnlockPremium(),
-                          ),
-                      ],
-              ),
             ),
             const Divider(height: 1),
             // ── Support ────────────────────────────────────────

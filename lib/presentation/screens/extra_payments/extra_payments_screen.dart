@@ -258,7 +258,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                               ),
                             ],
                           ],
-                          const SizedBox(height: 80),
+                          const SizedBox(height: AppSpacing.listBottomInset),
                         ]),
                   ),
                 ),

@@ -240,7 +240,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                             ),
                           ]),
                         ],
-                        const SizedBox(height: 80),
+                        const SizedBox(height: AppSpacing.listBottomInset),
                       ]),
                 ), // Form closes
               )))),

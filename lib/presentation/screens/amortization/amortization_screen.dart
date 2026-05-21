@@ -1,3 +1,4 @@
+import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -572,7 +573,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                   isPremium: freemiumService.hasFullAccess),
             ],
 
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.listBottomInset)),
           ]),
         );
       },
@@ -1179,7 +1180,7 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
         flex: flex,
         child: Text(text,
-            style: const TextStyle(fontSize: AppTheme.tableBodySize),
+            style: const TextStyle(fontSize: AppTheme.tableBodySize, fontFeatures: [FontFeature.tabularFigures()]),
             textAlign: TextAlign.right),
       );
 }

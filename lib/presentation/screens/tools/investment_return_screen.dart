@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/irr_engine.dart';
 import '../../../core/theme/app_theme.dart';
@@ -6,6 +7,7 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter;
@@ -14,21 +16,23 @@ import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 // ── Color for Investment Return tool icon (emerald-teal) ──────────────────────
 const Color _kToolColor = Color(0xFF0D9488); // teal-600
 
-class InvestmentReturnScreen extends StatefulWidget {
+class InvestmentReturnScreen extends ConsumerStatefulWidget {
   const InvestmentReturnScreen({super.key});
 
   @override
-  State<InvestmentReturnScreen> createState() => _InvestmentReturnScreenState();
+  ConsumerState<InvestmentReturnScreen> createState() =>
+      _InvestmentReturnScreenState();
 }
 
-class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
+class _InvestmentReturnScreenState
+    extends ConsumerState<InvestmentReturnScreen> {
   // ── Controllers ──────────────────────────────────────────────────────────
-  final _priceCtrl = TextEditingController(text: '400000');
+  late final TextEditingController _priceCtrl;
   final _rentCtrl = TextEditingController(text: '2500');
   final _discountCtrl = TextEditingController(text: '10');
 
   // ── State ─────────────────────────────────────────────────────────────────
-  double _downPct = 20.0;
+  late double _downPct;
   double _appreciation = 3.0;
   int _holdYears = 10;
   bool _analyticsLogged = false;
@@ -36,9 +40,21 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
   static const List<int> _holdOptions = [5, 10, 15, 20];
 
   // ── Interest rate used for mortgage calculation ───────────────────────────
-  static const double _defaultRate = 7.0;
+  late double _defaultRate;
   static const int _defaultTerm = 30;
   static const double _expenseRatio = 0.30; // 30% of gross rent
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill from current calculator values
+    final input = ref.read(mortgageInputProvider);
+    final price = input.homePrice > 0 ? input.homePrice : 400000;
+    _downPct = input.downPaymentPct.clamp(5.0, 50.0);
+    _defaultRate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+    _priceCtrl =
+        TextEditingController(text: NumberFormat('#,##0').format(price.round()));
+  }
 
   @override
   void dispose() {

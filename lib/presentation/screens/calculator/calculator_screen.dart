@@ -1148,28 +1148,14 @@ class _LoanTypeSelector extends ConsumerWidget {
       children: [
         Text(s.loanType, style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: 8,
-          children: LoanType.values.map((type) {
-            final selected = inputState.loanType == type;
-            return Semantics(
-              label:
-                  '${type.label} loan type, ${selected ? "selected" : "not selected"}',
-              child: ChoiceChip(
-                label: Text(type.label),
-                selected: selected,
-                selectedColor: AppTheme.primary,
-                labelStyle: TextStyle(
-                  color: selected ? Colors.white : AppTheme.labelGray,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                ),
-                onSelected: (_) {
-                  HapticFeedback.selectionClick();
-                  notifier.updateLoanType(type);
-                },
-              ),
-            );
-          }).toList(),
+        _ChipRow<LoanType>(
+          values: LoanType.values,
+          selected: inputState.loanType,
+          label: (t) => t.label,
+          onTap: (t) {
+            HapticFeedback.selectionClick();
+            notifier.updateLoanType(t);
+          },
         ),
       ],
     );
@@ -1479,4 +1465,69 @@ class _Row extends StatelessWidget {
         ),
       ),
       );
+}
+
+// ── Generic pill chip row (same style as MortgageUK) ─────────────────────────
+
+class _ChipRow<T> extends StatelessWidget {
+  final List<T> values;
+  final T selected;
+  final String Function(T) label;
+  final void Function(T) onTap;
+
+  const _ChipRow({
+    required this.values,
+    required this.selected,
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs + 2,
+      children: values.map((v) {
+        final isSelected = v == selected;
+        return Semantics(
+          label: label(v),
+          selected: isSelected,
+          button: true,
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap(v);
+            },
+            child: AnimatedContainer(
+              duration: AppDuration.fast,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.xs + 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppTheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                border: Border.all(
+                  color: isSelected
+                      ? AppTheme.primary
+                      : CalcwiseTheme.of(context).cardBorder,
+                ),
+              ),
+              child: Text(
+                label(v),
+                style: TextStyle(
+                  fontSize: AppTextSize.sm,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : CalcwiseTheme.of(context).textSecondary,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 }

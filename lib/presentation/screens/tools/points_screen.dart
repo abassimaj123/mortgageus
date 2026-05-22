@@ -146,12 +146,12 @@ class _PointsScreenState extends State<PointsScreen> {
                         onChanged: (v) => setState(() => _points = v),
                         onChangeEnd: (_) => _onInteraction(),
                       ),
-                      Wrap(spacing: 8, children: [
+                      Wrap(spacing: AppSpacing.sm, children: [
                         for (final t in const [15, 20, 30])
-                          ChoiceChip(
-                            label: Text('$t yr'),
+                          _TermChip(
+                            label: '$t yr',
                             selected: _term == t,
-                            onSelected: (_) {
+                            onTap: () {
                               setState(() => _term = t);
                               _onInteraction();
                             },
@@ -306,4 +306,45 @@ class _Row extends StatelessWidget {
           ],
         ),
       );
+}
+
+class _TermChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _TermChip(
+      {required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.xs + 2),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppTheme.primary
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+          border: Border.all(
+            color: selected
+                ? AppTheme.primary
+                : Theme.of(context).dividerColor,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: AppTextSize.sm,
+            fontWeight: FontWeight.w500,
+            color: selected
+                ? Colors.white
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
 }

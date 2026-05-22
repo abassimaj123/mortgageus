@@ -23,6 +23,7 @@ import 'presentation/screens/splash_screen.dart';
 import 'l10n/strings_en.dart';
 import 'l10n/strings_es.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'presentation/widgets/paywall_hard.dart';
 
 // Global language notifier — false = English, true = Spanish
 final ValueNotifier<bool> isSpanishNotifier = ValueNotifier<bool>(false);
@@ -261,6 +262,7 @@ class _MainShellState extends State<_MainShell> {
                     ),
                   ),
                   onRewardAd: () => CalcwiseRewardAdSheet.show(context),
+                  onPremium: () => PaywallHard.show(context),
                 ),
               ],
             ),

@@ -43,6 +43,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
       if (loan > 0) {
         _loanCtrl.text = loan.toStringAsFixed(0);
       }
+      if (mounted) _calculate();
     });
   }
 
@@ -137,7 +138,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                               color: sel ? Colors.white : null,
                               fontWeight: FontWeight.w600,
                             ),
-                            onSelected: (_) => setState(() => _fixedYears = y),
+                            onSelected: (_) { setState(() => _fixedYears = y); _calculate(); },
                           ),
                         ),
                       ));
@@ -176,7 +177,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                               color: sel ? Colors.white : null,
                               fontWeight: FontWeight.w600,
                             ),
-                            onSelected: (_) => setState(() => _termYears = y),
+                            onSelected: (_) { setState(() => _termYears = y); _calculate(); },
                           ),
                         ),
                       ));
@@ -202,19 +203,6 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    // ── Calculate button ──────────────────────────────────
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _calculate,
-                        style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(AppSpacing.lg)),
-                        child: Text(
-                          isEs ? 'Calcular ARM' : 'Calculate ARM',
-                          style: const TextStyle(fontSize: AppTextSize.bodyLg),
-                        ),
-                      ),
-                    ),
                     // ── Results ───────────────────────────────────────────
                     if (r != null) ...[
                       const SizedBox(height: AppSpacing.xxl),
@@ -259,6 +247,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
         contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
+      onChanged: (_) => _calculate(),
     );
   }
 }

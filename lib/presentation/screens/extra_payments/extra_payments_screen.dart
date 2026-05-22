@@ -29,12 +29,16 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
   final _lumpMonthCtrl = TextEditingController(text: '12');
 
   ExtraPaymentResult? _result;
+  bool _interacted = false;
   final _fmt =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _recalculate(ref.read(mortgageInputProvider));
+    });
   }
 
   @override
@@ -46,7 +50,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
     super.dispose();
   }
 
-  Future<void> _calculate(MortgageInputState s) async {
+  void _recalculate(MortgageInputState s) {
     final loan = s.homePrice - s.downPaymentDollar;
     if (loan <= 0) return;
     final extraMonthly =
@@ -55,7 +59,6 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
         double.tryParse(_extraAnnualCtrl.text.replaceAll(',', '')) ?? 0;
     final lumpSum = double.tryParse(_lumpSumCtrl.text.replaceAll(',', '')) ?? 0;
     final lumpMonth = int.tryParse(_lumpMonthCtrl.text) ?? 0;
-
     setState(() {
       try {
         _result = MortgageCalculator.calcExtraPayments(
@@ -71,13 +74,23 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
         _result = null;
       }
     });
+  }
+
+  void _onChanged(MortgageInputState s) {
+    _recalculate(s);
+    if (_interacted) return;
+    _interacted = true;
+    _trackInteraction();
+  }
+
+  Future<void> _trackInteraction() async {
     adService.onAction();
     AnalyticsService.instance.logExtraPaymentSimulated();
-    if (mounted) {
-      final trigger = await paywallSession.recordAction();
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-    }
+    if (!mounted) return;
+    final trigger = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
   }
 
   @override
@@ -149,24 +162,20 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                   fontSize: AppTextSize.bodyLg)),
                           const SizedBox(height: AppSpacing.md),
                           _field(s.extraMonthly, _extraMonthlyCtrl,
-                              prefix: '\$', currency: true),
+                              prefix: '\$',
+                              currency: true,
+                              onChanged: () => _onChanged(inputState)),
                           _field(s.extraAnnual, _extraAnnualCtrl,
-                              prefix: '\$', currency: true),
+                              prefix: '\$',
+                              currency: true,
+                              onChanged: () => _onChanged(inputState)),
                           _field(s.lumpSum, _lumpSumCtrl,
-                              prefix: '\$', currency: true),
-                          _field(s.lumpSumMonth, _lumpMonthCtrl),
+                              prefix: '\$',
+                              currency: true,
+                              onChanged: () => _onChanged(inputState)),
+                          _field(s.lumpSumMonth, _lumpMonthCtrl,
+                              onChanged: () => _onChanged(inputState)),
                           const SizedBox(height: AppSpacing.sm),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () => _calculate(inputState),
-                              style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.all(AppSpacing.lg)),
-                              child: Text(s.calcSavings,
-                                  style: const TextStyle(
-                                      fontSize: AppTextSize.bodyLg)),
-                            ),
-                          ),
                           // Big CTA
                           if ((extraMonthly > 0 || extraAnnual > 0 || lumpSum > 0) && r != null) ...[
                             const SizedBox(height: AppSpacing.xl),
@@ -272,7 +281,10 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
   }
 
   Widget _field(String label, TextEditingController ctrl,
-      {String? prefix, String? suffix, bool currency = false}) {
+      {String? prefix,
+      String? suffix,
+      bool currency = false,
+      VoidCallback? onChanged}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: TextFormField(
@@ -288,6 +300,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
           contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
+        onChanged: onChanged != null ? (_) => onChanged() : null,
       ),
     );
   }

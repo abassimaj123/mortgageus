@@ -33,9 +33,14 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
   final _fmt =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
 
+  bool _interacted = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _recalculate();
+    });
   }
 
   @override
@@ -49,8 +54,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
     super.dispose();
   }
 
-  Future<void> _calculate() async {
-    if (!(_formKey.currentState?.validate() ?? true)) return;
+  void _recalculate() {
     final balance = double.tryParse(_balanceCtrl.text.replaceAll(',', '')) ?? 0;
     final curRate = double.tryParse(_curRateCtrl.text) ?? 0;
     final curYears = int.tryParse(_curYearsCtrl.text) ?? 25;
@@ -58,15 +62,13 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
     final newYears = int.tryParse(_newYearsCtrl.text) ?? 30;
     final closing =
         double.tryParse(_closingCtrl.text.replaceAll(',', '')) ?? 4000;
-
     if (balance <= 0 || curYears <= 0 || newYears <= 0) {
       setState(() =>
           _balanceError = balance <= 0 ? 'Enter a valid loan balance' : null);
       return;
     }
-    setState(() => _balanceError = null);
-
     setState(() {
+      _balanceError = null;
       try {
         _result = MortgageCalculator.calcRefinance(
           currentBalance: balance,
@@ -80,13 +82,23 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
         _result = null;
       }
     });
+  }
+
+  void _onChanged() {
+    _recalculate();
+    if (_interacted) return;
+    _interacted = true;
+    _trackInteraction();
+  }
+
+  Future<void> _trackInteraction() async {
     adService.onAction();
     AnalyticsService.instance.logRefinanceSimulated();
-    if (mounted) {
-      final trigger = await paywallSession.recordAction();
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-    }
+    if (!mounted) return;
+    final trigger = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
   }
 
   @override
@@ -117,33 +129,33 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
                               prefix: '\$',
                               currency: true,
                               errorText: _balanceError,
-                              required: true),
+                              required: true,
+                              onChanged: _onChanged),
                           _field(s.currentRate, _curRateCtrl,
-                              suffix: '%', required: true),
+                              suffix: '%',
+                              required: true,
+                              onChanged: _onChanged),
                           _field(s.yearsRemaining, _curYearsCtrl,
-                              suffix: s.years as String?, required: true),
+                              suffix: s.years as String?,
+                              required: true,
+                              onChanged: _onChanged),
                         ]),
                         const SizedBox(height: AppSpacing.lg),
                         _Section(s.newLoan, [
                           _field(s.newRate, _newRateCtrl,
-                              suffix: '%', required: true),
+                              suffix: '%',
+                              required: true,
+                              onChanged: _onChanged),
                           _field(s.newTerm, _newYearsCtrl,
-                              suffix: s.years as String?, required: true),
+                              suffix: s.years as String?,
+                              required: true,
+                              onChanged: _onChanged),
                           _field(s.closingCosts, _closingCtrl,
-                              prefix: '\$', currency: true),
+                              prefix: '\$',
+                              currency: true,
+                              onChanged: _onChanged),
                         ]),
                         const SizedBox(height: AppSpacing.lg),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _calculate,
-                            style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.all(AppSpacing.lg)),
-                            child: Text(s.calcRefi,
-                                style: const TextStyle(
-                                    fontSize: AppTextSize.bodyLg)),
-                          ),
-                        ),
                         if (r != null) ...[
                           const SizedBox(height: AppSpacing.xl),
                           Card(
@@ -257,13 +269,15 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
       String? suffix,
       bool currency = false,
       String? errorText,
-      bool required = false}) {
+      bool required = false,
+      VoidCallback? onChanged}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: TextFormField(
         controller: ctrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: currency ? [CurrencyInputFormatter()] : null,
+        onChanged: onChanged != null ? (_) => onChanged() : null,
         decoration: InputDecoration(
           labelText: label,
           prefixText: prefix,

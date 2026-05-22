@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart'
     show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
@@ -12,19 +14,33 @@ import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 /// PMI Standalone Calculator
 /// Monthly PMI = loan × annual_rate(by credit score & LTV) / 12.
 /// Shows months until LTV reaches 80% (auto-cancel request) and 78% (mandatory).
-class PmiCalculatorScreen extends StatefulWidget {
+class PmiCalculatorScreen extends ConsumerStatefulWidget {
   const PmiCalculatorScreen({super.key});
 
   @override
-  State<PmiCalculatorScreen> createState() => _PmiCalculatorScreenState();
+  ConsumerState<PmiCalculatorScreen> createState() =>
+      _PmiCalculatorScreenState();
 }
 
-class _PmiCalculatorScreenState extends State<PmiCalculatorScreen> {
-  final _homePriceCtrl = TextEditingController(text: '400000');
-  final _rateCtrl = TextEditingController(text: '7.0');
-  double _downPct = 10.0;
+class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
+  late final TextEditingController _homePriceCtrl;
+  late final TextEditingController _rateCtrl;
+  late double _downPct;
   int _creditScore = 720;
   bool _logged = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill from current calculator values
+    final input = ref.read(mortgageInputProvider);
+    final price = input.homePrice > 0 ? input.homePrice : 400000;
+    final rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+    _downPct = input.downPaymentPct.clamp(3.0, 19.9);
+    _homePriceCtrl = TextEditingController(
+        text: NumberFormat('#,##0').format(price.round()));
+    _rateCtrl = TextEditingController(text: rate.toStringAsFixed(1));
+  }
 
   static const int _term = 30;
 

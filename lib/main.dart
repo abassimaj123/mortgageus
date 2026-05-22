@@ -19,6 +19,7 @@ import 'presentation/screens/comparator/comparator_screen.dart';
 import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/tools/tools_screen.dart';
 import 'presentation/screens/affordability/affordability_screen.dart';
+import 'presentation/screens/history/history_screen.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'l10n/strings_en.dart';
 import 'l10n/strings_es.dart';
@@ -206,6 +207,8 @@ class _MainShellState extends State<_MainShell> {
           return s.affordTitle;
         case 4:
           return s.toolsTitle;
+        case 5:
+          return s.navHistory;
         default:
           return s.appTitle;
       }
@@ -220,6 +223,8 @@ class _MainShellState extends State<_MainShell> {
           return s.affordTitle;
         case 4:
           return s.toolsTitle;
+        case 5:
+          return s.navHistory;
         default:
           return s.appTitle;
       }
@@ -232,6 +237,7 @@ class _MainShellState extends State<_MainShell> {
     ComparatorScreen(),
     AffordabilityScreen(),
     ToolsScreen(),
+    HistoryScreen(),
   ];
 
   @override
@@ -290,7 +296,8 @@ class _MainShellState extends State<_MainShell> {
                   'schedule',
                   'comparator',
                   'affordability',
-                  'tools'
+                  'tools',
+                  'history'
                 ];
                 if (i < _tabNames.length) {
                   AnalyticsService.instance.logTabChanged(_tabNames[i]);
@@ -327,6 +334,10 @@ class _MainShellState extends State<_MainShell> {
                     icon: const Icon(Icons.build_rounded),
                     selectedIcon: const Icon(Icons.build_rounded),
                     label: s.navTools),
+                NavigationDestination(
+                    icon: const Icon(Icons.history_rounded),
+                    selectedIcon: const Icon(Icons.history),
+                    label: s.navHistory),
               ],
             ),
           );

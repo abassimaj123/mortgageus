@@ -33,7 +33,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
   final _incomeCtrl = TextEditingController(text: '100000');
   final _debtsCtrl = TextEditingController(text: '500');
   final _downCtrl = TextEditingController(text: '60000');
-  final _rateCtrl = TextEditingController();
+  final _rateCtrl = TextEditingController(text: '6.8');
   final _taxCtrl = TextEditingController(text: '1.1');
   final _insuranceCtrl = TextEditingController(text: '1750');
   final _hoaCtrl = TextEditingController(text: '0');
@@ -50,9 +50,11 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Sync rate from main calculator provider, then auto-calculate
       final rate = ref.read(mortgageInputProvider).annualRatePct;
       _rateCtrl.text = rate.toStringAsFixed(2);
+      if (mounted) await _calculate();
     });
   }
 

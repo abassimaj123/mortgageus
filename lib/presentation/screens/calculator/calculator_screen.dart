@@ -53,7 +53,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   final _taxCtrl = TextEditingController(text: '1.1');
   final _insuranceCtrl = TextEditingController(text: '1750');
   final _hoaCtrl = TextEditingController(text: '0');
-  final _incomeCtrl = TextEditingController();
+  final _incomeCtrl = TextEditingController(text: '80000');
   double _monthlyIncome = 0.0;
   bool _advancedExpanded = false;
   String? _homePriceError;

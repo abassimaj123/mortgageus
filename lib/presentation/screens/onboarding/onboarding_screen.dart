@@ -39,6 +39,21 @@ class OnboardingScreen extends StatelessWidget {
                 'Cambia entre 15 y 30 años o tasa fija vs variable — al instante.',
             pillsEs: ['Tasa fija', 'ARM', '15 vs 30 años'],
           ),
+          OnboardingPage(
+            icon: Icons.history_rounded,
+            title: 'Save Every\nScenario',
+            subtitle:
+                'Your calculations are saved automatically. Revisit and compare anytime.',
+            pills: ['History', 'PDF Export', 'Share'],
+            titleFr: 'Sauvegardez vos\nscénarios',
+            subtitleFr:
+                'Vos calculs sont sauvegardés automatiquement. Retrouvez-les et comparez.',
+            pillsFr: ['Historique', 'Export PDF', 'Partager'],
+            titleEs: 'Guarda todos\ntus escenarios',
+            subtitleEs:
+                'Tus cálculos se guardan automáticamente. Recupéralos y compara cuando quieras.',
+            pillsEs: ['Historial', 'Exportar PDF', 'Compartir'],
+          ),
         ],
       );
 }

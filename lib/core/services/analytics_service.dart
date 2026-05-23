@@ -43,6 +43,7 @@ class AnalyticsService extends CalcwiseAnalytics {
   Future<void> logUsdaCalculated() => log('usda_calculated');
   Future<void> logPmiStandaloneCalculated() => log('pmi_standalone_calculated');
   Future<void> logPointsCalculated() => log('points_calculated');
+  Future<void> logDtiCalculated() => log('dti_calculated');
 
   // ── Universal events (Phase 2) ────────────────────────────────────────────
 

@@ -14,6 +14,7 @@ import 'va_screen.dart';
 import 'usda_screen.dart';
 import 'pmi_calculator_screen.dart';
 import 'points_screen.dart';
+import 'dti_screen.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 
 class ToolsScreen extends StatelessWidget {
@@ -36,6 +37,23 @@ class ToolsScreen extends StatelessWidget {
                 context,
                 PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const ExtraPaymentsScreen(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: AppDuration.base,
+                )),
+          ),
+          _ToolItem(
+            icon: Icons.balance_rounded,
+            iconSelected: Icons.balance,
+            color: const Color(0xFF0891B2), // cyan-600
+            title: isEs ? 'Relación Deuda-Ingreso' : 'DTI Calculator',
+            subtitle: isEs
+                ? 'Verifica tu elegibilidad con prestamistas'
+                : 'Check lender eligibility & max payment',
+            onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder<void>(
+                  pageBuilder: (_, __, ___) => const DtiScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),
                   transitionDuration: AppDuration.base,

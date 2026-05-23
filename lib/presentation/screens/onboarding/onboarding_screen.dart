@@ -14,15 +14,15 @@ class OnboardingScreen extends StatelessWidget {
             title: 'Your Smart\nMortgage Calculator',
             subtitle:
                 'Monthly payment, amortization & property breakdown — all in one place.',
-            pills: ['51 States', '2026 Rates', 'Amortization'],
+            pills: ['Spanish/Español', 'FHA·VA·USDA', 'DTI Calc', '51 States'],
             titleFr: 'Votre calculatrice\nhypothécaire',
             subtitleFr:
                 'Versement mensuel, amortissement et bilan immobilier — tout en un.',
-            pillsFr: ['51 États', 'Taux 2026', 'Amortissement'],
+            pillsFr: ['Spanish/Español', 'FHA·VA·USDA', 'Calcul DTI', '51 États'],
             titleEs: 'Tu calculadora\nhipotecaria',
             subtitleEs:
                 'Pago mensual, amortización y análisis de propiedad — todo en uno.',
-            pillsEs: ['51 Estados', 'Tasas 2026', 'Amortización'],
+            pillsEs: ['Spanish/Español', 'FHA·VA·USDA', 'Calc. DTI', '51 Estados'],
           ),
           OnboardingPage(
             icon: Icons.bar_chart_rounded,

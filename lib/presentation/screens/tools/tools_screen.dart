@@ -15,6 +15,8 @@ import 'usda_screen.dart';
 import 'pmi_calculator_screen.dart';
 import 'points_screen.dart';
 import 'dti_screen.dart';
+import 'heloc_calc_screen.dart';
+import 'closing_costs_screen.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 
 class ToolsScreen extends StatelessWidget {
@@ -210,6 +212,40 @@ class ToolsScreen extends StatelessWidget {
                 transitionDuration: AppDuration.base,
               ),
             ),
+          ),
+          _ToolItem(
+            icon: Icons.account_balance_rounded,
+            iconSelected: Icons.account_balance,
+            color: Color(0xFF0D9488), // teal
+            title: isEs ? 'Calculadora HELOC' : 'HELOC Calculator',
+            subtitle: isEs
+                ? 'Línea de crédito sobre el capital de tu hogar'
+                : 'Home equity line of credit estimator',
+            onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder<void>(
+                  pageBuilder: (_, __, ___) => const HelocCalcScreen(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: AppDuration.base,
+                )),
+          ),
+          _ToolItem(
+            icon: Icons.receipt_long_rounded,
+            iconSelected: Icons.receipt_long,
+            color: Color(0xFFEA580C), // deep orange
+            title: isEs ? 'Costos de Cierre' : 'Closing Costs by State',
+            subtitle: isEs
+                ? 'Estima costos de cierre por estado'
+                : 'Estimate closing costs by US state',
+            onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder<void>(
+                  pageBuilder: (_, __, ___) => const ClosingCostsScreen(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: AppDuration.base,
+                )),
           ),
           _ToolItem(
             icon: Icons.history_rounded,

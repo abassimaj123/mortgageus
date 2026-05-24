@@ -329,9 +329,7 @@ class _TermChip extends StatelessWidget {
               : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppRadius.full),
           border: Border.all(
-            color: selected
-                ? AppTheme.primary
-                : Theme.of(context).dividerColor,
+            color: selected ? AppTheme.primary : Theme.of(context).dividerColor,
           ),
         ),
         child: Text(

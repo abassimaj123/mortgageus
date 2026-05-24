@@ -138,7 +138,10 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                               color: sel ? Colors.white : null,
                               fontWeight: FontWeight.w600,
                             ),
-                            onSelected: (_) { setState(() => _fixedYears = y); _calculate(); },
+                            onSelected: (_) {
+                              setState(() => _fixedYears = y);
+                              _calculate();
+                            },
                           ),
                         ),
                       ));
@@ -177,7 +180,10 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                               color: sel ? Colors.white : null,
                               fontWeight: FontWeight.w600,
                             ),
-                            onSelected: (_) { setState(() => _termYears = y); _calculate(); },
+                            onSelected: (_) {
+                              setState(() => _termYears = y);
+                              _calculate();
+                            },
                           ),
                         ),
                       ));

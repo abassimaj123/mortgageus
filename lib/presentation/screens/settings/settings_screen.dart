@@ -189,13 +189,18 @@ class _LangButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         decoration: BoxDecoration(
           color: selected ? color : Colors.transparent,
-          border: Border.all(color: selected ? color : Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(
+              color: selected
+                  ? color
+                  : Theme.of(context).colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(AppRadius.mdPlus),
         ),
         alignment: Alignment.center,
         child: Text(label,
             style: TextStyle(
-              color: selected ? Colors.white : CalcwiseTheme.of(context).textSecondary,
+              color: selected
+                  ? Colors.white
+                  : CalcwiseTheme.of(context).textSecondary,
               fontWeight: selected ? FontWeight.bold : FontWeight.normal,
             )),
       ),

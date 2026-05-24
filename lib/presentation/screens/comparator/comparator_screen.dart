@@ -174,35 +174,38 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                             ? '${str.home} ${fmt.format(s.homePrice)}, ${str.down} ${fmt.format(s.downPaymentDollar)} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%'
                             : '${str.home} ${fmt.format(s.homePrice)}, ${str.down} ${fmt.format(s.downPaymentDollar)} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%',
                         child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          border: Border.all(color: AppTheme.primary, width: 1),
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
-                        child: Row(children: [
-                          const Icon(Icons.home_rounded,
-                              color: AppTheme.primary),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                Text('${str.home} ${fmt.format(s.homePrice)}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primary)),
-                                Text(
-                                    '${str.down} ${fmt.format(s.downPaymentDollar)}'
-                                    ' (${s.downPaymentPct.toStringAsFixed(1)}%)'
-                                    '  ${str.rate} ${s.annualRatePct}%',
-                                    style: TextStyle(
-                                        color: AppTheme.primary
-                                            .withValues(alpha: 0.7),
-                                        fontSize: AppTextSize.sm)),
-                              ])),
-                        ]),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.lg,
+                              vertical: AppSpacing.lg),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            border:
+                                Border.all(color: AppTheme.primary, width: 1),
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                          ),
+                          child: Row(children: [
+                            const Icon(Icons.home_rounded,
+                                color: AppTheme.primary),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                  Text('${str.home} ${fmt.format(s.homePrice)}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primary)),
+                                  Text(
+                                      '${str.down} ${fmt.format(s.downPaymentDollar)}'
+                                      ' (${s.downPaymentPct.toStringAsFixed(1)}%)'
+                                      '  ${str.rate} ${s.annualRatePct}%',
+                                      style: TextStyle(
+                                          color: AppTheme.primary
+                                              .withValues(alpha: 0.7),
+                                          fontSize: AppTextSize.sm)),
+                                ])),
+                          ]),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
@@ -288,47 +291,49 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                     : 'Save comparison',
                                 button: true,
                                 child: GestureDetector(
-                                onTap: _isSaving
-                                    ? null
-                                    : () => _saveComparison(
-                                        context, s, r30, r15, isEs),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: AppSpacing.mdPlus),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: AppTheme.primary),
-                                    borderRadius:
-                                        BorderRadius.circular(AppRadius.mdPlus),
+                                  onTap: _isSaving
+                                      ? null
+                                      : () => _saveComparison(
+                                          context, s, r30, r15, isEs),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: AppSpacing.mdPlus),
+                                    decoration: BoxDecoration(
+                                      border:
+                                          Border.all(color: AppTheme.primary),
+                                      borderRadius: BorderRadius.circular(
+                                          AppRadius.mdPlus),
+                                    ),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          _isSaving
+                                              ? const SizedBox(
+                                                  width: 16,
+                                                  height: 16,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          strokeWidth: 2))
+                                              : Icon(
+                                                  unlocked
+                                                      ? Icons
+                                                          .bookmark_add_rounded
+                                                      : Icons.lock_outline,
+                                                  color: AppTheme.primary,
+                                                  size: 18),
+                                          const SizedBox(width: AppSpacing.sm),
+                                          Text(
+                                              isEs
+                                                  ? 'Guardar comparación'
+                                                  : 'Save comparison',
+                                              style: const TextStyle(
+                                                  color: AppTheme.primary,
+                                                  fontWeight: FontWeight.w600)),
+                                        ]),
                                   ),
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        _isSaving
-                                            ? const SizedBox(
-                                                width: 16,
-                                                height: 16,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                        strokeWidth: 2))
-                                            : Icon(
-                                                unlocked
-                                                    ? Icons.bookmark_add_rounded
-                                                    : Icons.lock_outline,
-                                                color: AppTheme.primary,
-                                                size: 18),
-                                        const SizedBox(width: AppSpacing.sm),
-                                        Text(
-                                            isEs
-                                                ? 'Guardar comparación'
-                                                : 'Save comparison',
-                                            style: const TextStyle(
-                                                color: AppTheme.primary,
-                                                fontWeight: FontWeight.w600)),
-                                      ]),
                                 ),
-                              ),
                               );
                             },
                           ),
@@ -402,45 +407,46 @@ class _CompareTable extends StatelessWidget {
       const SizedBox(height: AppSpacing.lg),
       // Savings callout
       Semantics(
-        label: '15-year advantage: saves ${fmtK.format(r30.totalInterest - r15.totalInterest)} in interest. '
+        label:
+            '15-year advantage: saves ${fmtK.format(r30.totalInterest - r15.totalInterest)} in interest. '
             '30-year advantage: ${fmt.format(r15.monthly.piPayment - r30.monthly.piPayment)} lower monthly payment.',
         child: Card(
-        color: AppTheme.accentGood.withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            side:
-                BorderSide(color: AppTheme.accentGood.withValues(alpha: 0.4))),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(s.advantage15,
-                style: TextStyle(
-                  color: AppTheme.accentGood,
-                  fontWeight: FontWeight.bold,
-                  fontSize: AppTextSize.bodyMd,
-                )),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-                '${s.interestSaved} ${fmtK.format(r30.totalInterest - r15.totalInterest)}',
-                style: const TextStyle(fontSize: AppTextSize.md)),
-            Text(
-                '${s.paidOff15} ${(r30.payoffDate.year - r15.payoffDate.year)} ${s.yearsEarlier}',
-                style: const TextStyle(fontSize: AppTextSize.md)),
-            const Divider(height: 20),
-            Text(s.advantage30,
-                style: TextStyle(
-                  color: AppTheme.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: AppTextSize.bodyMd,
-                )),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-                '${s.monthlySavings} ${fmt.format(r15.monthly.piPayment - r30.monthly.piPayment)} ${s.lower}',
-                style: const TextStyle(fontSize: AppTextSize.md)),
-          ]),
+          color: AppTheme.accentGood.withValues(alpha: 0.08),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              side: BorderSide(
+                  color: AppTheme.accentGood.withValues(alpha: 0.4))),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(s.advantage15,
+                  style: TextStyle(
+                    color: AppTheme.accentGood,
+                    fontWeight: FontWeight.bold,
+                    fontSize: AppTextSize.bodyMd,
+                  )),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                  '${s.interestSaved} ${fmtK.format(r30.totalInterest - r15.totalInterest)}',
+                  style: const TextStyle(fontSize: AppTextSize.md)),
+              Text(
+                  '${s.paidOff15} ${(r30.payoffDate.year - r15.payoffDate.year)} ${s.yearsEarlier}',
+                  style: const TextStyle(fontSize: AppTextSize.md)),
+              const Divider(height: 20),
+              Text(s.advantage30,
+                  style: TextStyle(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: AppTextSize.bodyMd,
+                  )),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                  '${s.monthlySavings} ${fmt.format(r15.monthly.piPayment - r30.monthly.piPayment)} ${s.lower}',
+                  style: const TextStyle(fontSize: AppTextSize.md)),
+            ]),
+          ),
         ),
-      ),
       ),
     ]);
   }
@@ -557,34 +563,36 @@ class _ModeToggleBtn extends StatelessWidget {
         button: true,
         selected: selected,
         child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.mdPlus),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected
-                ? AppTheme.primary
-                : CalcwiseTheme.of(context).surfaceHigh,
-            borderRadius: BorderRadius.circular(AppRadius.mdPlus),
-            border: selected
-                ? null
-                : Border.all(color: AppTheme.labelGray.withValues(alpha: 0.4)),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: selected
+                  ? AppTheme.primary
+                  : CalcwiseTheme.of(context).surfaceHigh,
+              borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+              border: selected
+                  ? null
+                  : Border.all(
+                      color: AppTheme.labelGray.withValues(alpha: 0.4)),
+            ),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(icon,
+                  size: 16,
+                  color: selected ? Colors.white : AppTheme.labelGray),
+              const SizedBox(width: AppRadius.sm),
+              Text(label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppTextSize.md,
+                    color: selected ? Colors.white : AppTheme.labelGray,
+                  )),
+            ]),
           ),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(icon,
-                size: 16, color: selected ? Colors.white : AppTheme.labelGray),
-            const SizedBox(width: AppRadius.sm),
-            Text(label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppTextSize.md,
-                  color: selected ? Colors.white : AppTheme.labelGray,
-                )),
-          ]),
         ),
-      ),
-    );
+      );
 }
 
 // ── ARM controls ──────────────────────────────────────────────────────────────
@@ -619,16 +627,16 @@ class _ArmControls extends StatelessWidget {
           child: Semantics(
             label: '${y}/1 ARM${sel ? ', selected' : ''}',
             child: ChoiceChip(
-            label: Text('${y}/1'),
-            selected: sel,
-            selectedColor: AppTheme.primary,
-            showCheckmark: false,
-            labelStyle: TextStyle(
-              color: sel ? Colors.white : null,
-              fontWeight: FontWeight.w600,
+              label: Text('${y}/1'),
+              selected: sel,
+              selectedColor: AppTheme.primary,
+              showCheckmark: false,
+              labelStyle: TextStyle(
+                color: sel ? Colors.white : null,
+                fontWeight: FontWeight.w600,
+              ),
+              onSelected: (_) => onFixedYearsChanged(y),
             ),
-            onSelected: (_) => onFixedYearsChanged(y),
-          ),
           ),
         ));
       }).toList()),
@@ -716,57 +724,57 @@ class _ArmCompareTable extends StatelessWidget {
             ? 'ARM saves ${fmtK.format(armInterestSavings.abs())} in total interest vs fixed 30-year.'
             : 'ARM costs ${fmtK.format(armInterestSavings.abs())} more in total interest vs fixed 30-year.',
         child: Card(
-        color: (armIsCheaper
-                ? AppTheme.accentGood
-                : CalcwiseSemanticColors.warnIcon)
-            .withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(
-              color: (armIsCheaper
-                      ? AppTheme.accentGood
-                      : CalcwiseSemanticColors.warnIcon)
-                  .withValues(alpha: 0.4)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (armIsCheaper) ...[
-              Text(
-                '${s.armTotalInterest}: ${fmtK.format(armInterestSavings.abs())} ${s.lower}',
-                style: TextStyle(
-                    color: AppTheme.accentGood,
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppTextSize.bodyMd),
-              ),
-              const SizedBox(height: AppRadius.sm),
-              if (arm.breakEvenMonths == null)
-                Text(s.armAlwaysBetter,
-                    style: TextStyle(
-                        color: AppTheme.accentGood, fontSize: AppTextSize.md))
-              else
+          color: (armIsCheaper
+                  ? AppTheme.accentGood
+                  : CalcwiseSemanticColors.warnIcon)
+              .withValues(alpha: 0.08),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            side: BorderSide(
+                color: (armIsCheaper
+                        ? AppTheme.accentGood
+                        : CalcwiseSemanticColors.warnIcon)
+                    .withValues(alpha: 0.4)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              if (armIsCheaper) ...[
                 Text(
-                    '${s.armCrossesAt} ${arm.breakEvenMonths}'
-                    ' (${(arm.breakEvenMonths! / 12).toStringAsFixed(1)} yrs)',
-                    style: const TextStyle(fontSize: AppTextSize.md)),
-            ] else ...[
-              Text(
-                '${s.armTotalInterest}: ${fmtK.format(armInterestSavings.abs())} more vs fixed',
-                style: const TextStyle(
-                    color: CalcwiseSemanticColors.warnIcon,
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppTextSize.bodyMd),
-              ),
-              const SizedBox(height: AppRadius.sm),
-              Text(
-                'Rate reset to ${adjRate.toStringAsFixed(2)}% increases long-term cost.',
-                style: const TextStyle(fontSize: AppTextSize.md),
-              ),
-            ],
-          ]),
+                  '${s.armTotalInterest}: ${fmtK.format(armInterestSavings.abs())} ${s.lower}',
+                  style: TextStyle(
+                      color: AppTheme.accentGood,
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppTextSize.bodyMd),
+                ),
+                const SizedBox(height: AppRadius.sm),
+                if (arm.breakEvenMonths == null)
+                  Text(s.armAlwaysBetter,
+                      style: TextStyle(
+                          color: AppTheme.accentGood, fontSize: AppTextSize.md))
+                else
+                  Text(
+                      '${s.armCrossesAt} ${arm.breakEvenMonths}'
+                      ' (${(arm.breakEvenMonths! / 12).toStringAsFixed(1)} yrs)',
+                      style: const TextStyle(fontSize: AppTextSize.md)),
+              ] else ...[
+                Text(
+                  '${s.armTotalInterest}: ${fmtK.format(armInterestSavings.abs())} more vs fixed',
+                  style: const TextStyle(
+                      color: CalcwiseSemanticColors.warnIcon,
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppTextSize.bodyMd),
+                ),
+                const SizedBox(height: AppRadius.sm),
+                Text(
+                  'Rate reset to ${adjRate.toStringAsFixed(2)}% increases long-term cost.',
+                  style: const TextStyle(fontSize: AppTextSize.md),
+                ),
+              ],
+            ]),
+          ),
         ),
-      ),
       ),
     ]);
   }

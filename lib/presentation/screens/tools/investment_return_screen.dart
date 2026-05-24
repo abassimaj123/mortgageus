@@ -52,8 +52,8 @@ class _InvestmentReturnScreenState
     final price = input.homePrice > 0 ? input.homePrice : 400000;
     _downPct = input.downPaymentPct.clamp(5.0, 50.0);
     _defaultRate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
-    _priceCtrl =
-        TextEditingController(text: NumberFormat('#,##0').format(price.round()));
+    _priceCtrl = TextEditingController(
+        text: NumberFormat('#,##0').format(price.round()));
   }
 
   @override

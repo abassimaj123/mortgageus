@@ -113,149 +113,169 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
           body: Column(
             children: [
               Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _Section(s.currentLoan, [
-                          _field(s.currentBalance, _balanceCtrl,
-                              prefix: '\$',
-                              currency: true,
-                              errorText: _balanceError,
-                              required: true,
-                              onChanged: _onChanged),
-                          _field(s.currentRate, _curRateCtrl,
-                              suffix: '%',
-                              required: true,
-                              onChanged: _onChanged),
-                          _field(s.yearsRemaining, _curYearsCtrl,
-                              suffix: s.years as String?,
-                              required: true,
-                              onChanged: _onChanged),
-                        ]),
-                        const SizedBox(height: AppSpacing.lg),
-                        _Section(s.newLoan, [
-                          _field(s.newRate, _newRateCtrl,
-                              suffix: '%',
-                              required: true,
-                              onChanged: _onChanged),
-                          _field(s.newTerm, _newYearsCtrl,
-                              suffix: s.years as String?,
-                              required: true,
-                              onChanged: _onChanged),
-                          _field(s.closingCosts, _closingCtrl,
-                              prefix: '\$',
-                              currency: true,
-                              onChanged: _onChanged),
-                        ]),
-                        const SizedBox(height: AppSpacing.lg),
-                        if (r != null) ...[
-                          const SizedBox(height: AppSpacing.xl),
-                          Card(
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.xl)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(AppSpacing.lg),
-                              child: Column(children: [
-                                _ResultRow(s.currentPayment,
-                                    _fmt.format(r.oldMonthlyPayment)),
-                                _ResultRow(s.newPayment,
-                                    _fmt.format(r.newMonthlyPayment)),
-                                _ResultRow(s.monthlySavings,
-                                    _fmt.format(r.monthlySavings),
-                                    color: r.monthlySavings > 0
-                                        ? AppTheme.accentGood
-                                        : CalcwiseSemanticColors.errorDark),
-                                const Divider(height: 24),
-                                _ResultRow(
-                                    s.breakEven,
-                                    r.monthlySavings <= 0
-                                        ? (isEs
-                                            ? 'N/A — tasa más alta'
-                                            : 'N/A — higher rate')
-                                        : r.breakEvenMonths > 9999
-                                            ? (isEs
-                                                ? 'N/A — nunca'
-                                                : 'N/A — never')
-                                            : '${r.breakEvenMonths} ${s.months}'
-                                                ' (${(r.breakEvenMonths / 12).toStringAsFixed(1)} yrs)'),
-                                _ResultRow(s.totalSavings,
-                                    _fmt.format(r.totalSavingsOverLife),
-                                    color: r.totalSavingsOverLife > 0
-                                        ? AppTheme.accentGood
-                                        : CalcwiseSemanticColors.errorDark),
-                                const SizedBox(height: AppSpacing.md),
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(AppSpacing.md),
-                                  decoration: BoxDecoration(
-                                    color: r.refinanceMakesSense
-                                        ? AppTheme.accentGood
-                                            .withValues(alpha: 0.1)
-                                        : CalcwiseSemanticColors.errorBg,
-                                    borderRadius:
-                                        BorderRadius.circular(AppRadius.lg),
-                                    border: Border.all(
-                                        color: r.refinanceMakesSense
-                                            ? AppTheme.accentGood
-                                            : CalcwiseSemanticColors.errorDark),
-                                  ),
-                                  child: Text(
-                                    r.refinanceMakesSense
-                                        ? '${s.refiMakesSense} ${r.breakEvenMonths} ${s.months}'
-                                        : r.monthlySavings <= 0
-                                            ? (isEs
-                                                ? 'La nueva tasa es mayor — el refinanciamiento cuesta más'
-                                                : 'New rate is higher — refinancing costs more')
-                                            : '${s.refiMayNot} ${s.breakEvenLong}',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: r.refinanceMakesSense
-                                          ? AppTheme.accentGood
-                                          : CalcwiseSemanticColors.errorDark,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ]),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          Row(children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () async {
-                                  final text = isEs
-                                      ? '📊 Refinanciamiento\n'
-                                        'Pago actual: ${_fmt.format(r!.oldMonthlyPayment)}/mes\n'
-                                        'Nuevo pago: ${_fmt.format(r!.newMonthlyPayment)}/mes\n'
-                                        'Ahorro mensual: ${_fmt.format(r!.monthlySavings)}\n'
-                                        '— MortgageUS'
-                                      : '📊 Refinance Summary\n'
-                                        'Current payment: ${_fmt.format(r!.oldMonthlyPayment)}/mo\n'
-                                        'New payment: ${_fmt.format(r!.newMonthlyPayment)}/mo\n'
-                                        'Monthly savings: ${_fmt.format(r!.monthlySavings)}\n'
-                                        '— MortgageUS';
-                                  await Share.share(text);
-                                },
-                                icon: const Icon(Icons.share_rounded),
-                                label: Text(isEs ? 'Compartir' : 'Share'),
-                              ),
-                            ),
-                          ]),
-                        ],
-                        const SizedBox(height: AppSpacing.listBottomInset),
-                      ]),
-                ), // Form closes
-              )))),
+                  child: Center(
+                      child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            child: Form(
+                              key: _formKey,
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _Section(s.currentLoan, [
+                                      _field(s.currentBalance, _balanceCtrl,
+                                          prefix: '\$',
+                                          currency: true,
+                                          errorText: _balanceError,
+                                          required: true,
+                                          onChanged: _onChanged),
+                                      _field(s.currentRate, _curRateCtrl,
+                                          suffix: '%',
+                                          required: true,
+                                          onChanged: _onChanged),
+                                      _field(s.yearsRemaining, _curYearsCtrl,
+                                          suffix: s.years as String?,
+                                          required: true,
+                                          onChanged: _onChanged),
+                                    ]),
+                                    const SizedBox(height: AppSpacing.lg),
+                                    _Section(s.newLoan, [
+                                      _field(s.newRate, _newRateCtrl,
+                                          suffix: '%',
+                                          required: true,
+                                          onChanged: _onChanged),
+                                      _field(s.newTerm, _newYearsCtrl,
+                                          suffix: s.years as String?,
+                                          required: true,
+                                          onChanged: _onChanged),
+                                      _field(s.closingCosts, _closingCtrl,
+                                          prefix: '\$',
+                                          currency: true,
+                                          onChanged: _onChanged),
+                                    ]),
+                                    const SizedBox(height: AppSpacing.lg),
+                                    if (r != null) ...[
+                                      const SizedBox(height: AppSpacing.xl),
+                                      Card(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppRadius.xl)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(
+                                              AppSpacing.lg),
+                                          child: Column(children: [
+                                            _ResultRow(
+                                                s.currentPayment,
+                                                _fmt.format(
+                                                    r.oldMonthlyPayment)),
+                                            _ResultRow(
+                                                s.newPayment,
+                                                _fmt.format(
+                                                    r.newMonthlyPayment)),
+                                            _ResultRow(s.monthlySavings,
+                                                _fmt.format(r.monthlySavings),
+                                                color: r.monthlySavings > 0
+                                                    ? AppTheme.accentGood
+                                                    : CalcwiseSemanticColors
+                                                        .errorDark),
+                                            const Divider(height: 24),
+                                            _ResultRow(
+                                                s.breakEven,
+                                                r.monthlySavings <= 0
+                                                    ? (isEs
+                                                        ? 'N/A — tasa más alta'
+                                                        : 'N/A — higher rate')
+                                                    : r.breakEvenMonths > 9999
+                                                        ? (isEs
+                                                            ? 'N/A — nunca'
+                                                            : 'N/A — never')
+                                                        : '${r.breakEvenMonths} ${s.months}'
+                                                            ' (${(r.breakEvenMonths / 12).toStringAsFixed(1)} yrs)'),
+                                            _ResultRow(
+                                                s.totalSavings,
+                                                _fmt.format(
+                                                    r.totalSavingsOverLife),
+                                                color:
+                                                    r.totalSavingsOverLife > 0
+                                                        ? AppTheme.accentGood
+                                                        : CalcwiseSemanticColors
+                                                            .errorDark),
+                                            const SizedBox(
+                                                height: AppSpacing.md),
+                                            Container(
+                                              width: double.infinity,
+                                              padding: const EdgeInsets.all(
+                                                  AppSpacing.md),
+                                              decoration: BoxDecoration(
+                                                color: r.refinanceMakesSense
+                                                    ? AppTheme.accentGood
+                                                        .withValues(alpha: 0.1)
+                                                    : CalcwiseSemanticColors
+                                                        .errorBg,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        AppRadius.lg),
+                                                border: Border.all(
+                                                    color: r.refinanceMakesSense
+                                                        ? AppTheme.accentGood
+                                                        : CalcwiseSemanticColors
+                                                            .errorDark),
+                                              ),
+                                              child: Text(
+                                                r.refinanceMakesSense
+                                                    ? '${s.refiMakesSense} ${r.breakEvenMonths} ${s.months}'
+                                                    : r.monthlySavings <= 0
+                                                        ? (isEs
+                                                            ? 'La nueva tasa es mayor — el refinanciamiento cuesta más'
+                                                            : 'New rate is higher — refinancing costs more')
+                                                        : '${s.refiMayNot} ${s.breakEvenLong}',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: r.refinanceMakesSense
+                                                      ? AppTheme.accentGood
+                                                      : CalcwiseSemanticColors
+                                                          .errorDark,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ]),
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.lg),
+                                      Row(children: [
+                                        Expanded(
+                                          child: OutlinedButton.icon(
+                                            onPressed: () async {
+                                              final text = isEs
+                                                  ? '📊 Refinanciamiento\n'
+                                                      'Pago actual: ${_fmt.format(r!.oldMonthlyPayment)}/mes\n'
+                                                      'Nuevo pago: ${_fmt.format(r!.newMonthlyPayment)}/mes\n'
+                                                      'Ahorro mensual: ${_fmt.format(r!.monthlySavings)}\n'
+                                                      '— MortgageUS'
+                                                  : '📊 Refinance Summary\n'
+                                                      'Current payment: ${_fmt.format(r!.oldMonthlyPayment)}/mo\n'
+                                                      'New payment: ${_fmt.format(r!.newMonthlyPayment)}/mo\n'
+                                                      'Monthly savings: ${_fmt.format(r!.monthlySavings)}\n'
+                                                      '— MortgageUS';
+                                              await Share.share(text);
+                                            },
+                                            icon:
+                                                const Icon(Icons.share_rounded),
+                                            label: Text(
+                                                isEs ? 'Compartir' : 'Share'),
+                                          ),
+                                        ),
+                                      ]),
+                                    ],
+                                    const SizedBox(
+                                        height: AppSpacing.listBottomInset),
+                                  ]),
+                            ), // Form closes
+                          )))),
               const CalcwiseAdFooter(),
             ],
           ),

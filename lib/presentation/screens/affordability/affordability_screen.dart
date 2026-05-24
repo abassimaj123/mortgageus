@@ -211,8 +211,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                         const SizedBox(height: AppSpacing.sm),
                         InkWell(
                           onTap: _calculate,
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.mdPlus),
+                          borderRadius: BorderRadius.circular(AppRadius.mdPlus),
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -239,8 +238,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                             width: double.infinity,
                             child: InkWell(
                               onTap: _useInCalculator,
-                              borderRadius:
-                                  BorderRadius.circular(AppRadius.lg),
+                              borderRadius: BorderRadius.circular(AppRadius.lg),
                               child: Container(
                                 width: double.infinity,
                                 padding:

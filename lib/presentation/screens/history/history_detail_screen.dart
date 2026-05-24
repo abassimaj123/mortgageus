@@ -176,92 +176,94 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             ],
           ),
           body: SafeArea(
-            top: false, left: false, right: false,
+            top: false,
+            left: false,
+            right: false,
             child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
-              // ── Inputs card ───────────────────────────────────────
-              _SectionCard(
-                title: isEs ? 'Parámetros' : 'Inputs',
-                icon: Icons.input_rounded,
-                children: [
-                  _Row(isEs ? 'Precio de la casa' : 'Home Price',
-                      _fmtUSD.format(homePrice)),
-                  _Row(isEs ? 'Enganche' : 'Down Payment',
-                      '${downPercent.toStringAsFixed(1)}% (${_fmtUSD.format(downAmount)})'),
-                  _Row(isEs ? 'Tasa anual' : 'Annual Rate',
-                      '${annualRate.toStringAsFixed(2)}%'),
-                  _Row(isEs ? 'Plazo' : 'Loan Term',
-                      '$termYears ${isEs ? 'años' : 'years'}'),
-                  _Row(isEs ? 'Tipo de préstamo' : 'Loan Type', loanType),
-                  _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
-                      _fmtUSD.format(loanAmount)),
-                  if (taxRate > 0)
-                    _Row(isEs ? 'Impuesto predial' : 'Property Tax Rate',
-                        '${taxRate.toStringAsFixed(2)}%'),
-                  if (insurance > 0)
-                    _Row(isEs ? 'Seguro' : 'Home Insurance',
-                        _fmtUSD.format(insurance)),
-                  if (hoa > 0)
-                    _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
-                        _fmtUSD.format(hoa)),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              children: [
+                // ── Inputs card ───────────────────────────────────────
+                _SectionCard(
+                  title: isEs ? 'Parámetros' : 'Inputs',
+                  icon: Icons.input_rounded,
+                  children: [
+                    _Row(isEs ? 'Precio de la casa' : 'Home Price',
+                        _fmtUSD.format(homePrice)),
+                    _Row(isEs ? 'Enganche' : 'Down Payment',
+                        '${downPercent.toStringAsFixed(1)}% (${_fmtUSD.format(downAmount)})'),
+                    _Row(isEs ? 'Tasa anual' : 'Annual Rate',
+                        '${annualRate.toStringAsFixed(2)}%'),
+                    _Row(isEs ? 'Plazo' : 'Loan Term',
+                        '$termYears ${isEs ? 'años' : 'years'}'),
+                    _Row(isEs ? 'Tipo de préstamo' : 'Loan Type', loanType),
+                    _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
+                        _fmtUSD.format(loanAmount)),
+                    if (taxRate > 0)
+                      _Row(isEs ? 'Impuesto predial' : 'Property Tax Rate',
+                          '${taxRate.toStringAsFixed(2)}%'),
+                    if (insurance > 0)
+                      _Row(isEs ? 'Seguro' : 'Home Insurance',
+                          _fmtUSD.format(insurance)),
+                    if (hoa > 0)
+                      _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
+                          _fmtUSD.format(hoa)),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
 
-              // ── Results card ──────────────────────────────────────
-              _SectionCard(
-                title: isEs ? 'Resultados' : 'Results',
-                icon: Icons.bar_chart_rounded,
-                children: [
-                  _Row(
-                    isEs ? 'Pago mensual (PITI)' : 'Monthly Payment (PITI)',
-                    _fmtUSD.format(monthlyPayment),
-                    highlight: AppTheme.primary,
-                    bold: true,
-                  ),
-                  _Row(isEs ? 'Interés total' : 'Total Interest',
-                      _fmtUSD.format(totalInterest)),
-                  _Row(isEs ? 'Costo total' : 'Total Cost',
-                      _fmtUSD.format(totalCost),
-                      bold: true),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
+                // ── Results card ──────────────────────────────────────
+                _SectionCard(
+                  title: isEs ? 'Resultados' : 'Results',
+                  icon: Icons.bar_chart_rounded,
+                  children: [
+                    _Row(
+                      isEs ? 'Pago mensual (PITI)' : 'Monthly Payment (PITI)',
+                      _fmtUSD.format(monthlyPayment),
+                      highlight: AppTheme.primary,
+                      bold: true,
+                    ),
+                    _Row(isEs ? 'Interés total' : 'Total Interest',
+                        _fmtUSD.format(totalInterest)),
+                    _Row(isEs ? 'Costo total' : 'Total Cost',
+                        _fmtUSD.format(totalCost),
+                        bold: true),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
 
-              // ── PDF export button ──────────────────────────────────
-              ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
-                builder: (context, isPremium, _) => SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: isPremium
-                        ? () => _exportPdf(context, isEs)
-                        : () => PdfExportService.showUnlockOrPay(
-                            context, () => _exportPdf(context, isEs)),
-                    icon: Icon(
-                        isPremium
-                            ? Icons.picture_as_pdf_rounded
-                            : Icons.lock_outline,
-                        size: 18),
-                    label: Text(isPremium
-                        ? (isEs ? 'Exportar PDF' : 'Export PDF')
-                        : (isEs
-                            ? 'Exportar PDF — Premium'
-                            : 'Export PDF — Premium')),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isPremium
-                          ? AppTheme.primary
-                          : const Color(0xFFE2E8F0),
-                      foregroundColor:
-                          isPremium ? Colors.white : const Color(0xFF475569),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.mdPlus),
+                // ── PDF export button ──────────────────────────────────
+                ValueListenableBuilder<bool>(
+                  valueListenable: freemiumService.isPremiumNotifier,
+                  builder: (context, isPremium, _) => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: isPremium
+                          ? () => _exportPdf(context, isEs)
+                          : () => PdfExportService.showUnlockOrPay(
+                              context, () => _exportPdf(context, isEs)),
+                      icon: Icon(
+                          isPremium
+                              ? Icons.picture_as_pdf_rounded
+                              : Icons.lock_outline,
+                          size: 18),
+                      label: Text(isPremium
+                          ? (isEs ? 'Exportar PDF' : 'Export PDF')
+                          : (isEs
+                              ? 'Exportar PDF — Premium'
+                              : 'Export PDF — Premium')),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isPremium
+                            ? AppTheme.primary
+                            : const Color(0xFFE2E8F0),
+                        foregroundColor:
+                            isPremium ? Colors.white : const Color(0xFF475569),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.mdPlus),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
             ),
           ),
         );

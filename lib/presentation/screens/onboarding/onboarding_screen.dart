@@ -18,11 +18,21 @@ class OnboardingScreen extends StatelessWidget {
             titleFr: 'Votre calculatrice\nhypothécaire',
             subtitleFr:
                 'Versement mensuel, amortissement et bilan immobilier — tout en un.',
-            pillsFr: ['Spanish/Español', 'FHA·VA·USDA', 'Calcul DTI', '51 États'],
+            pillsFr: [
+              'Spanish/Español',
+              'FHA·VA·USDA',
+              'Calcul DTI',
+              '51 États'
+            ],
             titleEs: 'Tu calculadora\nhipotecaria',
             subtitleEs:
                 'Pago mensual, amortización y análisis de propiedad — todo en uno.',
-            pillsEs: ['Spanish/Español', 'FHA·VA·USDA', 'Calc. DTI', '51 Estados'],
+            pillsEs: [
+              'Spanish/Español',
+              'FHA·VA·USDA',
+              'Calc. DTI',
+              '51 Estados'
+            ],
           ),
           OnboardingPage(
             icon: Icons.bar_chart_rounded,

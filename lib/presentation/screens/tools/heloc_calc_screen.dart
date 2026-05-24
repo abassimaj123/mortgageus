@@ -84,8 +84,8 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
         final rate = double.tryParse(_rateCtrl.text) ?? 8.5;
 
         final availableEquity = homeValue > 0
-            ? (homeValue * _maxLtv / 100.0 - mortgageBal).clamp(
-                0.0, double.infinity)
+            ? (homeValue * _maxLtv / 100.0 - mortgageBal)
+                .clamp(0.0, double.infinity)
             : 0.0;
 
         final monthlyInterestOnly =
@@ -111,8 +111,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
         // ─────────────────────────────────────────────────────────────────────
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-                isEs ? 'Calculadora HELOC' : 'HELOC Calculator'),
+            title: Text(isEs ? 'Calculadora HELOC' : 'HELOC Calculator'),
           ),
           body: Column(children: [
             Expanded(
@@ -251,8 +250,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                           ActionChip(
                             label: Text(
                               isEs ? 'Máximo' : 'Max Available',
-                              style:
-                                  const TextStyle(fontSize: AppTextSize.sm),
+                              style: const TextStyle(fontSize: AppTextSize.sm),
                             ),
                             backgroundColor:
                                 AppTheme.primary.withValues(alpha: 0.1),
@@ -276,8 +274,9 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         decoration: InputDecoration(
-                          labelText:
-                              isEs ? 'Tasa de interés (%)' : 'Interest Rate (%)',
+                          labelText: isEs
+                              ? 'Tasa de interés (%)'
+                              : 'Interest Rate (%)',
                           suffixText: '%',
                           border: OutlineInputBorder(
                               borderRadius:
@@ -293,7 +292,9 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
 
                       // ── Draw Period chips ────────────────────────────────
                       _SectionLabel(
-                        isEs ? 'Período de Retiro (años)' : 'Draw Period (years)',
+                        isEs
+                            ? 'Período de Retiro (años)'
+                            : 'Draw Period (years)',
                         Icons.timer_outlined,
                       ),
                       const SizedBox(height: AppSpacing.sm),
@@ -331,9 +332,8 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                       if (homeValue > 0 && drawAmount > 0) ...[
                         // Hero: Available Equity
                         _HeroCard(
-                          label: isEs
-                              ? 'Capital Disponible'
-                              : 'Available Equity',
+                          label:
+                              isEs ? 'Capital Disponible' : 'Available Equity',
                           value: fmt.format(availableEquity),
                           icon: Icons.account_balance_rounded,
                           color: const Color(0xFF0D9488),
@@ -354,9 +354,8 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: _ResultMini(
-                              label: isEs
-                                  ? 'Pago de Repago'
-                                  : 'Repayment Payment',
+                              label:
+                                  isEs ? 'Pago de Repago' : 'Repayment Payment',
                               value: '${fmtDec.format(monthlyRepayment)}/mo',
                               color: AppTheme.primary,
                             ),
@@ -381,8 +380,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                               vertical: AppSpacing.md),
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardColor,
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.lg),
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.06),
@@ -392,8 +390,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                             ],
                           ),
                           child: Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 isEs
@@ -668,10 +665,7 @@ class _VerdictBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Row(children: [
-          Icon(
-              ok
-                  ? Icons.check_circle_outline
-                  : Icons.cancel_outlined,
+          Icon(ok ? Icons.check_circle_outline : Icons.cancel_outlined,
               color: ok
                   ? CalcwiseSemanticColors.successDark
                   : CalcwiseSemanticColors.errorDark,

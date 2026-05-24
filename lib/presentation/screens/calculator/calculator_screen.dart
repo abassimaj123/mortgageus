@@ -301,56 +301,61 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               const Divider(height: 1),
                               // Advanced toggle
                               Semantics(
-                                label: _advancedExpanded
-                                    ? (isEs ? 'Ocultar opciones avanzadas' : 'Hide advanced options')
-                                    : (isEs ? 'Mostrar opciones avanzadas' : 'Show advanced options'),
-                                button: true,
-                                child: InkWell(
-                                onTap: () => setState(() =>
-                                    _advancedExpanded = !_advancedExpanded),
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.md),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: AppSpacing.smPlus),
-                                  child: Row(children: [
-                                    Icon(
-                                      _advancedExpanded
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
-                                      color: AppTheme.primary,
-                                    ),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    Expanded(
-                                      child: Text(s.advancedOptions,
-                                          style: const TextStyle(
-                                            color: AppTheme.primary,
-                                            fontWeight: FontWeight.w600,
-                                          )),
-                                    ),
-                                    if (_advancedExpanded)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: AppSpacing.sm,
-                                            vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.primary
-                                              .withValues(alpha: 0.10),
-                                          borderRadius: BorderRadius.circular(
-                                              AppRadius.mdPlus),
+                                  label: _advancedExpanded
+                                      ? (isEs
+                                          ? 'Ocultar opciones avanzadas'
+                                          : 'Hide advanced options')
+                                      : (isEs
+                                          ? 'Mostrar opciones avanzadas'
+                                          : 'Show advanced options'),
+                                  button: true,
+                                  child: InkWell(
+                                    onTap: () => setState(() =>
+                                        _advancedExpanded = !_advancedExpanded),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.md),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: AppSpacing.smPlus),
+                                      child: Row(children: [
+                                        Icon(
+                                          _advancedExpanded
+                                              ? Icons.expand_less
+                                              : Icons.expand_more,
+                                          color: AppTheme.primary,
                                         ),
-                                        child: Text(
-                                          isEs ? 'Ocultar' : 'Hide',
-                                          style: const TextStyle(
-                                            fontSize: AppTextSize.xs,
-                                            color: AppTheme.primary,
-                                            fontWeight: FontWeight.w500,
+                                        const SizedBox(width: AppSpacing.sm),
+                                        Expanded(
+                                          child: Text(s.advancedOptions,
+                                              style: const TextStyle(
+                                                color: AppTheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                              )),
+                                        ),
+                                        if (_advancedExpanded)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: AppSpacing.sm,
+                                                vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.primary
+                                                  .withValues(alpha: 0.10),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      AppRadius.mdPlus),
+                                            ),
+                                            child: Text(
+                                              isEs ? 'Ocultar' : 'Hide',
+                                              style: const TextStyle(
+                                                fontSize: AppTextSize.xs,
+                                                color: AppTheme.primary,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                  ]),
-                                ),
-                              )), // Semantics + InkWell
+                                      ]),
+                                    ),
+                                  )), // Semantics + InkWell
                               if (_advancedExpanded) ...[
                                 Container(
                                   decoration: BoxDecoration(
@@ -440,119 +445,142 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               const SizedBox(
                                                   height: AppSpacing.md),
                                               CalcwiseStaggerItem(
-                                                index: 3,
-                                                child: ReverseSolveCard(
-                                                title: isEs
-                                                    ? '¿Qué precio puedo pagar?'
-                                                    : 'What home price can I afford?',
-                                                targetLabel: isEs
-                                                    ? 'Pago mensual objetivo'
-                                                    : 'Target monthly payment',
-                                                resultLabel: isEs
-                                                    ? 'Precio máximo'
-                                                    : 'Max home price',
-                                                prefix: '\$',
-                                                minBound: 50000,
-                                                maxBound: 2000000,
-                                                targetValue: 0,
-                                                compute: (homePrice) {
-                                                  // Monthly P&I for a candidate home price,
-                                                  // reusing the user's current down %, rate, term.
-                                                  final downPct =
-                                                      inputState.downPaymentPct;
-                                                  final loanAmount = homePrice *
-                                                      (1 - downPct / 100);
-                                                  final r =
-                                                      inputState.annualRatePct /
+                                                  index: 3,
+                                                  child: ReverseSolveCard(
+                                                    title: isEs
+                                                        ? '¿Qué precio puedo pagar?'
+                                                        : 'What home price can I afford?',
+                                                    targetLabel: isEs
+                                                        ? 'Pago mensual objetivo'
+                                                        : 'Target monthly payment',
+                                                    resultLabel: isEs
+                                                        ? 'Precio máximo'
+                                                        : 'Max home price',
+                                                    prefix: '\$',
+                                                    minBound: 50000,
+                                                    maxBound: 2000000,
+                                                    targetValue: 0,
+                                                    compute: (homePrice) {
+                                                      // Monthly P&I for a candidate home price,
+                                                      // reusing the user's current down %, rate, term.
+                                                      final downPct = inputState
+                                                          .downPaymentPct;
+                                                      final loanAmount =
+                                                          homePrice *
+                                                              (1 -
+                                                                  downPct /
+                                                                      100);
+                                                      final r = inputState
+                                                              .annualRatePct /
                                                           100 /
                                                           12;
-                                                  final n =
-                                                      inputState.termYears * 12;
-                                                  if (r == 0)
-                                                    return loanAmount / n;
-                                                  final f = pow(1 + r, n);
-                                                  return loanAmount *
-                                                      r *
-                                                      f /
-                                                      (f - 1);
-                                                },
-                                              )),
+                                                      final n =
+                                                          inputState.termYears *
+                                                              12;
+                                                      if (r == 0)
+                                                        return loanAmount / n;
+                                                      final f = pow(1 + r, n);
+                                                      return loanAmount *
+                                                          r *
+                                                          f /
+                                                          (f - 1);
+                                                    },
+                                                  )),
                                               // ── Stress Test Banner ─────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.sm),
                                               CalcwiseStaggerItem(
-                                                index: 4,
-                                                child: Semantics(
-                                                label: isEs
-                                                    ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${_fmt.format(result.stressTestMonthly)}'
-                                                    : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${_fmt.format(result.stressTestMonthly)}',
-                                                child: Container(
-                                                width: double.infinity,
-                                                padding: const EdgeInsets.all(
-                                                    AppSpacing.mdPlus),
-                                                decoration: BoxDecoration(
-                                                  color: AppTheme.accentWarn
-                                                      .withValues(alpha: 0.08),
-                                                  border: Border.all(
-                                                      color: AppTheme.accentWarn
-                                                          .withValues(
-                                                              alpha: 0.4)),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          AppRadius.lg),
-                                                ),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(children: [
-                                                      const Icon(
-                                                          Icons
-                                                              .warning_amber_rounded,
+                                                  index: 4,
+                                                  child: Semantics(
+                                                      label: isEs
+                                                          ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${_fmt.format(result.stressTestMonthly)}'
+                                                          : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${_fmt.format(result.stressTestMonthly)}',
+                                                      child: Container(
+                                                        width: double.infinity,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(AppSpacing
+                                                                    .mdPlus),
+                                                        decoration:
+                                                            BoxDecoration(
                                                           color: AppTheme
-                                                              .accentWarn,
-                                                          size: 18),
-                                                      const SizedBox(
-                                                          width: AppRadius.sm),
-                                                      Text(
-                                                        isEs
-                                                            ? 'Prueba de Estrés (+2%)'
-                                                            : 'Stress Test (+2%)',
-                                                        style: const TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: AppTheme
-                                                              .accentWarn,
-                                                          fontSize:
-                                                              AppTextSize.body,
+                                                              .accentWarn
+                                                              .withValues(
+                                                                  alpha: 0.08),
+                                                          border: Border.all(
+                                                              color: AppTheme
+                                                                  .accentWarn
+                                                                  .withValues(
+                                                                      alpha:
+                                                                          0.4)),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      AppRadius
+                                                                          .lg),
                                                         ),
-                                                      ),
-                                                      InfoTooltip(
-                                                        title: isEs
-                                                            ? 'Prueba de Estrés'
-                                                            : 'Stress Test',
-                                                        body: isEs
-                                                            ? 'Su tasa de calificación es su tasa contractual + 2%. Los prestamistas usan esto para asegurarse de que pueda pagar si suben las tasas.'
-                                                            : 'Your qualifying rate is your contract rate + 2%. Lenders use this to ensure you can still afford payments if interest rates rise.',
-                                                      ),
-                                                    ]),
-                                                    const SizedBox(
-                                                        height: AppRadius.sm),
-                                                    Text(
-                                                      isEs
-                                                          ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${_fmt.format(result.stressTestMonthly)}'
-                                                          : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${_fmt.format(result.stressTestMonthly)}',
-                                                      style: const TextStyle(
-                                                        color:
-                                                            AppTheme.accentWarn,
-                                                        fontSize:
-                                                            AppTextSize.md,
-                                                        height: 1.4,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ))), // Semantics (stress test) + CalcwiseStaggerItem
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(children: [
+                                                              const Icon(
+                                                                  Icons
+                                                                      .warning_amber_rounded,
+                                                                  color: AppTheme
+                                                                      .accentWarn,
+                                                                  size: 18),
+                                                              const SizedBox(
+                                                                  width:
+                                                                      AppRadius
+                                                                          .sm),
+                                                              Text(
+                                                                isEs
+                                                                    ? 'Prueba de Estrés (+2%)'
+                                                                    : 'Stress Test (+2%)',
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: AppTheme
+                                                                      .accentWarn,
+                                                                  fontSize:
+                                                                      AppTextSize
+                                                                          .body,
+                                                                ),
+                                                              ),
+                                                              InfoTooltip(
+                                                                title: isEs
+                                                                    ? 'Prueba de Estrés'
+                                                                    : 'Stress Test',
+                                                                body: isEs
+                                                                    ? 'Su tasa de calificación es su tasa contractual + 2%. Los prestamistas usan esto para asegurarse de que pueda pagar si suben las tasas.'
+                                                                    : 'Your qualifying rate is your contract rate + 2%. Lenders use this to ensure you can still afford payments if interest rates rise.',
+                                                              ),
+                                                            ]),
+                                                            const SizedBox(
+                                                                height:
+                                                                    AppRadius
+                                                                        .sm),
+                                                            Text(
+                                                              isEs
+                                                                  ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${_fmt.format(result.stressTestMonthly)}'
+                                                                  : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${_fmt.format(result.stressTestMonthly)}',
+                                                              style:
+                                                                  const TextStyle(
+                                                                color: AppTheme
+                                                                    .accentWarn,
+                                                                fontSize:
+                                                                    AppTextSize
+                                                                        .md,
+                                                                height: 1.4,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ))), // Semantics (stress test) + CalcwiseStaggerItem
                                               // ── Smart Insights ─────────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.md),
@@ -879,7 +907,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                         ),
                                       ),
                               ),
-                              const SizedBox(height: AppSpacing.listBottomInset),
+                              const SizedBox(
+                                  height: AppSpacing.listBottomInset),
                             ],
                           ),
                         ), // Form closes
@@ -982,36 +1011,36 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       label: label,
       textField: true,
       child: TextFormField(
-      controller: ctrl,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: currency
-          ? [CurrencyInputFormatter()]
-          : percent
-              ? [PercentInputFormatter()]
-              : [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
-      decoration: InputDecoration(
-        labelText: label,
-        prefixText: prefix,
-        suffixText: suffix,
-        errorText: errorText,
-        helperText: helperText,
-        helperStyle: const TextStyle(fontSize: 10),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg)),
-        contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
-      ),
-      validator: (v) {
-        final raw = (v ?? '').trim();
-        if (raw.isEmpty) return required ? 'Required' : null;
-        final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-        if (cleaned.isEmpty) return 'Invalid';
-        final n = double.tryParse(cleaned);
-        if (n == null) return 'Invalid';
-        if (n < 0) return 'Must be ≥ 0';
-        return null;
-      },
-      onChanged: onChanged,
+        controller: ctrl,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: currency
+            ? [CurrencyInputFormatter()]
+            : percent
+                ? [PercentInputFormatter()]
+                : [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
+        decoration: InputDecoration(
+          labelText: label,
+          prefixText: prefix,
+          suffixText: suffix,
+          errorText: errorText,
+          helperText: helperText,
+          helperStyle: const TextStyle(fontSize: 10),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.lg)),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+        ),
+        validator: (v) {
+          final raw = (v ?? '').trim();
+          if (raw.isEmpty) return required ? 'Required' : null;
+          final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
+          if (cleaned.isEmpty) return 'Invalid';
+          final n = double.tryParse(cleaned);
+          if (n == null) return 'Invalid';
+          if (n < 0) return 'Must be ≥ 0';
+          return null;
+        },
+        onChanged: onChanged,
       ),
     );
   }
@@ -1028,32 +1057,33 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fmt =
         NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-    final piPayment = result != null ? fmt.format(result!.monthly.piPayment) : '--';
+    final piPayment =
+        result != null ? fmt.format(result!.monthly.piPayment) : '--';
     return Semantics(
       label: result != null
           ? 'Monthly principal and interest: $piPayment. '
-            'Total PITI: ${fmt.format(result!.monthly.pitiPayment)}. '
-            'Total interest: ${fmt.format(result!.totalInterest)}. '
-            'Total cost: ${fmt.format(result!.totalCost)}.'
+              'Total PITI: ${fmt.format(result!.monthly.pitiPayment)}. '
+              'Total interest: ${fmt.format(result!.totalInterest)}. '
+              'Total cost: ${fmt.format(result!.totalCost)}.'
           : 'Monthly payment: enter values above to calculate',
       child: CalcwiseHeroCard(
-      label: s.monthlyPI as String,
-      value: piPayment,
-      secondary: result != null
-          ? '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}'
-          : null,
-      stats: result == null
-          ? null
-          : [
-              (
-                label: 'Total Interest',
-                value: fmt.format(result!.totalInterest),
-              ),
-              (
-                label: 'Total Cost',
-                value: fmt.format(result!.totalCost),
-              ),
-            ],
+        label: s.monthlyPI as String,
+        value: piPayment,
+        secondary: result != null
+            ? '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}'
+            : null,
+        stats: result == null
+            ? null
+            : [
+                (
+                  label: 'Total Interest',
+                  value: fmt.format(result!.totalInterest),
+                ),
+                (
+                  label: 'Total Cost',
+                  value: fmt.format(result!.totalCost),
+                ),
+              ],
       ),
     );
   }
@@ -1335,21 +1365,21 @@ class _ModeBtn extends StatelessWidget {
         button: true,
         selected: selected,
         child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.mdPlus, vertical: AppSpacing.mdPlus),
-          decoration: BoxDecoration(
-            color: selected ? AppTheme.primary : null,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.mdPlus, vertical: AppSpacing.mdPlus),
+            decoration: BoxDecoration(
+              color: selected ? AppTheme.primary : null,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            child: Text(label,
+                style: TextStyle(
+                  color: selected ? Colors.white : AppTheme.labelGray,
+                  fontWeight: FontWeight.bold,
+                )),
           ),
-          child: Text(label,
-              style: TextStyle(
-                color: selected ? Colors.white : AppTheme.labelGray,
-                fontWeight: FontWeight.bold,
-              )),
         ),
-      ),
       );
 }
 
@@ -1444,26 +1474,26 @@ class _Row extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MergeSemantics(
         child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(label,
-                    style: TextStyle(color: color ?? AppTheme.labelGray)),
-                if (tooltip != null) tooltip!,
-              ],
-            ),
-            Text(value,
-                style: TextStyle(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-                  color: color ?? (bold ? AppTheme.primary : null),
-                )),
-          ],
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label,
+                      style: TextStyle(color: color ?? AppTheme.labelGray)),
+                  if (tooltip != null) tooltip!,
+                ],
+              ),
+              Text(value,
+                  style: TextStyle(
+                    fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+                    color: color ?? (bold ? AppTheme.primary : null),
+                  )),
+            ],
+          ),
         ),
-      ),
       );
 }
 

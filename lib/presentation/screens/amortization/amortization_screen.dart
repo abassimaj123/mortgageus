@@ -190,30 +190,35 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xxl),
                     Semantics(
-                      label: isEs ? 'Ir a la calculadora' : 'Go to Calculator',
-                      button: true,
-                      child: GestureDetector(
-                      onTap: () => tabSwitchNotifier.value = 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.xxl,
-                            vertical: AppSpacing.mdPlus),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary,
-                          borderRadius: BorderRadius.circular(AppRadius.mdPlus),
-                        ),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.calculate_rounded,
-                              color: Colors.white, size: 18),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(
-                              isEs ? 'Ir a la calculadora' : 'Go to Calculator',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600)),
-                        ]),
-                      ),
-                    )),
+                        label:
+                            isEs ? 'Ir a la calculadora' : 'Go to Calculator',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () => tabSwitchNotifier.value = 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xxl,
+                                vertical: AppSpacing.mdPlus),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary,
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.mdPlus),
+                            ),
+                            child:
+                                Row(mainAxisSize: MainAxisSize.min, children: [
+                              const Icon(Icons.calculate_rounded,
+                                  color: Colors.white, size: 18),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                  isEs
+                                      ? 'Ir a la calculadora'
+                                      : 'Go to Calculator',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600)),
+                            ]),
+                          ),
+                        )),
                   ],
                 ),
               ),
@@ -471,84 +476,86 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                     child: Row(children: [
                       Expanded(
                           child: Semantics(
-                        label: s.yearlyView,
-                        button: true,
-                        selected: _yearlyView,
-                        child: GestureDetector(
-                        onTap: () => _setViewMode(true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.smPlus),
-                          decoration: BoxDecoration(
-                            color: _yearlyView
-                                ? AppTheme.primary
-                                : Colors.transparent,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(7),
-                              bottomLeft: Radius.circular(7),
-                            ),
-                          ),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.calendar_today,
-                                    size: 16,
+                              label: s.yearlyView,
+                              button: true,
+                              selected: _yearlyView,
+                              child: GestureDetector(
+                                onTap: () => _setViewMode(true),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.smPlus),
+                                  decoration: BoxDecoration(
                                     color: _yearlyView
-                                        ? Colors.white
-                                        : AppTheme.primary),
-                                const SizedBox(width: AppRadius.sm),
-                                Text(s.yearlyView,
-                                    style: TextStyle(
-                                        color: _yearlyView
-                                            ? Colors.white
-                                            : AppTheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: AppTextSize.md)),
-                              ]),
-                        ),
-                      ))),
+                                        ? AppTheme.primary
+                                        : Colors.transparent,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(7),
+                                      bottomLeft: Radius.circular(7),
+                                    ),
+                                  ),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.calendar_today,
+                                            size: 16,
+                                            color: _yearlyView
+                                                ? Colors.white
+                                                : AppTheme.primary),
+                                        const SizedBox(width: AppRadius.sm),
+                                        Text(s.yearlyView,
+                                            style: TextStyle(
+                                                color: _yearlyView
+                                                    ? Colors.white
+                                                    : AppTheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: AppTextSize.md)),
+                                      ]),
+                                ),
+                              ))),
                       Container(
                           width: 1,
                           height: 38,
                           color: AppTheme.primary.withValues(alpha: 0.5)),
                       Expanded(
                           child: Semantics(
-                        label: s.monthlyView,
-                        button: true,
-                        selected: !_yearlyView,
-                        child: GestureDetector(
-                        onTap: () => _setViewMode(false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.smPlus),
-                          decoration: BoxDecoration(
-                            color: !_yearlyView
-                                ? AppTheme.primary
-                                : Colors.transparent,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(7),
-                              bottomRight: Radius.circular(7),
-                            ),
-                          ),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.view_list,
-                                    size: 16,
+                              label: s.monthlyView,
+                              button: true,
+                              selected: !_yearlyView,
+                              child: GestureDetector(
+                                onTap: () => _setViewMode(false),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.smPlus),
+                                  decoration: BoxDecoration(
                                     color: !_yearlyView
-                                        ? Colors.white
-                                        : AppTheme.primary),
-                                const SizedBox(width: AppRadius.sm),
-                                Text(s.monthlyView,
-                                    style: TextStyle(
-                                        color: !_yearlyView
-                                            ? Colors.white
-                                            : AppTheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: AppTextSize.md)),
-                              ]),
-                        ),
-                      ))),
+                                        ? AppTheme.primary
+                                        : Colors.transparent,
+                                    borderRadius: const BorderRadius.only(
+                                      topRight: Radius.circular(7),
+                                      bottomRight: Radius.circular(7),
+                                    ),
+                                  ),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.view_list,
+                                            size: 16,
+                                            color: !_yearlyView
+                                                ? Colors.white
+                                                : AppTheme.primary),
+                                        const SizedBox(width: AppRadius.sm),
+                                        Text(s.monthlyView,
+                                            style: TextStyle(
+                                                color: !_yearlyView
+                                                    ? Colors.white
+                                                    : AppTheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: AppTextSize.md)),
+                                      ]),
+                                ),
+                              ))),
                     ]),
                   ),
                 ),
@@ -573,7 +580,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                   isPremium: freemiumService.hasFullAccess),
             ],
 
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.listBottomInset)),
+            const SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.listBottomInset)),
           ]),
         );
       },
@@ -640,19 +648,19 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MergeSemantics(
         child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(label,
-              style: const TextStyle(
-                  color: Colors.white70, fontSize: AppTextSize.md)),
-          Text(value,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: AppTextSize.md,
-                  fontWeight: FontWeight.w600)),
-        ]),
-      ),
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text(label,
+                style: const TextStyle(
+                    color: Colors.white70, fontSize: AppTextSize.md)),
+            Text(value,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: AppTextSize.md,
+                    fontWeight: FontWeight.w600)),
+          ]),
+        ),
       );
 }
 
@@ -1180,7 +1188,9 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
         flex: flex,
         child: Text(text,
-            style: const TextStyle(fontSize: AppTheme.tableBodySize, fontFeatures: [FontFeature.tabularFigures()]),
+            style: const TextStyle(
+                fontSize: AppTheme.tableBodySize,
+                fontFeatures: [FontFeature.tabularFigures()]),
             textAlign: TextAlign.right),
       );
 }

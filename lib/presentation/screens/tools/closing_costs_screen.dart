@@ -56,25 +56,111 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
 
   // State transfer tax rates (as fraction of home price)
   static const Map<String, double> _transferTaxRates = {
-    'AL': 0.001, 'AK': 0.0, 'AZ': 0.0, 'AR': 0.0033, 'CA': 0.0011,
-    'CO': 0.0001, 'CT': 0.0075, 'DE': 0.04, 'DC': 0.011, 'FL': 0.0035,
-    'GA': 0.001, 'HI': 0.01, 'ID': 0.001, 'IL': 0.001, 'IN': 0.001,
-    'IA': 0.0016, 'KS': 0.0, 'KY': 0.001, 'LA': 0.0, 'ME': 0.0044,
-    'MD': 0.0075, 'MA': 0.00456, 'MI': 0.0075, 'MN': 0.0033, 'MS': 0.001,
-    'MO': 0.0, 'MT': 0.0, 'NE': 0.00225, 'NV': 0.00195, 'NH': 0.015,
-    'NJ': 0.01, 'NM': 0.001, 'NY': 0.01, 'NC': 0.002, 'ND': 0.0,
-    'OH': 0.001, 'OK': 0.0, 'OR': 0.001, 'PA': 0.02, 'RI': 0.00228,
-    'SC': 0.004, 'SD': 0.0, 'TN': 0.00037, 'TX': 0.0, 'UT': 0.001,
-    'VT': 0.015, 'VA': 0.0035, 'WA': 0.0128, 'WV': 0.011, 'WI': 0.003,
+    'AL': 0.001,
+    'AK': 0.0,
+    'AZ': 0.0,
+    'AR': 0.0033,
+    'CA': 0.0011,
+    'CO': 0.0001,
+    'CT': 0.0075,
+    'DE': 0.04,
+    'DC': 0.011,
+    'FL': 0.0035,
+    'GA': 0.001,
+    'HI': 0.01,
+    'ID': 0.001,
+    'IL': 0.001,
+    'IN': 0.001,
+    'IA': 0.0016,
+    'KS': 0.0,
+    'KY': 0.001,
+    'LA': 0.0,
+    'ME': 0.0044,
+    'MD': 0.0075,
+    'MA': 0.00456,
+    'MI': 0.0075,
+    'MN': 0.0033,
+    'MS': 0.001,
+    'MO': 0.0,
+    'MT': 0.0,
+    'NE': 0.00225,
+    'NV': 0.00195,
+    'NH': 0.015,
+    'NJ': 0.01,
+    'NM': 0.001,
+    'NY': 0.01,
+    'NC': 0.002,
+    'ND': 0.0,
+    'OH': 0.001,
+    'OK': 0.0,
+    'OR': 0.001,
+    'PA': 0.02,
+    'RI': 0.00228,
+    'SC': 0.004,
+    'SD': 0.0,
+    'TN': 0.00037,
+    'TX': 0.0,
+    'UT': 0.001,
+    'VT': 0.015,
+    'VA': 0.0035,
+    'WA': 0.0128,
+    'WV': 0.011,
+    'WI': 0.003,
     'WY': 0.001,
   };
 
   static const List<String> _allStates = [
-    'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL',
-    'GA','HI','ID','IL','IN','IA','KS','KY','LA','ME',
-    'MD','MA','MI','MN','MS','MO','MT','NE','NV','NH',
-    'NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI',
-    'SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY',
+    'AL',
+    'AK',
+    'AZ',
+    'AR',
+    'CA',
+    'CO',
+    'CT',
+    'DE',
+    'DC',
+    'FL',
+    'GA',
+    'HI',
+    'ID',
+    'IL',
+    'IN',
+    'IA',
+    'KS',
+    'KY',
+    'LA',
+    'ME',
+    'MD',
+    'MA',
+    'MI',
+    'MN',
+    'MS',
+    'MO',
+    'MT',
+    'NE',
+    'NV',
+    'NH',
+    'NJ',
+    'NM',
+    'NY',
+    'NC',
+    'ND',
+    'OH',
+    'OK',
+    'OR',
+    'PA',
+    'RI',
+    'SC',
+    'SD',
+    'TN',
+    'TX',
+    'UT',
+    'VT',
+    'VA',
+    'WA',
+    'WV',
+    'WI',
+    'WY',
   ];
 
   static const List<String> _loanTypes = [
@@ -111,8 +197,8 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
       _CostLine('Appraisal', 'Tasación', appraisal),
       _CostLine('Title Insurance', 'Seguro de Título', titleInsurance),
       _CostLine('Home Inspection', 'Inspección del Hogar', homeInspection),
-      _CostLine(
-          'Transfer Tax ($state)', 'Impuesto de Transferencia ($state)', transferTax),
+      _CostLine('Transfer Tax ($state)', 'Impuesto de Transferencia ($state)',
+          transferTax),
       _CostLine('Recording Fees', 'Tarifas de Registro', recordingFees),
       _CostLine(
           'Prepaid Interest (30d)', 'Interés Prepagado (30d)', prePaidInterest),
@@ -124,11 +210,11 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
       lines.add(_CostLine(
           'Upfront MIP (1.75%)', 'MIP Inicial (1.75%)', loanAmount * 0.0175));
     } else if (loanType == 'VA') {
-      lines.add(_CostLine(
-          'VA Funding Fee (2.15%)', 'Tarifa de Financ. VA (2.15%)', loanAmount * 0.0215));
+      lines.add(_CostLine('VA Funding Fee (2.15%)',
+          'Tarifa de Financ. VA (2.15%)', loanAmount * 0.0215));
     } else if (loanType == 'USDA') {
-      lines.add(_CostLine(
-          'USDA Guarantee Fee (1%)', 'Tarifa de Garantía USDA (1%)', loanAmount * 0.01));
+      lines.add(_CostLine('USDA Guarantee Fee (1%)',
+          'Tarifa de Garantía USDA (1%)', loanAmount * 0.01));
     }
 
     return lines;
@@ -194,8 +280,9 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         decoration: InputDecoration(
-                          labelText:
-                              isEs ? 'Tasa de interés (%)' : 'Interest Rate (%)',
+                          labelText: isEs
+                              ? 'Tasa de interés (%)'
+                              : 'Interest Rate (%)',
                           suffixText: '%',
                           border: OutlineInputBorder(
                               borderRadius:
@@ -226,8 +313,8 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                               vertical: AppSpacing.md),
                         ),
                         items: _allStates
-                            .map((s) => DropdownMenuItem(
-                                value: s, child: Text(s)))
+                            .map((s) =>
+                                DropdownMenuItem(value: s, child: Text(s)))
                             .toList(),
                         onChanged: (v) {
                           if (v != null) {
@@ -283,10 +370,8 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                       Container(
                         decoration: BoxDecoration(
                           color: Theme.of(context).cardColor,
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(
-                              color: const Color(0xFFE2E8F0)),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
                         child: Row(children: [
                           Expanded(
@@ -318,8 +403,9 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                       if (homePrice > 0 && lines.isNotEmpty) ...[
                         // Hero card
                         _HeroCard(
-                          label:
-                              isEs ? 'Total Estimado' : 'Estimated Closing Costs',
+                          label: isEs
+                              ? 'Total Estimado'
+                              : 'Estimated Closing Costs',
                           value: fmt.format(total),
                           subValue:
                               '${pct.toStringAsFixed(1)}% ${isEs ? "del precio" : "of home price"}',
@@ -335,12 +421,10 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                         Container(
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardColor,
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.xl),
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                    Colors.black.withValues(alpha: 0.06),
+                                color: Colors.black.withValues(alpha: 0.06),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -417,10 +501,8 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                         padding: const EdgeInsets.all(AppSpacing.mdPlus),
                         decoration: BoxDecoration(
                           color: AppTheme.infoSurface,
-                          border:
-                              Border.all(color: AppTheme.infoBorder),
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.lg),
+                          border: Border.all(color: AppTheme.infoBorder),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,8 +707,7 @@ class _BarChart extends StatelessWidget {
           Text(
             isEs ? 'Distribución de costos' : 'Cost distribution',
             style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: AppTextSize.bodyMd),
+                fontWeight: FontWeight.w700, fontSize: AppTextSize.bodyMd),
           ),
           const SizedBox(height: AppSpacing.md),
           ...lines.asMap().entries.map((e) {
@@ -718,8 +799,7 @@ class _LineItemRow extends StatelessWidget {
                           color: Color(0xFF334155))),
                   Text('${pct.toStringAsFixed(1)}% of total',
                       style: const TextStyle(
-                          fontSize: AppTextSize.xs,
-                          color: Color(0xFF94A3B8))),
+                          fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
                 ],
               ),
             ),

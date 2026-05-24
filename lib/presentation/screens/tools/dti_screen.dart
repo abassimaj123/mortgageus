@@ -48,11 +48,11 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
       final r = input.annualRatePct / 100 / 12;
       final n = input.termYears * 12;
       if (r > 0 && n > 0) {
-        final monthlyPI = loanAmt *
-            (r * math.pow(1 + r, n)) /
-            (math.pow(1 + r, n) - 1);
+        final monthlyPI =
+            loanAmt * (r * math.pow(1 + r, n)) / (math.pow(1 + r, n) - 1);
         // Add monthly property tax + insurance estimate
-        final monthlyTax = input.homePrice * input.propertyTaxRatePct / 100 / 12;
+        final monthlyTax =
+            input.homePrice * input.propertyTaxRatePct / 100 / 12;
         final monthlyIns = input.homeInsuranceAnnual / 12;
         estimatedPiti = monthlyPI + monthlyTax + monthlyIns;
       }
@@ -109,12 +109,10 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
         final totalHousing = piti;
         final totalAll = piti + totalDebts;
 
-        final frontEndDti = monthlyIncome > 0
-            ? (totalHousing / monthlyIncome) * 100
-            : 0.0;
-        final backEndDti = monthlyIncome > 0
-            ? (totalAll / monthlyIncome) * 100
-            : 0.0;
+        final frontEndDti =
+            monthlyIncome > 0 ? (totalHousing / monthlyIncome) * 100 : 0.0;
+        final backEndDti =
+            monthlyIncome > 0 ? (totalAll / monthlyIncome) * 100 : 0.0;
 
         // Max mortgage at 28% conventional front-end
         final maxMortgagePayment =
@@ -138,20 +136,22 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ── Income ──────────────────────────────────────────
-                      _SectionLabel(
-                          isEs ? 'Ingreso' : 'Income', Icons.account_balance_wallet_rounded),
+                      _SectionLabel(isEs ? 'Ingreso' : 'Income',
+                          Icons.account_balance_wallet_rounded),
                       const SizedBox(height: AppSpacing.sm),
                       TextFormField(
                         controller: _annualIncomeCtrl,
                         keyboardType: TextInputType.number,
                         inputFormatters: [CurrencyInputFormatter()],
                         decoration: InputDecoration(
-                          labelText:
-                              isEs ? 'Ingreso bruto anual' : 'Annual gross income',
+                          labelText: isEs
+                              ? 'Ingreso bruto anual'
+                              : 'Annual gross income',
                           prefixText: '\$',
                           suffixText: '/yr',
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.lg)),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.lg)),
                         ),
                         onChanged: (_) {
                           setState(() {});
@@ -174,7 +174,9 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
 
                       // ── Housing costs ────────────────────────────────────
                       _SectionLabel(
-                          isEs ? 'Costos de vivienda (PITI)' : 'Housing Costs (PITI)',
+                          isEs
+                              ? 'Costos de vivienda (PITI)'
+                              : 'Housing Costs (PITI)',
                           Icons.home_rounded),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
@@ -190,11 +192,14 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [CurrencyInputFormatter()],
                         decoration: InputDecoration(
-                          labelText: isEs ? 'Pago mensual PITI' : 'Monthly PITI payment',
+                          labelText: isEs
+                              ? 'Pago mensual PITI'
+                              : 'Monthly PITI payment',
                           prefixText: '\$',
                           suffixText: '/mo',
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.lg)),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.lg)),
                         ),
                         onChanged: (_) {
                           setState(() {});
@@ -285,7 +290,9 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                 children: [
                                   // DTI gauges
                                   _DtiGauge(
-                                    label: isEs ? 'DTI Front-End' : 'Front-End DTI',
+                                    label: isEs
+                                        ? 'DTI Front-End'
+                                        : 'Front-End DTI',
                                     subtitle: isEs
                                         ? 'Solo vivienda / ingreso'
                                         : 'Housing only / income',
@@ -296,7 +303,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                   ),
                                   const SizedBox(height: AppSpacing.md),
                                   _DtiGauge(
-                                    label: isEs ? 'DTI Back-End' : 'Back-End DTI',
+                                    label:
+                                        isEs ? 'DTI Back-End' : 'Back-End DTI',
                                     subtitle: isEs
                                         ? 'Vivienda + todas las deudas / ingreso'
                                         : 'Housing + all debts / income',
@@ -319,7 +327,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                   if (maxMortgagePayment > 0)
                                     Container(
                                       width: double.infinity,
-                                      padding: const EdgeInsets.all(AppSpacing.lg),
+                                      padding:
+                                          const EdgeInsets.all(AppSpacing.lg),
                                       decoration: BoxDecoration(
                                         color: AppTheme.surfaceTint,
                                         borderRadius:
@@ -329,7 +338,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                                 .withValues(alpha: 0.3)),
                                       ),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             isEs
@@ -470,8 +480,7 @@ class _DtiGauge extends StatelessWidget {
                         fontSize: AppTextSize.bodyMd)),
                 Text(subtitle,
                     style: const TextStyle(
-                        fontSize: AppTextSize.sm,
-                        color: Color(0xFF64748B))),
+                        fontSize: AppTextSize.sm, color: Color(0xFF64748B))),
               ]),
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Text(
@@ -603,7 +612,9 @@ class _LenderVerdictsCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg, AppSpacing.mdPlus, AppSpacing.lg, AppSpacing.sm),
             child: Text(
-              isEs ? 'Elegibilidad por tipo de préstamo' : 'Lender eligibility by loan type',
+              isEs
+                  ? 'Elegibilidad por tipo de préstamo'
+                  : 'Lender eligibility by loan type',
               style: const TextStyle(
                   fontWeight: FontWeight.w700, fontSize: AppTextSize.bodyMd),
             ),
@@ -640,8 +651,12 @@ class _LenderVerdict extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final passes = _passes;
-    final color = passes ? CalcwiseSemanticColors.successDark : CalcwiseSemanticColors.errorDark;
-    final bg = passes ? CalcwiseSemanticColors.successBg : CalcwiseSemanticColors.errorBg;
+    final color = passes
+        ? CalcwiseSemanticColors.successDark
+        : CalcwiseSemanticColors.errorDark;
+    final bg = passes
+        ? CalcwiseSemanticColors.successBg
+        : CalcwiseSemanticColors.errorBg;
     final icon = passes ? Icons.check_circle_outline : Icons.cancel_outlined;
 
     return Padding(
@@ -651,7 +666,8 @@ class _LenderVerdict extends StatelessWidget {
         Icon(icon, color: color, size: 20),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(name,
                 style: const TextStyle(
                     fontWeight: FontWeight.w600, fontSize: AppTextSize.body)),

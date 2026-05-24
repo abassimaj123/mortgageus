@@ -102,8 +102,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
         double.tryParse(_extraMonthlyCtrl.text.replaceAll(',', '')) ?? 0;
     final extraAnnual =
         double.tryParse(_extraAnnualCtrl.text.replaceAll(',', '')) ?? 0;
-    final lumpSum =
-        double.tryParse(_lumpSumCtrl.text.replaceAll(',', '')) ?? 0;
+    final lumpSum = double.tryParse(_lumpSumCtrl.text.replaceAll(',', '')) ?? 0;
 
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
@@ -177,7 +176,10 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                               onChanged: () => _onChanged(inputState)),
                           const SizedBox(height: AppSpacing.sm),
                           // Big CTA
-                          if ((extraMonthly > 0 || extraAnnual > 0 || lumpSum > 0) && r != null) ...[
+                          if ((extraMonthly > 0 ||
+                                  extraAnnual > 0 ||
+                                  lumpSum > 0) &&
+                              r != null) ...[
                             const SizedBox(height: AppSpacing.xl),
                             Container(
                               width: double.infinity,
@@ -244,7 +246,9 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                 ]),
                               ),
                             ),
-                            if (extraMonthly > 0 || extraAnnual > 0 || lumpSum > 0) ...[
+                            if (extraMonthly > 0 ||
+                                extraAnnual > 0 ||
+                                lumpSum > 0) ...[
                               const SizedBox(height: AppSpacing.lg),
                               SizedBox(
                                 width: double.infinity,
@@ -252,17 +256,19 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
                                   onPressed: () async {
                                     final text = isEs
                                         ? '💰 Pagos Extra\n'
-                                          'Ahorro en intereses: ${_fmt.format(r.interestSaved)}\n'
-                                          'Tiempo ahorrado: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
-                                          '— MortgageUS'
+                                            'Ahorro en intereses: ${_fmt.format(r.interestSaved)}\n'
+                                            'Tiempo ahorrado: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
+                                            '— MortgageUS'
                                         : '💰 Extra Payments\n'
-                                          'Interest saved: ${_fmt.format(r.interestSaved)}\n'
-                                          'Time saved: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
-                                          '— MortgageUS';
+                                            'Interest saved: ${_fmt.format(r.interestSaved)}\n'
+                                            'Time saved: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
+                                            '— MortgageUS';
                                     await Share.share(text);
                                   },
                                   icon: const Icon(Icons.share_rounded),
-                                  label: Text(isEs ? 'Compartir resultados' : 'Share results'),
+                                  label: Text(isEs
+                                      ? 'Compartir resultados'
+                                      : 'Share results'),
                                 ),
                               ),
                             ],

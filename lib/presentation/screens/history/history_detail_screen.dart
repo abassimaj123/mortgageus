@@ -123,7 +123,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     try {
       final result = MortgageCalculator.calculate(input);
       if (context.mounted) {
-        await PdfExportService.exportMortgage(context, inputState, result);
+        await PdfExportService.exportMortgage(context, inputState, result,
+            isEs: isEs);
       }
     } catch (e) {
       if (context.mounted) {

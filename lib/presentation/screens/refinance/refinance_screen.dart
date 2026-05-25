@@ -19,7 +19,7 @@ class RefinanceScreen extends StatefulWidget {
   State<RefinanceScreen> createState() => _RefinanceScreenState();
 }
 
-class _RefinanceScreenState extends State<RefinanceScreen> {
+class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalcMixin {
   final _formKey = GlobalKey<FormState>();
   final _balanceCtrl = TextEditingController(text: '300000');
   final _curRateCtrl = TextEditingController(text: '7.0');
@@ -85,7 +85,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> {
   }
 
   void _onChanged() {
-    _recalculate();
+    scheduleCalc(_recalculate);
     if (_interacted) return;
     _interacted = true;
     _trackInteraction();

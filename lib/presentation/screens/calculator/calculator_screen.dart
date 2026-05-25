@@ -643,7 +643,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                                       .exportMortgage(
                                                                           context,
                                                                           inputState,
-                                                                          result);
+                                                                          result,
+                                                                          isEs: isEs);
                                                                   AnalyticsService
                                                                       .instance
                                                                       .logPdfExported();
@@ -689,7 +690,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                                     await PdfExportService.exportMortgage(
                                                                         context,
                                                                         inputState,
-                                                                        result);
+                                                                        result,
+                                                                        isEs: isEs);
                                                                     await AnalyticsService
                                                                         .instance
                                                                         .logPdfExported();
@@ -798,14 +800,16 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                               'Tasa: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
                                                               'Mensual: ${fmt.format(result.monthly.pitiPayment)}\n'
                                                               'Interés total: ${fmt.format(result.totalInterest)}\n'
-                                                              '— Calculado con Mortgage Calculator US'
+                                                              '— Calculado con Mortgage Calculator US\n\n'
+                                                              '📄 Exporta el reporte completo en PDF →'
                                                           : '🏠 Mortgage Summary\n'
                                                               'Price: ${fmt.format(inputState.homePrice)}\n'
                                                               'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
                                                               'Rate: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
                                                               'Monthly: ${fmt.format(result.monthly.pitiPayment)}\n'
                                                               'Total Interest: ${fmt.format(result.totalInterest)}\n'
-                                                              '— Calculated with Mortgage Calculator US';
+                                                              '— Calculated with Mortgage Calculator US\n\n'
+                                                              '📄 Export the full PDF report in the app →';
                                                       try {
                                                         AnalyticsService
                                                             .instance

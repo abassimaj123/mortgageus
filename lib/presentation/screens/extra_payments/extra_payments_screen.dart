@@ -22,7 +22,7 @@ class ExtraPaymentsScreen extends ConsumerStatefulWidget {
       _ExtraPaymentsScreenState();
 }
 
-class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
+class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with CalcwiseAutoCalcMixin {
   final _extraMonthlyCtrl = TextEditingController(text: '200');
   final _extraAnnualCtrl = TextEditingController(text: '0');
   final _lumpSumCtrl = TextEditingController(text: '0');
@@ -77,7 +77,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> {
   }
 
   void _onChanged(MortgageInputState s) {
-    _recalculate(s);
+    scheduleCalc(() => _recalculate(s));
     if (_interacted) return;
     _interacted = true;
     _trackInteraction();

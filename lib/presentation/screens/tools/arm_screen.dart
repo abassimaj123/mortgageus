@@ -17,7 +17,7 @@ class ArmScreen extends ConsumerStatefulWidget {
   ConsumerState<ArmScreen> createState() => _ArmScreenState();
 }
 
-class _ArmScreenState extends ConsumerState<ArmScreen> {
+class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixin {
   final _loanCtrl = TextEditingController();
   final _initRateCtrl = TextEditingController(text: '6.0');
   final _adjRateCtrl = TextEditingController(text: '7.5');
@@ -253,7 +253,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
         contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
-      onChanged: (_) => _calculate(),
+      onChanged: (_) => scheduleCalc(_calculate),
     );
   }
 }

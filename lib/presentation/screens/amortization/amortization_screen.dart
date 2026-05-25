@@ -834,7 +834,7 @@ class _YearTileState extends State<_YearTile> {
                       ),
                       const SizedBox(height: AppSpacing.xxs),
                       Text('${group.pctPaid.toStringAsFixed(1)}% ${s.paid}',
-                          style: const TextStyle(fontSize: 10)),
+                          style: const TextStyle(fontSize: AppTextSize.xs)),
                     ]),
               ),
             ),
@@ -861,7 +861,7 @@ class _Badge extends StatelessWidget {
         ),
         child: Text(label,
             style: TextStyle(
-                fontSize: 9, color: color, fontWeight: FontWeight.bold)),
+                fontSize: AppTextSize.xxs, color: color, fontWeight: FontWeight.bold)),
       );
 }
 
@@ -1115,7 +1115,7 @@ class _MetricChip extends StatelessWidget {
           children: [
             Text(label,
                 style: TextStyle(
-                    fontSize: 9, color: color.withValues(alpha: 0.8))),
+                    fontSize: AppTextSize.xxs, color: color.withValues(alpha: 0.8))),
             Text(value,
                 style: TextStyle(
                     fontSize: AppTextSize.xs,

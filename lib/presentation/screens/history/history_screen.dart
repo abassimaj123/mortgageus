@@ -958,7 +958,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     BorderRadius.circular(AppRadius.sm)),
                             child: Text(loanType,
                                 style: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: AppTextSize.xs,
                                     fontWeight: FontWeight.w600,
                                     color: AppTheme.primary)),
                           ),
@@ -1063,7 +1063,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           borderRadius: BorderRadius.circular(AppRadius.sm)),
                       child: Text(loanType,
                           style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: AppTextSize.xs,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.primary)),
                     ),
@@ -1348,6 +1348,7 @@ class _CompareBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ct = CalcwiseTheme.of(context);
     const colorA = AppTheme.primary;
     const colorB = Color(0xFF475569); // secondary/slate
 
@@ -1411,8 +1412,8 @@ class _CompareBarChart extends StatelessWidget {
                           padding: const EdgeInsets.only(top: AppSpacing.xs),
                           child: Text(
                             groups[idx].$1,
-                            style: const TextStyle(
-                                fontSize: 10, color: Color(0xFF64748B)),
+                            style: TextStyle(
+                                fontSize: AppTextSize.xs, color: ct.textSecondary),
                             textAlign: TextAlign.center,
                           ),
                         );
@@ -1425,8 +1426,8 @@ class _CompareBarChart extends StatelessWidget {
                       reservedSize: 44,
                       getTitlesWidget: (v, _) => Text(
                         _kFormat(v),
-                        style: const TextStyle(
-                            fontSize: 9, color: Color(0xFF94A3B8)),
+                        style: TextStyle(
+                            fontSize: AppTextSize.xxs, color: ct.textSecondary),
                       ),
                     ),
                   ),

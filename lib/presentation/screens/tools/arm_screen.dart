@@ -400,7 +400,7 @@ class _PhaseCard extends StatelessWidget {
           Text(sublabel,
               textAlign: TextAlign.center,
               style:
-                  TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10)),
+                  TextStyle(color: color.withValues(alpha: 0.7), fontSize: AppTextSize.xs)),
           const SizedBox(height: AppSpacing.sm),
           Text(value,
               textAlign: TextAlign.center,

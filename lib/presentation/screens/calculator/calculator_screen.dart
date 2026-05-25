@@ -871,7 +871,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     : 'For informational purposes only. Not financial advice.',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                  fontSize: 10,
+                                                  fontSize: AppTextSize.xs,
                                                   color: Theme.of(context)
                                                       .colorScheme
                                                       .onSurface
@@ -1028,7 +1028,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
           suffixText: suffix,
           errorText: errorText,
           helperText: helperText,
-          helperStyle: const TextStyle(fontSize: 10),
+          helperStyle: const TextStyle(fontSize: AppTextSize.xs),
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg)),
           contentPadding: const EdgeInsets.symmetric(

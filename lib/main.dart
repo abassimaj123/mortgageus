@@ -306,6 +306,8 @@ class _MainShellState extends State<_MainShell> {
                   AnalyticsService.instance.logTabChanged(_tabNames[i]);
                 }
                 final trigger = await paywallSession.recordAction();
+                if (!mounted) return;
+                if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
                 if (trigger == PaywallTrigger.soft) {
                   AnalyticsService.instance.logPaywallShown('soft');
                   PaywallSoft.show(context);

@@ -164,14 +164,14 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                           child: Column(children: [
                                             _ResultRow(
                                                 s.currentPayment,
-                                                AmountFormatter.format(
+                                                AmountFormatter.ui(
                                                     r.oldMonthlyPayment, 'USD')),
                                             _ResultRow(
                                                 s.newPayment,
-                                                AmountFormatter.format(
+                                                AmountFormatter.ui(
                                                     r.newMonthlyPayment, 'USD')),
                                             _ResultRow(s.monthlySavings,
-                                                AmountFormatter.format(r.monthlySavings, 'USD'),
+                                                AmountFormatter.ui(r.monthlySavings, 'USD'),
                                                 color: r.monthlySavings > 0
                                                     ? AppTheme.accentGood
                                                     : CalcwiseSemanticColors
@@ -191,7 +191,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                                             ' (${(r.breakEvenMonths / 12).toStringAsFixed(1)} yrs)'),
                                             _ResultRow(
                                                 s.totalSavings,
-                                                AmountFormatter.format(
+                                                AmountFormatter.ui(
                                                     r.totalSavingsOverLife, 'USD'),
                                                 color:
                                                     r.totalSavingsOverLife > 0
@@ -247,14 +247,14 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                             onPressed: () async {
                                               final text = isEs
                                                   ? '📊 Refinanciamiento\n'
-                                                      'Pago actual: ${AmountFormatter.format(r!.oldMonthlyPayment, 'USD')}/mes\n'
-                                                      'Nuevo pago: ${AmountFormatter.format(r!.newMonthlyPayment, 'USD')}/mes\n'
-                                                      'Ahorro mensual: ${AmountFormatter.format(r!.monthlySavings, 'USD')}\n'
+                                                      'Pago actual: ${AmountFormatter.ui(r!.oldMonthlyPayment, 'USD')}/mes\n'
+                                                      'Nuevo pago: ${AmountFormatter.ui(r!.newMonthlyPayment, 'USD')}/mes\n'
+                                                      'Ahorro mensual: ${AmountFormatter.ui(r!.monthlySavings, 'USD')}\n'
                                                       '— MortgageUS'
                                                   : '📊 Refinance Summary\n'
-                                                      'Current payment: ${AmountFormatter.format(r!.oldMonthlyPayment, 'USD')}/mo\n'
-                                                      'New payment: ${AmountFormatter.format(r!.newMonthlyPayment, 'USD')}/mo\n'
-                                                      'Monthly savings: ${AmountFormatter.format(r!.monthlySavings, 'USD')}\n'
+                                                      'Current payment: ${AmountFormatter.ui(r!.oldMonthlyPayment, 'USD')}/mo\n'
+                                                      'New payment: ${AmountFormatter.ui(r!.newMonthlyPayment, 'USD')}/mo\n'
+                                                      'Monthly savings: ${AmountFormatter.ui(r!.monthlySavings, 'USD')}\n'
                                                       '— MortgageUS';
                                               await Share.share(text);
                                             },

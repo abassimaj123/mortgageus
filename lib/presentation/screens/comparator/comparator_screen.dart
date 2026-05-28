@@ -169,8 +169,8 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       // Header info
                       Semantics(
                         label: isEs
-                            ? '${str.home} ${AmountFormatter.format(s.homePrice, 'USD')}, ${str.down} ${AmountFormatter.format(s.downPaymentDollar, 'USD')} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%'
-                            : '${str.home} ${AmountFormatter.format(s.homePrice, 'USD')}, ${str.down} ${AmountFormatter.format(s.downPaymentDollar, 'USD')} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%',
+                            ? '${str.home} ${AmountFormatter.ui(s.homePrice, 'USD')}, ${str.down} ${AmountFormatter.ui(s.downPaymentDollar, 'USD')} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%'
+                            : '${str.home} ${AmountFormatter.ui(s.homePrice, 'USD')}, ${str.down} ${AmountFormatter.ui(s.downPaymentDollar, 'USD')} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%',
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.lg,
@@ -190,12 +190,12 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                  Text('${str.home} ${AmountFormatter.format(s.homePrice, 'USD')}',
+                                  Text('${str.home} ${AmountFormatter.ui(s.homePrice, 'USD')}',
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: AppTheme.primary)),
                                   Text(
-                                      '${str.down} ${AmountFormatter.format(s.downPaymentDollar, 'USD')}'
+                                      '${str.down} ${AmountFormatter.ui(s.downPaymentDollar, 'USD')}'
                                       ' (${s.downPaymentPct.toStringAsFixed(1)}%)'
                                       '  ${str.rate} ${s.annualRatePct}%',
                                       style: TextStyle(
@@ -275,7 +275,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       if (canSave) ...[
                         const SizedBox(height: AppSpacing.xs),
                         ValueListenableBuilder<bool>(
-                          valueListenable: freemiumService.isPremiumNotifier,
+                          valueListenable: freemiumService.hasFullAccessNotifier,
                           builder: (_, isPremium, __) =>
                               ValueListenableBuilder<bool>(
                             valueListenable: freemiumService.isRewardedNotifier,
@@ -369,26 +369,26 @@ class _CompareTable extends StatelessWidget {
       const SizedBox(height: AppSpacing.md),
       _CompareRow(
         label: s.monthlyPILabel,
-        val30: AmountFormatter.format(r30.monthly.piPayment, 'USD'),
-        val15: AmountFormatter.format(r15.monthly.piPayment, 'USD'),
+        val30: AmountFormatter.ui(r30.monthly.piPayment, 'USD'),
+        val15: AmountFormatter.ui(r15.monthly.piPayment, 'USD'),
         winner: 30, // 30yr lower monthly
       ),
       _CompareRow(
         label: s.monthlyPITI,
-        val30: AmountFormatter.format(r30.monthly.pitiPayment, 'USD'),
-        val15: AmountFormatter.format(r15.monthly.pitiPayment, 'USD'),
+        val30: AmountFormatter.ui(r30.monthly.pitiPayment, 'USD'),
+        val15: AmountFormatter.ui(r15.monthly.pitiPayment, 'USD'),
         winner: 30,
       ),
       _CompareRow(
         label: s.totalInterest,
-        val30: AmountFormatter.format(r30.totalInterest, 'USD'),
-        val15: AmountFormatter.format(r15.totalInterest, 'USD'),
+        val30: AmountFormatter.ui(r30.totalInterest, 'USD'),
+        val15: AmountFormatter.ui(r15.totalInterest, 'USD'),
         winner: 15, // 15yr saves interest
       ),
       _CompareRow(
         label: s.totalCost,
-        val30: AmountFormatter.format(r30.totalCost, 'USD'),
-        val15: AmountFormatter.format(r15.totalCost, 'USD'),
+        val30: AmountFormatter.ui(r30.totalCost, 'USD'),
+        val15: AmountFormatter.ui(r15.totalCost, 'USD'),
         winner: 15,
       ),
       _CompareRow(
@@ -401,8 +401,8 @@ class _CompareTable extends StatelessWidget {
       // Savings callout
       Semantics(
         label:
-            '15-year advantage: saves ${AmountFormatter.format(r30.totalInterest - r15.totalInterest, 'USD')} in interest. '
-            '30-year advantage: ${AmountFormatter.format(r15.monthly.piPayment - r30.monthly.piPayment, 'USD')} lower monthly payment.',
+            '15-year advantage: saves ${AmountFormatter.ui(r30.totalInterest - r15.totalInterest, 'USD')} in interest. '
+            '30-year advantage: ${AmountFormatter.ui(r15.monthly.piPayment - r30.monthly.piPayment, 'USD')} lower monthly payment.',
         child: Card(
           color: AppTheme.accentGood.withValues(alpha: 0.08),
           shape: RoundedRectangleBorder(
@@ -421,7 +421,7 @@ class _CompareTable extends StatelessWidget {
                   )),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                  '${s.interestSaved} ${AmountFormatter.format(r30.totalInterest - r15.totalInterest, 'USD')}',
+                  '${s.interestSaved} ${AmountFormatter.ui(r30.totalInterest - r15.totalInterest, 'USD')}',
                   style: const TextStyle(fontSize: AppTextSize.md)),
               Text(
                   '${s.paidOff15} ${(r30.payoffDate.year - r15.payoffDate.year)} ${s.yearsEarlier}',
@@ -435,7 +435,7 @@ class _CompareTable extends StatelessWidget {
                   )),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                  '${s.monthlySavings} ${AmountFormatter.format(r15.monthly.piPayment - r30.monthly.piPayment, 'USD')} ${s.lower}',
+                  '${s.monthlySavings} ${AmountFormatter.ui(r15.monthly.piPayment - r30.monthly.piPayment, 'USD')} ${s.lower}',
                   style: const TextStyle(fontSize: AppTextSize.md)),
             ]),
           ),
@@ -684,34 +684,34 @@ class _ArmCompareTable extends StatelessWidget {
       const SizedBox(height: AppSpacing.md),
       _CompareRow(
         label: s.armPaymentDuring,
-        val30: AmountFormatter.format(arm.fixedPayment, 'USD'),
-        val15: AmountFormatter.format(arm.payment1, 'USD'),
+        val30: AmountFormatter.ui(arm.fixedPayment, 'USD'),
+        val15: AmountFormatter.ui(arm.payment1, 'USD'),
         winner: arm.payment1 < arm.fixedPayment ? 15 : 30,
       ),
       _CompareRow(
         label: s.armPaymentAfter,
-        val30: AmountFormatter.format(arm.fixedPayment, 'USD'),
-        val15: AmountFormatter.format(arm.payment2, 'USD'),
+        val30: AmountFormatter.ui(arm.fixedPayment, 'USD'),
+        val15: AmountFormatter.ui(arm.payment2, 'USD'),
         winner: arm.payment2 < arm.fixedPayment ? 15 : 30,
       ),
       _CompareRow(
         label: s.armTotalInterest,
-        val30: AmountFormatter.format(arm.fixedTotalInterest, 'USD'),
-        val15: AmountFormatter.format(arm.totalInterest, 'USD'),
+        val30: AmountFormatter.ui(arm.fixedTotalInterest, 'USD'),
+        val15: AmountFormatter.ui(arm.totalInterest, 'USD'),
         winner: armIsCheaper ? 15 : 30,
       ),
       _CompareRow(
         label: s.armTotalCost,
-        val30: AmountFormatter.format(
+        val30: AmountFormatter.ui(
             (arm.totalCost - arm.totalInterest) + arm.fixedTotalInterest, 'USD'),
-        val15: AmountFormatter.format(arm.totalCost, 'USD'),
+        val15: AmountFormatter.ui(arm.totalCost, 'USD'),
         winner: armIsCheaper ? 15 : 30,
       ),
       const SizedBox(height: AppSpacing.lg),
       Semantics(
         label: armIsCheaper
-            ? 'ARM saves ${AmountFormatter.format(armInterestSavings.abs(), 'USD')} in total interest vs fixed 30-year.'
-            : 'ARM costs ${AmountFormatter.format(armInterestSavings.abs(), 'USD')} more in total interest vs fixed 30-year.',
+            ? 'ARM saves ${AmountFormatter.ui(armInterestSavings.abs(), 'USD')} in total interest vs fixed 30-year.'
+            : 'ARM costs ${AmountFormatter.ui(armInterestSavings.abs(), 'USD')} more in total interest vs fixed 30-year.',
         child: Card(
           color: (armIsCheaper
                   ? AppTheme.accentGood
@@ -731,7 +731,7 @@ class _ArmCompareTable extends StatelessWidget {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (armIsCheaper) ...[
                 Text(
-                  '${s.armTotalInterest}: ${AmountFormatter.format(armInterestSavings.abs(), 'USD')} ${s.lower}',
+                  '${s.armTotalInterest}: ${AmountFormatter.ui(armInterestSavings.abs(), 'USD')} ${s.lower}',
                   style: TextStyle(
                       color: AppTheme.accentGood,
                       fontWeight: FontWeight.bold,
@@ -749,7 +749,7 @@ class _ArmCompareTable extends StatelessWidget {
                       style: const TextStyle(fontSize: AppTextSize.md)),
               ] else ...[
                 Text(
-                  '${s.armTotalInterest}: ${AmountFormatter.format(armInterestSavings.abs(), 'USD')} more vs fixed',
+                  '${s.armTotalInterest}: ${AmountFormatter.ui(armInterestSavings.abs(), 'USD')} more vs fixed',
                   style: const TextStyle(
                       color: CalcwiseSemanticColors.warnIcon,
                       fontWeight: FontWeight.bold,

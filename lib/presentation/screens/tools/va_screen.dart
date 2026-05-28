@@ -115,7 +115,7 @@ class _VaScreenState extends State<VaScreen> {
                               style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: AppTextSize.bodyMd)),
-                          Text(AmountFormatter.format(down, 'USD'),
+                          Text(AmountFormatter.ui(down, 'USD'),
                               style: const TextStyle(
                                   color: AppTheme.primary,
                                   fontWeight: FontWeight.bold)),
@@ -229,25 +229,25 @@ class _VaScreenState extends State<VaScreen> {
                                         label: isEs
                                             ? 'Tarifa de financiación \$'
                                             : 'Funding Fee \$',
-                                        value: AmountFormatter.format(fundingFee, 'USD'),
+                                        value: AmountFormatter.ui(fundingFee, 'USD'),
                                         color:
                                             CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs
                                             ? 'Monto del préstamo (con tarifa)'
                                             : 'Loan Amount (incl. fee)',
-                                        value: AmountFormatter.format(loan, 'USD')),
+                                        value: AmountFormatter.ui(loan, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Capital + Interés'
                                             : 'P & I',
-                                        value: AmountFormatter.format(pAndI, 'USD')),
+                                        value: AmountFormatter.ui(pAndI, 'USD')),
                                     const Divider(height: 24),
                                     _Row(
                                         label: isEs
                                             ? 'Pago total mensual'
                                             : 'Total Monthly Payment',
-                                        value: AmountFormatter.format(total, 'USD'),
+                                        value: AmountFormatter.ui(total, 'USD'),
                                         bold: true,
                                         color: AppTheme.primary),
                                     const SizedBox(height: AppRadius.sm),

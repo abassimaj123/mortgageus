@@ -181,7 +181,7 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Costo de los puntos'
                                             : 'Points Cost',
-                                        value: AmountFormatter.format(pointsCost, 'USD'),
+                                        value: AmountFormatter.ui(pointsCost, 'USD'),
                                         color:
                                             CalcwiseSemanticColors.alertText),
                                     _Row(
@@ -192,16 +192,16 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Pago original'
                                             : 'Original Payment',
-                                        value: AmountFormatter.format(origPay, 'USD')),
+                                        value: AmountFormatter.ui(origPay, 'USD')),
                                     _Row(
                                         label:
                                             isEs ? 'Pago nuevo' : 'New Payment',
-                                        value: AmountFormatter.format(newPay, 'USD')),
+                                        value: AmountFormatter.ui(newPay, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Ahorro mensual'
                                             : 'Monthly Savings',
-                                        value: AmountFormatter.format(monthlySav, 'USD'),
+                                        value: AmountFormatter.ui(monthlySav, 'USD'),
                                         bold: true,
                                         color: AppTheme.accentGood),
                                     const Divider(height: 24),
@@ -215,7 +215,7 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Ahorro neto ($_term años)'
                                             : 'Net Savings ($_term yrs)',
-                                        value: AmountFormatter.format(lifetimeSav, 'USD'),
+                                        value: AmountFormatter.ui(lifetimeSav, 'USD'),
                                         bold: true,
                                         color: lifetimeSav >= 0
                                             ? AppTheme.accentGood

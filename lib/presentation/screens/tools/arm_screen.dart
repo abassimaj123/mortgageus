@@ -282,7 +282,7 @@ class _ResultCard extends StatelessWidget {
               ? 'Pago durante\nperíodo fijo'
               : 'Payment during\nfixed period',
           sublabel: '${fixedYears}yr @ ${s.armMode}',
-          value: AmountFormatter.format(r.payment1, 'USD'),
+          value: AmountFormatter.ui(r.payment1, 'USD'),
           color: AppTheme.primary,
         )),
         const SizedBox(width: AppSpacing.md),
@@ -292,7 +292,7 @@ class _ResultCard extends StatelessWidget {
           sublabel: isEs
               ? 'años ${fixedYears + 1}–$termYears'
               : 'yr ${fixedYears + 1}–$termYears',
-          value: AmountFormatter.format(r.payment2, 'USD'),
+          value: AmountFormatter.ui(r.payment2, 'USD'),
           color: r.payment2 > r.payment1
               ? AppTheme.accentWarn
               : AppTheme.accentGood,
@@ -308,19 +308,19 @@ class _ResultCard extends StatelessWidget {
           child: Column(children: [
             _Row(
               isEs ? 'Saldo al reset' : 'Balance at reset',
-              AmountFormatter.format(r.balanceAtReset, 'USD'),
+              AmountFormatter.ui(r.balanceAtReset, 'USD'),
             ),
             const Divider(height: 20),
-            _Row(s.armTotalInterest, AmountFormatter.format(r.totalInterest, 'USD')),
+            _Row(s.armTotalInterest, AmountFormatter.ui(r.totalInterest, 'USD')),
             _Row(
               isEs
                   ? 'Interés (tasa fija equivalente)'
                   : 'Interest (equivalent fixed rate)',
-              AmountFormatter.format(r.fixedTotalInterest, 'USD'),
+              AmountFormatter.ui(r.fixedTotalInterest, 'USD'),
             ),
             _Row(
               isEs ? 'Diferencia vs. fija' : 'Difference vs. fixed',
-              '${armCheaper ? "-" : "+"}${AmountFormatter.format(interestDiff.abs(), 'USD')}',
+              '${armCheaper ? "-" : "+"}${AmountFormatter.ui(interestDiff.abs(), 'USD')}',
               color: armCheaper ? AppTheme.accentGood : AppTheme.accentWarn,
               bold: true,
             ),

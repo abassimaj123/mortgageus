@@ -179,7 +179,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                           ),
                           if (availableEquity > 0)
                             Text(
-                              '${isEs ? 'Disp:' : 'Avail:'} ${AmountFormatter.format(availableEquity, 'USD')}',
+                              '${isEs ? 'Disp:' : 'Avail:'} ${AmountFormatter.ui(availableEquity, 'USD')}',
                               style: const TextStyle(
                                   fontSize: AppTextSize.sm,
                                   color: Color(0xFF64748B)),
@@ -329,7 +329,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                         _HeroCard(
                           label:
                               isEs ? 'Capital Disponible' : 'Available Equity',
-                          value: AmountFormatter.format(availableEquity, 'USD'),
+                          value: AmountFormatter.ui(availableEquity, 'USD'),
                           icon: Icons.account_balance_rounded,
                           color: const Color(0xFF0D9488),
                         ),
@@ -342,7 +342,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                               label: isEs
                                   ? 'Pago Solo Interés'
                                   : 'Interest-Only Payment',
-                              value: '${AmountFormatter.format(monthlyInterestOnly, 'USD')}/mo',
+                              value: '${AmountFormatter.ui(monthlyInterestOnly, 'USD')}/mo',
                               color: const Color(0xFF0D9488),
                             ),
                           ),
@@ -351,7 +351,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                             child: _ResultMini(
                               label:
                                   isEs ? 'Pago de Repago' : 'Repayment Payment',
-                              value: '${AmountFormatter.format(monthlyRepayment, 'USD')}/mo',
+                              value: '${AmountFormatter.ui(monthlyRepayment, 'USD')}/mo',
                               color: AppTheme.primary,
                             ),
                           ),
@@ -361,7 +361,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                           label: isEs
                               ? 'Costo Total del HELOC'
                               : 'Total Cost of HELOC',
-                          value: AmountFormatter.format(totalCost, 'USD'),
+                          value: AmountFormatter.ui(totalCost, 'USD'),
                           color: AppTheme.accentWarn,
                           wide: true,
                         ),

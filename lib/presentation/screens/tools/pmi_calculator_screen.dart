@@ -301,7 +301,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
                                             label: isEs
                                                 ? 'PMI mensual'
                                                 : 'Monthly PMI',
-                                            value: AmountFormatter.format(monthly, 'USD'),
+                                            value: AmountFormatter.ui(monthly, 'USD'),
                                             bold: true,
                                             color: CalcwiseSemanticColors
                                                 .alertText),

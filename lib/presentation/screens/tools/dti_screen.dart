@@ -157,8 +157,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           isEs
-                              ? 'Ingreso mensual: ${AmountFormatter.format(monthlyIncome, 'USD')}'
-                              : 'Monthly income: ${AmountFormatter.format(monthlyIncome, 'USD')}',
+                              ? 'Ingreso mensual: ${AmountFormatter.ui(monthlyIncome, 'USD')}'
+                              : 'Monthly income: ${AmountFormatter.ui(monthlyIncome, 'USD')}',
                           style: const TextStyle(
                               fontSize: AppTextSize.sm,
                               color: Color(0xFF64748B)),
@@ -348,7 +348,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                           ),
                                           const SizedBox(height: AppSpacing.xs),
                                           Text(
-                                            '${AmountFormatter.format(maxMortgagePayment, 'USD')}/mo',
+                                            '${AmountFormatter.ui(maxMortgagePayment, 'USD')}/mo',
                                             style: const TextStyle(
                                               fontSize: AppTextSize.titleMd,
                                               fontWeight: FontWeight.w800,
@@ -358,8 +358,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                           const SizedBox(height: AppSpacing.xs),
                                           Text(
                                             isEs
-                                                ? 'Basado en tu ingreso mensual de ${AmountFormatter.format(monthlyIncome, 'USD')}'
-                                                : 'Based on your monthly income of ${AmountFormatter.format(monthlyIncome, 'USD')}',
+                                                ? 'Basado en tu ingreso mensual de ${AmountFormatter.ui(monthlyIncome, 'USD')}'
+                                                : 'Based on your monthly income of ${AmountFormatter.ui(monthlyIncome, 'USD')}',
                                             style: const TextStyle(
                                                 fontSize: AppTextSize.xs,
                                                 color: AppTheme.labelGray),

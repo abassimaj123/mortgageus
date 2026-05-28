@@ -136,7 +136,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                    Text('${s.loan} ${AmountFormatter.format(loan, 'USD')}',
+                                    Text('${s.loan} ${AmountFormatter.ui(loan, 'USD')}',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: AppTheme.primary,
@@ -192,7 +192,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                     color: Colors.white, size: 36),
                                 const SizedBox(height: AppSpacing.sm),
                                 Text(
-                                  '${s.youCouldSave} ${AmountFormatter.format(r.interestSaved, 'USD')}',
+                                  '${s.youCouldSave} ${AmountFormatter.ui(r.interestSaved, 'USD')}',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: AppTextSize.titleMd,
@@ -201,7 +201,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                   textAlign: TextAlign.center,
                                 ),
                                 Text(
-                                  '${s.byPaying} ${AmountFormatter.format(extraMonthly, 'USD')} ${s.extraPerMonth}',
+                                  '${s.byPaying} ${AmountFormatter.ui(extraMonthly, 'USD')} ${s.extraPerMonth}',
                                   style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: AppTextSize.body),
@@ -232,11 +232,11 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                       color: AppTheme.accentGood),
                                   const Divider(height: 24),
                                   _ResultRow(s.origTotalInt,
-                                      AmountFormatter.format(r.originalTotalInterest, 'USD')),
+                                      AmountFormatter.ui(r.originalTotalInterest, 'USD')),
                                   _ResultRow(s.newTotalInt,
-                                      AmountFormatter.format(r.newTotalInterest, 'USD')),
+                                      AmountFormatter.ui(r.newTotalInterest, 'USD')),
                                   _ResultRow(s.interestSavedRow,
-                                      AmountFormatter.format(r.interestSaved, 'USD'),
+                                      AmountFormatter.ui(r.interestSaved, 'USD'),
                                       color: AppTheme.accentGood, bold: true),
                                 ]),
                               ),
@@ -251,11 +251,11 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                   onPressed: () async {
                                     final text = isEs
                                         ? '💰 Pagos Extra\n'
-                                            'Ahorro en intereses: ${AmountFormatter.format(r.interestSaved, 'USD')}\n'
+                                            'Ahorro en intereses: ${AmountFormatter.ui(r.interestSaved, 'USD')}\n'
                                             'Tiempo ahorrado: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
                                             '— MortgageUS'
                                         : '💰 Extra Payments\n'
-                                            'Interest saved: ${AmountFormatter.format(r.interestSaved, 'USD')}\n'
+                                            'Interest saved: ${AmountFormatter.ui(r.interestSaved, 'USD')}\n'
                                             'Time saved: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
                                             '— MortgageUS';
                                     await Share.share(text);

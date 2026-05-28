@@ -283,10 +283,10 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                               ? (result.totalInterest / _total * 100).round()
                               : 0;
                           final _chartLabel = isEs
-                              ? 'Desglose total: ${AmountFormatter.format(result.loanAmount, 'USD')} capital ($_principalPct%), '
-                                  '${AmountFormatter.format(result.totalInterest, 'USD')} interés ($_interestPct%)'
-                              : 'Lifetime breakdown: ${AmountFormatter.format(result.loanAmount, 'USD')} principal ($_principalPct%), '
-                                  '${AmountFormatter.format(result.totalInterest, 'USD')} interest ($_interestPct%)';
+                              ? 'Desglose total: ${AmountFormatter.ui(result.loanAmount, 'USD')} capital ($_principalPct%), '
+                                  '${AmountFormatter.ui(result.totalInterest, 'USD')} interés ($_interestPct%)'
+                              : 'Lifetime breakdown: ${AmountFormatter.ui(result.loanAmount, 'USD')} principal ($_principalPct%), '
+                                  '${AmountFormatter.ui(result.totalInterest, 'USD')} interest ($_interestPct%)';
                           return Flex(
                             direction:
                                 isSmallScreen ? Axis.vertical : Axis.horizontal,
@@ -362,13 +362,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                     _LegendRow(
                                       color: AppTheme.primary,
                                       label: s.principal,
-                                      value: AmountFormatter.format(result.loanAmount, 'USD'),
+                                      value: AmountFormatter.ui(result.loanAmount, 'USD'),
                                     ),
                                     const SizedBox(height: AppSpacing.smPlus),
                                     _LegendRow(
                                       color: AppTheme.secondary,
                                       label: s.interest,
-                                      value: AmountFormatter.format(result.totalInterest, 'USD'),
+                                      value: AmountFormatter.ui(result.totalInterest, 'USD'),
                                       valueColor: AppTheme.secondary,
                                     ),
                                     const SizedBox(height: AppSpacing.smPlus),
@@ -389,7 +389,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                               fontSize: AppTextSize.md),
                                         ),
                                         Text(
-                                          AmountFormatter.format(result.loanAmount +
+                                          AmountFormatter.ui(result.loanAmount +
                                               result.totalInterest, 'USD'),
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
@@ -408,13 +408,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                       _LegendRow(
                                         color: AppTheme.primary,
                                         label: s.principal,
-                                        value: AmountFormatter.format(result.loanAmount, 'USD'),
+                                        value: AmountFormatter.ui(result.loanAmount, 'USD'),
                                       ),
                                       const SizedBox(height: AppSpacing.smPlus),
                                       _LegendRow(
                                         color: AppTheme.secondary,
                                         label: s.interest,
-                                        value: AmountFormatter.format(result.totalInterest, 'USD'),
+                                        value: AmountFormatter.ui(result.totalInterest, 'USD'),
                                         valueColor: AppTheme.secondary,
                                       ),
                                       const SizedBox(height: AppSpacing.smPlus),
@@ -435,7 +435,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                                 fontSize: AppTextSize.md),
                                           ),
                                           Text(
-                                            AmountFormatter.format(result.loanAmount +
+                                            AmountFormatter.ui(result.loanAmount +
                                                 result.totalInterest, 'USD'),
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
@@ -622,12 +622,12 @@ class _SummaryCard extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         // Show home price + down payment for clarity
         _SummaryRow(s.homePrice,
-            '${AmountFormatter.format(inputState.homePrice, 'USD')}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
-        _SummaryRow(s.loanAmount, AmountFormatter.format(result.loanAmount, 'USD')),
+            '${AmountFormatter.ui(inputState.homePrice, 'USD')}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
+        _SummaryRow(s.loanAmount, AmountFormatter.ui(result.loanAmount, 'USD')),
         _SummaryRow(
             s.payoffDate, fmtDate.format(result.payoffDate as DateTime)),
-        _SummaryRow(s.totalInterest, AmountFormatter.format(result.totalInterest, 'USD')),
-        _SummaryRow(s.totalPayments, AmountFormatter.format(result.totalCost, 'USD')),
+        _SummaryRow(s.totalInterest, AmountFormatter.ui(result.totalInterest, 'USD')),
+        _SummaryRow(s.totalPayments, AmountFormatter.ui(result.totalCost, 'USD')),
         if (result.pmiDropMonth != null)
           _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
       ]),
@@ -721,7 +721,7 @@ class _YearTileState extends State<_YearTile> {
 
     return Semantics(
       label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '
-          '${s.balance}: ${AmountFormatter.format(group.endBalance, 'USD')}. '
+          '${s.balance}: ${AmountFormatter.ui(group.endBalance, 'USD')}. '
           '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
       child: Container(
         margin:
@@ -781,15 +781,15 @@ class _YearTileState extends State<_YearTile> {
                       Wrap(spacing: 6, runSpacing: 4, children: [
                         _MetricChip(
                             label: s.balance,
-                            value: AmountFormatter.format(group.endBalance, 'USD'),
+                            value: AmountFormatter.ui(group.endBalance, 'USD'),
                             color: AppTheme.primary),
                         _MetricChip(
                             label: s.interest,
-                            value: AmountFormatter.format(group.yearlyInterest, 'USD'),
+                            value: AmountFormatter.ui(group.yearlyInterest, 'USD'),
                             color: AppTheme.secondary),
                         _MetricChip(
                             label: s.principal,
-                            value: AmountFormatter.format(group.yearlyPrincipal, 'USD'),
+                            value: AmountFormatter.ui(group.yearlyPrincipal, 'USD'),
                             color: AppTheme.accentGood),
                       ]),
                       const SizedBox(height: AppSpacing.sm),
@@ -891,7 +891,7 @@ class _MonthSubTable extends StatelessWidget {
                 : Theme.of(context).colorScheme.surface;
 
         return Semantics(
-          label: 'Month ${e.month}, balance ${AmountFormatter.format(e.balance, 'USD')}',
+          label: 'Month ${e.month}, balance ${AmountFormatter.ui(e.balance, 'USD')}',
           child: Container(
             color: bg,
             padding: const EdgeInsets.symmetric(
@@ -899,16 +899,16 @@ class _MonthSubTable extends StatelessWidget {
             child: Row(children: [
               _Cell('${e.month}', flex: 1),
               _Cell('${e.date.month}/${e.date.year}', flex: 2),
-              _Cell(AmountFormatter.format(e.payment, 'USD'), flex: 2),
-              _Cell(AmountFormatter.format(e.interest, 'USD'), flex: 2),
-              _Cell(AmountFormatter.format(e.principal, 'USD'), flex: 2),
-              _Cell(AmountFormatter.format(e.balance, 'USD'), flex: 2),
+              _Cell(AmountFormatter.ui(e.payment, 'USD'), flex: 2),
+              _Cell(AmountFormatter.ui(e.interest, 'USD'), flex: 2),
+              _Cell(AmountFormatter.ui(e.principal, 'USD'), flex: 2),
+              _Cell(AmountFormatter.ui(e.balance, 'USD'), flex: 2),
               if (hasPmi)
                 _Cell(
                     e.pmiDropped
                         ? s.off
                         : e.pmiAmount > 0
-                            ? AmountFormatter.format(e.pmiAmount, 'USD')
+                            ? AmountFormatter.ui(e.pmiAmount, 'USD')
                             : '-',
                     flex: 2),
             ]),
@@ -976,10 +976,10 @@ class _MonthlyList extends StatelessWidget {
               child: Row(children: [
                 _Cell('${e.month}', flex: 1),
                 _Cell('${e.date.month}/${e.date.year}', flex: 2),
-                _Cell(AmountFormatter.format(e.payment, 'USD'), flex: 2),
-                _Cell(AmountFormatter.format(e.principal, 'USD'), flex: 2),
-                _Cell(AmountFormatter.format(e.interest, 'USD'), flex: 2),
-                _Cell(AmountFormatter.format(e.balance, 'USD'), flex: 2),
+                _Cell(AmountFormatter.ui(e.payment, 'USD'), flex: 2),
+                _Cell(AmountFormatter.ui(e.principal, 'USD'), flex: 2),
+                _Cell(AmountFormatter.ui(e.interest, 'USD'), flex: 2),
+                _Cell(AmountFormatter.ui(e.balance, 'USD'), flex: 2),
               ]),
             );
           }

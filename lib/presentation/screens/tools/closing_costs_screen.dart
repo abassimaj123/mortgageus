@@ -402,7 +402,7 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                           label: isEs
                               ? 'Total Estimado'
                               : 'Estimated Closing Costs',
-                          value: AmountFormatter.format(total, 'USD'),
+                          value: AmountFormatter.ui(total, 'USD'),
                           subValue:
                               '${pct.toStringAsFixed(1)}% ${isEs ? "del precio" : "of home price"}',
                           color: const Color(0xFFEA580C),
@@ -457,7 +457,7 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                             const Divider(height: 1),
                             ...lines.map((l) => _LineItemRow(
                                   label: isEs ? l.labelEs : l.labelEn,
-                                  amount: AmountFormatter.format(l.amount, 'USD'),
+                                  amount: AmountFormatter.ui(l.amount, 'USD'),
                                   pct: total > 0
                                       ? l.amount / total * 100.0
                                       : 0.0,
@@ -477,7 +477,7 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                                         color: AppTheme.primary),
                                   ),
                                   Text(
-                                    AmountFormatter.format(total, 'USD'),
+                                    AmountFormatter.ui(total, 'USD'),
                                     style: const TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: AppTextSize.bodyMd,

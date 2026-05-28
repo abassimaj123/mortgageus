@@ -336,7 +336,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ]),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                '${AmountFormatter.format(homePrice, 'USD')} · $loanType · ${annualRate.toStringAsFixed(2)}%',
+                '${AmountFormatter.ui(homePrice, 'USD')} · $loanType · ${annualRate.toStringAsFixed(2)}%',
                 style: TextStyle(
                     fontSize: AppTextSize.md, color: Color(0xFF475569)),
               ),
@@ -361,20 +361,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const SizedBox(height: AppSpacing.smPlus),
               _CompDetailRow(
                 label: isEs ? 'Mensual' : 'Monthly',
-                v30: AmountFormatter.format(m30, 'USD'),
-                v15: AmountFormatter.format(m15, 'USD'),
+                v30: AmountFormatter.ui(m30, 'USD'),
+                v15: AmountFormatter.ui(m15, 'USD'),
                 winnerIs15: m15 < m30,
               ),
               _CompDetailRow(
                 label: isEs ? 'Interés total' : 'Total Interest',
-                v30: AmountFormatter.format(i30, 'USD'),
-                v15: AmountFormatter.format(i15, 'USD'),
+                v30: AmountFormatter.ui(i30, 'USD'),
+                v15: AmountFormatter.ui(i15, 'USD'),
                 winnerIs15: i15 < i30,
               ),
               _CompDetailRow(
                 label: isEs ? 'Ahorro en interés' : 'Interest Saved',
                 v30: '—',
-                v15: AmountFormatter.format(i30 - i15, 'USD'),
+                v15: AmountFormatter.ui(i30 - i15, 'USD'),
                 winnerIs15: true,
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -390,10 +390,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 child: Text(
                   isEs
-                      ? 'El plan de 15 años ahorra ${AmountFormatter.format(i30 - i15, 'USD')} en interés total, '
-                          'pagando ${AmountFormatter.format(m15 - m30, 'USD')} más por mes.'
-                      : '15-year saves ${AmountFormatter.format(i30 - i15, 'USD')} in total interest, '
-                          'paying ${AmountFormatter.format(m15 - m30, 'USD')} more per month.',
+                      ? 'El plan de 15 años ahorra ${AmountFormatter.ui(i30 - i15, 'USD')} en interés total, '
+                          'pagando ${AmountFormatter.ui(m15 - m30, 'USD')} más por mes.'
+                      : '15-year saves ${AmountFormatter.ui(i30 - i15, 'USD')} in total interest, '
+                          'paying ${AmountFormatter.ui(m15 - m30, 'USD')} more per month.',
                   style: TextStyle(
                       fontSize: AppTextSize.md, color: Color(0xFF334155)),
                 ),
@@ -404,7 +404,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               _SectionTitle(isEs ? 'Exportar PDF' : 'Export PDF'),
               const SizedBox(height: AppSpacing.sm),
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (context, isPremium, _) =>
                     ValueListenableBuilder<bool>(
                   valueListenable: freemiumService.isRewardedNotifier,
@@ -601,7 +601,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       AppSpacing.sm),
                                   child: ValueListenableBuilder<bool>(
                                     valueListenable:
-                                        freemiumService.isPremiumNotifier,
+                                        freemiumService.hasFullAccessNotifier,
                                     builder: (context, isPremium, _) {
                                       return Column(
                                         crossAxisAlignment:
@@ -899,7 +899,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final id = row['id'] as int? ?? 0;
     final label = row['label'] as String?;
     final humanLabel =
-        '${AmountFormatter.format(homePrice, 'USD')} · ${annualRate.toStringAsFixed(2)}% · ${termYears}${isEs ? 'a' : 'yr'}';
+        '${AmountFormatter.ui(homePrice, 'USD')} · ${annualRate.toStringAsFixed(2)}% · ${termYears}${isEs ? 'a' : 'yr'}';
 
     final isSelected = _selectedIds.contains(id);
     final canSelect = _compareMode && (_selectedIds.length < 2 || isSelected);
@@ -979,7 +979,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               )
             else
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (context, isPremium, _) => IconButton(
                   icon: Icon(
                     isPremium
@@ -1046,7 +1046,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         size: 16, color: AppTheme.primary),
                     const SizedBox(width: AppRadius.sm),
                     Text(
-                      AmountFormatter.format(homePrice, 'USD'),
+                      AmountFormatter.ui(homePrice, 'USD'),
                       style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: AppTextSize.bodyMd,
@@ -1071,17 +1071,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Row(children: [
                     _ScenarioPill(
                         label: isEs ? '30a' : '30yr',
-                        value: AmountFormatter.format(m30, 'USD'),
+                        value: AmountFormatter.ui(m30, 'USD'),
                         color: AppTheme.primary),
                     const SizedBox(width: AppSpacing.sm),
                     _ScenarioPill(
                         label: isEs ? '15a' : '15yr',
-                        value: AmountFormatter.format(m15, 'USD'),
+                        value: AmountFormatter.ui(m15, 'USD'),
                         color: AppTheme.accentGood),
                     const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: Text(
-                        '${isEs ? 'Ahorra' : 'Saves'} ${AmountFormatter.format(i30 - i15, 'USD')}',
+                        '${isEs ? 'Ahorra' : 'Saves'} ${AmountFormatter.ui(i30 - i15, 'USD')}',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontSize: AppTextSize.xs,
@@ -1534,7 +1534,7 @@ class _HistoryCompareScreen extends StatelessWidget {
         : _fmtDate.format(createdAt.toLocal());
   }
 
-  String _fmt(dynamic v) => AmountFormatter.format((v as num?)?.toDouble() ?? 0.0, 'USD');
+  String _fmt(dynamic v) => AmountFormatter.ui((v as num?)?.toDouble() ?? 0.0, 'USD');
 
   Color _winner(double v1, double v2, {required bool lowerIsBetter}) {
     if (lowerIsBetter)

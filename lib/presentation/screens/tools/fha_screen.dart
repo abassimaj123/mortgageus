@@ -126,7 +126,7 @@ class _FhaScreenState extends State<FhaScreen> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppTextSize.bodyMd)),
-                            Text(AmountFormatter.format(down, 'USD'),
+                            Text(AmountFormatter.ui(down, 'USD'),
                                 style: const TextStyle(
                                     color: AppTheme.primary,
                                     fontWeight: FontWeight.bold)),
@@ -255,30 +255,30 @@ class _FhaScreenState extends State<FhaScreen> {
                                           label: isEs
                                               ? 'Monto del préstamo'
                                               : 'Loan Amount',
-                                          value: AmountFormatter.format(loan, 'USD')),
+                                          value: AmountFormatter.ui(loan, 'USD')),
                                       _Row(
                                           label: isEs
                                               ? 'MIP inicial (1.75%)'
                                               : 'Upfront MIP (1.75%)',
-                                          value: AmountFormatter.format(upfrontMip, 'USD')),
+                                          value: AmountFormatter.ui(upfrontMip, 'USD')),
                                       _Row(
                                           label: isEs
                                               ? 'MIP mensual (${(annualMipRate * 100).toStringAsFixed(2)}%)'
                                               : 'Monthly MIP (${(annualMipRate * 100).toStringAsFixed(2)}%)',
-                                          value: AmountFormatter.format(monthlyMip, 'USD'),
+                                          value: AmountFormatter.ui(monthlyMip, 'USD'),
                                           color:
                                               CalcwiseSemanticColors.alertText),
                                       _Row(
                                           label: isEs
                                               ? 'Capital + Interés'
                                               : 'P & I',
-                                          value: AmountFormatter.format(pAndI, 'USD')),
+                                          value: AmountFormatter.ui(pAndI, 'USD')),
                                       const Divider(height: 24),
                                       _Row(
                                           label: isEs
                                               ? 'Pago total mensual'
                                               : 'Total Monthly Payment',
-                                          value: AmountFormatter.format(total, 'USD'),
+                                          value: AmountFormatter.ui(total, 'USD'),
                                           bold: true,
                                           color: AppTheme.primary),
                                     ]),

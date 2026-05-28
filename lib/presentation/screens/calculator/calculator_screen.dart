@@ -476,8 +476,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                   index: 4,
                                                   child: Semantics(
                                                       label: isEs
-                                                          ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${AmountFormatter.format(result.stressTestMonthly, 'USD')}'
-                                                          : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${AmountFormatter.format(result.stressTestMonthly, 'USD')}',
+                                                          ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}'
+                                                          : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}',
                                                       child: Container(
                                                         width: double.infinity,
                                                         padding:
@@ -549,8 +549,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                                         .sm),
                                                             Text(
                                                               isEs
-                                                                  ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${AmountFormatter.format(result.stressTestMonthly, 'USD')}'
-                                                                  : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${AmountFormatter.format(result.stressTestMonthly, 'USD')}',
+                                                                  ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}'
+                                                                  : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}',
                                                               style:
                                                                   const TextStyle(
                                                                 color: AppTheme
@@ -615,7 +615,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                       bool>(
                                                     valueListenable:
                                                         freemiumService
-                                                            .isPremiumNotifier,
+                                                            .hasFullAccessNotifier,
                                                     builder: (context,
                                                         isPremium, _) {
                                                       return TextButton.icon(
@@ -773,19 +773,19 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                       }
                                                       final text = isEs
                                                           ? '🏠 Resumen hipotecario\n'
-                                                              'Precio: ${AmountFormatter.format(inputState.homePrice, 'USD')}\n'
-                                                              'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.format(inputState.downPaymentDollar, 'USD')})\n'
+                                                              'Precio: ${AmountFormatter.ui(inputState.homePrice, 'USD')}\n'
+                                                              'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.ui(inputState.downPaymentDollar, 'USD')})\n'
                                                               'Tasa: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                                              'Mensual: ${AmountFormatter.format(result.monthly.pitiPayment, 'USD')}\n'
-                                                              'Interés total: ${AmountFormatter.format(result.totalInterest, 'USD')}\n'
+                                                              'Mensual: ${AmountFormatter.ui(result.monthly.pitiPayment, 'USD')}\n'
+                                                              'Interés total: ${AmountFormatter.ui(result.totalInterest, 'USD')}\n'
                                                               '— Calculado con Mortgage Calculator US\n\n'
                                                               '📄 Exporta el reporte completo en PDF →'
                                                           : '🏠 Mortgage Summary\n'
-                                                              'Price: ${AmountFormatter.format(inputState.homePrice, 'USD')}\n'
-                                                              'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.format(inputState.downPaymentDollar, 'USD')})\n'
+                                                              'Price: ${AmountFormatter.ui(inputState.homePrice, 'USD')}\n'
+                                                              'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.ui(inputState.downPaymentDollar, 'USD')})\n'
                                                               'Rate: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                                              'Monthly: ${AmountFormatter.format(result.monthly.pitiPayment, 'USD')}\n'
-                                                              'Total Interest: ${AmountFormatter.format(result.totalInterest, 'USD')}\n'
+                                                              'Monthly: ${AmountFormatter.ui(result.monthly.pitiPayment, 'USD')}\n'
+                                                              'Total Interest: ${AmountFormatter.ui(result.totalInterest, 'USD')}\n'
                                                               '— Calculated with Mortgage Calculator US\n\n'
                                                               '📄 Export the full PDF report in the app →';
                                                       try {
@@ -1038,31 +1038,31 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final piPayment = result != null
-        ? AmountFormatter.format(result!.monthly.piPayment, 'USD')
+        ? AmountFormatter.ui(result!.monthly.piPayment, 'USD')
         : '--';
     return Semantics(
       label: result != null
           ? 'Monthly principal and interest: $piPayment. '
-              'Total PITI: ${AmountFormatter.format(result!.monthly.pitiPayment, 'USD')}. '
-              'Total interest: ${AmountFormatter.format(result!.totalInterest, 'USD')}. '
-              'Total cost: ${AmountFormatter.format(result!.totalCost, 'USD')}.'
+              'Total PITI: ${AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')}. '
+              'Total interest: ${AmountFormatter.ui(result!.totalInterest, 'USD')}. '
+              'Total cost: ${AmountFormatter.ui(result!.totalCost, 'USD')}.'
           : 'Monthly payment: enter values above to calculate',
       child: CalcwiseHeroCard(
         label: s.monthlyPI as String,
         value: piPayment,
         secondary: result != null
-            ? '${s.totalPITI}: ${AmountFormatter.format(result!.monthly.pitiPayment, 'USD')}'
+            ? '${s.totalPITI}: ${AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')}'
             : null,
         stats: result == null
             ? null
             : [
                 (
                   label: 'Total Interest',
-                  value: AmountFormatter.format(result!.totalInterest, 'USD'),
+                  value: AmountFormatter.ui(result!.totalInterest, 'USD'),
                 ),
                 (
                   label: 'Total Cost',
-                  value: AmountFormatter.format(result!.totalCost, 'USD'),
+                  value: AmountFormatter.ui(result!.totalCost, 'USD'),
                 ),
               ],
       ),
@@ -1387,17 +1387,17 @@ class _BreakdownCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(children: [
-          _Row(s.principal, AmountFormatter.format(m.principal, 'USD')),
-          _Row(s.interest, AmountFormatter.format(m.interest, 'USD')),
-          _Row(s.propertyTax, AmountFormatter.format(m.propertyTax, 'USD')),
-          _Row(s.homeInsurance, AmountFormatter.format(m.homeInsurance, 'USD')),
-          if (m.hoa > 0) _Row(s.hoa, AmountFormatter.format(m.hoa, 'USD')),
+          _Row(s.principal, AmountFormatter.ui(m.principal, 'USD')),
+          _Row(s.interest, AmountFormatter.ui(m.interest, 'USD')),
+          _Row(s.propertyTax, AmountFormatter.ui(m.propertyTax, 'USD')),
+          _Row(s.homeInsurance, AmountFormatter.ui(m.homeInsurance, 'USD')),
+          if (m.hoa > 0) _Row(s.hoa, AmountFormatter.ui(m.hoa, 'USD')),
           if (m.pmi > 0)
             _Row(
               result!.isUsda
                   ? s.usdaFeeLabel
                   : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
-              AmountFormatter.format(m.pmi, 'USD'),
+              AmountFormatter.ui(m.pmi, 'USD'),
               color: result!.isUsda
                   ? AppTheme.accentGood
                   : CalcwiseSemanticColors.warnIcon,
@@ -1418,10 +1418,10 @@ class _BreakdownCard extends StatelessWidget {
                     ),
             ),
           const Divider(height: 24),
-          _Row(s.totalPITI, AmountFormatter.format(m.pitiPayment, 'USD'), bold: true),
+          _Row(s.totalPITI, AmountFormatter.ui(m.pitiPayment, 'USD'), bold: true),
           const SizedBox(height: AppSpacing.sm),
-          _Row(s.totalInterest, AmountFormatter.format(result!.totalInterest, 'USD')),
-          _Row(s.totalCost, AmountFormatter.format(result!.totalCost, 'USD')),
+          _Row(s.totalInterest, AmountFormatter.ui(result!.totalInterest, 'USD')),
+          _Row(s.totalCost, AmountFormatter.ui(result!.totalCost, 'USD')),
           _Row(s.payoffDate,
               '${result!.payoffDate.month}/${result!.payoffDate.year}'),
           _Row(

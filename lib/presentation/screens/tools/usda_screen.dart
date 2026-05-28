@@ -235,15 +235,15 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                           child: Text(
                                               (incomeOk && _rural)
                                                   ? (isEs
-                                                      ? 'Elegible (límite ${AmountFormatter.format(maxIncome, 'USD')})'
-                                                      : 'Eligible (limit ${AmountFormatter.format(maxIncome, 'USD')})')
+                                                      ? 'Elegible (límite ${AmountFormatter.ui(maxIncome, 'USD')})'
+                                                      : 'Eligible (limit ${AmountFormatter.ui(maxIncome, 'USD')})')
                                                   : !_rural
                                                       ? (isEs
                                                           ? 'Zona no elegible'
                                                           : 'Area not eligible')
                                                       : (isEs
-                                                          ? 'Ingreso supera ${AmountFormatter.format(maxIncome, 'USD')}'
-                                                          : 'Income exceeds ${AmountFormatter.format(maxIncome, 'USD')}'),
+                                                          ? 'Ingreso supera ${AmountFormatter.ui(maxIncome, 'USD')}'
+                                                          : 'Income exceeds ${AmountFormatter.ui(maxIncome, 'USD')}'),
                                               style: TextStyle(
                                                   color: (incomeOk && _rural)
                                                       ? CalcwiseSemanticColors
@@ -260,30 +260,30 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                         label: isEs
                                             ? 'Tarifa garantía inicial (1%)'
                                             : 'Upfront Guarantee Fee (1%)',
-                                        value: AmountFormatter.format(upfrontFee, 'USD')),
+                                        value: AmountFormatter.ui(upfrontFee, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Monto del préstamo'
                                             : 'Loan Amount',
-                                        value: AmountFormatter.format(loan, 'USD')),
+                                        value: AmountFormatter.ui(loan, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Tarifa anual mensualizada (0.35%)'
                                             : 'Monthly Annual Fee (0.35%)',
-                                        value: AmountFormatter.format(monthlyFee, 'USD'),
+                                        value: AmountFormatter.ui(monthlyFee, 'USD'),
                                         color:
                                             CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs
                                             ? 'Capital + Interés'
                                             : 'P & I',
-                                        value: AmountFormatter.format(pAndI, 'USD')),
+                                        value: AmountFormatter.ui(pAndI, 'USD')),
                                     const Divider(height: 24),
                                     _Row(
                                         label: isEs
                                             ? 'Pago total mensual'
                                             : 'Total Monthly Payment',
-                                        value: AmountFormatter.format(total, 'USD'),
+                                        value: AmountFormatter.ui(total, 'USD'),
                                         bold: true,
                                         color: AppTheme.primary),
                                   ]),

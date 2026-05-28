@@ -176,7 +176,7 @@ class _InvestmentReturnScreenState
                     value: _downPct,
                     valueSuffix: '%',
                     displayValue:
-                        result != null ? AmountFormatter.format(result.downAmt, 'USD') : '—',
+                        result != null ? AmountFormatter.ui(result.downAmt, 'USD') : '—',
                     min: 3.0,
                     max: 50.0,
                     divisions: 470,
@@ -316,7 +316,7 @@ class _ResultsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: freemiumService.isPremiumNotifier,
+      valueListenable: freemiumService.hasFullAccessNotifier,
       builder: (context, isPremium, _) {
         return ValueListenableBuilder<bool>(
           valueListenable: freemiumService.isRewardedNotifier,
@@ -446,7 +446,7 @@ class _ResultsCard extends StatelessWidget {
               _Row(
                 label: isEs ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
                 value: '${result.monthlyCF >= 0 ? '+' : ''}'
-                    '${AmountFormatter.format(result.monthlyCF, 'USD')}',
+                    '${AmountFormatter.ui(result.monthlyCF, 'USD')}',
                 color: result.monthlyCF >= 0
                     ? AppTheme.accentGood
                     : CalcwiseSemanticColors.errorDark,
@@ -456,13 +456,13 @@ class _ResultsCard extends StatelessWidget {
                 label: isEs
                     ? 'Inversión inicial (enganche + cierre)'
                     : 'Initial Investment (down + closing)',
-                value: AmountFormatter.format(result.initialInv, 'USD'),
+                value: AmountFormatter.ui(result.initialInv, 'USD'),
               ),
               _Row(
                 label: isEs
                     ? 'Pago hipotecario mensual (7%, 30 años)'
                     : 'Monthly Mortgage Payment (7%, 30yr)',
-                value: AmountFormatter.format(result.mortgageMo, 'USD'),
+                value: AmountFormatter.ui(result.mortgageMo, 'USD'),
               ),
               const Divider(height: 24),
 
@@ -480,7 +480,7 @@ class _ResultsCard extends StatelessWidget {
                     ? 'VPN (valor presente neto)'
                     : 'NPV (Net Present Value)',
                 value: '${result.npv >= 0 ? '+' : ''}'
-                    '${AmountFormatter.format(result.npv, 'USD')}',
+                    '${AmountFormatter.ui(result.npv, 'USD')}',
                 color: result.npv >= 0
                     ? AppTheme.accentGood
                     : CalcwiseSemanticColors.errorDark,

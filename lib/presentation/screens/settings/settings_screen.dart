@@ -40,7 +40,7 @@ class SettingsScreen extends StatelessWidget {
           children: [
             // ── Premium ────────────────────────────────────────
             ValueListenableBuilder<bool>(
-              valueListenable: freemiumService.isPremiumNotifier,
+              valueListenable: freemiumService.hasFullAccessNotifier,
               builder: (context, isPremium, _) => CalcwiseSettingsSection(
                 title: 'Premium',
                 children: isPremium

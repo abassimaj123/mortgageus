@@ -187,25 +187,25 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   icon: Icons.input_rounded,
                   children: [
                     _Row(isEs ? 'Precio de la casa' : 'Home Price',
-                        AmountFormatter.format(homePrice, 'USD')),
+                        AmountFormatter.ui(homePrice, 'USD')),
                     _Row(isEs ? 'Enganche' : 'Down Payment',
-                        '${downPercent.toStringAsFixed(1)}% (${AmountFormatter.format(downAmount, 'USD')})'),
+                        '${downPercent.toStringAsFixed(1)}% (${AmountFormatter.ui(downAmount, 'USD')})'),
                     _Row(isEs ? 'Tasa anual' : 'Annual Rate',
                         '${annualRate.toStringAsFixed(2)}%'),
                     _Row(isEs ? 'Plazo' : 'Loan Term',
                         '$termYears ${isEs ? 'años' : 'years'}'),
                     _Row(isEs ? 'Tipo de préstamo' : 'Loan Type', loanType),
                     _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
-                        AmountFormatter.format(loanAmount, 'USD')),
+                        AmountFormatter.ui(loanAmount, 'USD')),
                     if (taxRate > 0)
                       _Row(isEs ? 'Impuesto predial' : 'Property Tax Rate',
                           '${taxRate.toStringAsFixed(2)}%'),
                     if (insurance > 0)
                       _Row(isEs ? 'Seguro' : 'Home Insurance',
-                          AmountFormatter.format(insurance, 'USD')),
+                          AmountFormatter.ui(insurance, 'USD')),
                     if (hoa > 0)
                       _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
-                          AmountFormatter.format(hoa, 'USD')),
+                          AmountFormatter.ui(hoa, 'USD')),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -217,14 +217,14 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   children: [
                     _Row(
                       isEs ? 'Pago mensual (PITI)' : 'Monthly Payment (PITI)',
-                      AmountFormatter.format(monthlyPayment, 'USD'),
+                      AmountFormatter.ui(monthlyPayment, 'USD'),
                       highlight: AppTheme.primary,
                       bold: true,
                     ),
                     _Row(isEs ? 'Interés total' : 'Total Interest',
-                        AmountFormatter.format(totalInterest, 'USD')),
+                        AmountFormatter.ui(totalInterest, 'USD')),
                     _Row(isEs ? 'Costo total' : 'Total Cost',
-                        AmountFormatter.format(totalCost, 'USD'),
+                        AmountFormatter.ui(totalCost, 'USD'),
                         bold: true),
                   ],
                 ),
@@ -232,7 +232,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
                 // ── PDF export button ──────────────────────────────────
                 ValueListenableBuilder<bool>(
-                  valueListenable: freemiumService.isPremiumNotifier,
+                  valueListenable: freemiumService.hasFullAccessNotifier,
                   builder: (context, isPremium, _) => SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(

@@ -149,7 +149,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                             fontSize: AppTextSize.bodyMd),
                       ),
                       Text(
-                        AmountFormatter.format(downAmt, 'USD'),
+                        AmountFormatter.ui(downAmt, 'USD'),
                         style: const TextStyle(
                             color: AppTheme.primary,
                             fontWeight: FontWeight.bold),
@@ -321,7 +321,7 @@ class _PmiResultsCard extends StatelessWidget {
               label: isEs
                   ? 'PMI mensual estimado (0.80%)'
                   : 'Est. Monthly PMI (0.80%)',
-              value: AmountFormatter.format(monthlyPmi, 'USD'),
+              value: AmountFormatter.ui(monthlyPmi, 'USD'),
               bold: true,
               color: CalcwiseSemanticColors.warnIcon,
             ),
@@ -337,7 +337,7 @@ class _PmiResultsCard extends StatelessWidget {
                 label: isEs
                     ? 'Costo total PMI hasta cancelación'
                     : 'Total PMI cost until auto-cancel',
-                value: AmountFormatter.format(totalPmiCost, 'USD'),
+                value: AmountFormatter.ui(totalPmiCost, 'USD'),
                 bold: true,
               ),
           ],

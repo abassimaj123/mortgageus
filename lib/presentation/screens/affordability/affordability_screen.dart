@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/affordability_result.dart';
@@ -15,8 +14,6 @@ import '../../../main.dart'
         isSpanishNotifier,
         preFillNotifier,
         tabSwitchNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
@@ -33,7 +30,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
   final _incomeCtrl = TextEditingController(text: '100000');
   final _debtsCtrl = TextEditingController(text: '500');
   final _downCtrl = TextEditingController(text: '60000');
-  final _rateCtrl = TextEditingController();
+  final _rateCtrl = TextEditingController(text: '6.8');
   final _taxCtrl = TextEditingController(text: '1.1');
   final _insuranceCtrl = TextEditingController(text: '1750');
   final _hoaCtrl = TextEditingController(text: '0');
@@ -43,16 +40,15 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
   String? _incomeError;
   AffordabilityResult? _result;
 
-  final _fmt =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-  final _fmtK = NumberFormat.compactCurrency(locale: 'en_US', symbol: '\$');
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Sync rate from main calculator provider, then auto-calculate
       final rate = ref.read(mortgageInputProvider).annualRatePct;
       _rateCtrl.text = rate.toStringAsFixed(2);
+      if (mounted) await _calculate();
     });
   }
 
@@ -207,8 +203,9 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                           const SizedBox(height: AppSpacing.md),
                         ],
                         const SizedBox(height: AppSpacing.sm),
-                        GestureDetector(
+                        InkWell(
                           onTap: _calculate,
+                          borderRadius: BorderRadius.circular(AppRadius.mdPlus),
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -229,12 +226,13 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                         if (r != null) ...[
                           const SizedBox(height: AppSpacing.xl),
                           _ResultCard(
-                              r: r, fmt: _fmt, fmtK: _fmtK, s: s, isEs: isEs),
+                              r: r, s: s, isEs: isEs),
                           const SizedBox(height: AppSpacing.md),
                           SizedBox(
                             width: double.infinity,
-                            child: GestureDetector(
+                            child: InkWell(
                               onTap: _useInCalculator,
+                              borderRadius: BorderRadius.circular(AppRadius.lg),
                               child: Container(
                                 width: double.infinity,
                                 padding:
@@ -268,7 +266,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                                     fontSize: AppTextSize.md)),
                           ),
                         ],
-                        const SizedBox(height: 80),
+                        const SizedBox(height: AppSpacing.listBottomInset),
                       ]),
                 ), // Form closes
               ),
@@ -355,14 +353,10 @@ class _TermRow extends StatelessWidget {
 
 class _ResultCard extends StatelessWidget {
   final AffordabilityResult r;
-  final NumberFormat fmt;
-  final NumberFormat fmtK;
   final AppStrings s;
   final bool isEs;
   const _ResultCard({
     required this.r,
-    required this.fmt,
-    required this.fmtK,
     required this.s,
     required this.isEs,
   });
@@ -376,7 +370,6 @@ class _ResultCard extends StatelessWidget {
             child: _PriceCard(
           label: s.affordConservative,
           price: r.maxHomePriceConservative,
-          fmt: fmt,
           color: AppTheme.accentGood,
         )),
         const SizedBox(width: AppSpacing.md),
@@ -386,7 +379,6 @@ class _ResultCard extends StatelessWidget {
           price: r.maxHomePriceStandard > 0
               ? r.maxHomePriceStandard
               : r.maxHomePriceConservative,
-          fmt: fmt,
           color: AppTheme.primary,
         )),
       ]),
@@ -406,15 +398,15 @@ class _ResultCard extends StatelessWidget {
                       fontSize: AppTextSize.bodyMd)),
             ),
             const Divider(height: 20),
-            _Row('${s.principal} & ${s.interest}', fmt.format(r.monthlyPI)),
-            _Row(s.propertyTax, fmt.format(r.monthlyTax)),
-            _Row(s.homeInsurance, fmt.format(r.monthlyInsurance)),
+            _Row('${s.principal} & ${s.interest}', AmountFormatter.ui(r.monthlyPI, 'USD')),
+            _Row(s.propertyTax, AmountFormatter.ui(r.monthlyTax, 'USD')),
+            _Row(s.homeInsurance, AmountFormatter.ui(r.monthlyInsurance, 'USD')),
             if (r.monthlyPMI > 0)
-              _Row(s.pmi, fmt.format(r.monthlyPMI),
+              _Row(s.pmi, AmountFormatter.ui(r.monthlyPMI, 'USD'),
                   color: CalcwiseSemanticColors.warnIcon),
-            if (r.monthlyHOA > 0) _Row(s.hoa, fmt.format(r.monthlyHOA)),
+            if (r.monthlyHOA > 0) _Row(s.hoa, AmountFormatter.ui(r.monthlyHOA, 'USD')),
             const Divider(height: 20),
-            _Row(s.totalPITI, fmt.format(r.totalMonthly), bold: true),
+            _Row(s.totalPITI, AmountFormatter.ui(r.totalMonthly, 'USD'), bold: true),
           ]),
         ),
       ),
@@ -425,12 +417,10 @@ class _ResultCard extends StatelessWidget {
 class _PriceCard extends StatelessWidget {
   final String label;
   final double price;
-  final NumberFormat fmt;
   final Color color;
   const _PriceCard({
     required this.label,
     required this.price,
-    required this.fmt,
     required this.color,
   });
 
@@ -450,7 +440,7 @@ class _PriceCard extends StatelessWidget {
                   fontSize: AppTextSize.xs,
                   fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSpacing.sm),
-          Text(fmt.format(price),
+          Text(AmountFormatter.ui(price, 'USD'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: color,

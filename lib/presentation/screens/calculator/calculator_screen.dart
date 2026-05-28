@@ -1,21 +1,9 @@
 import 'dart:async';
 import 'dart:math' show pow;
-import 'package:calcwise_core/calcwise_core.dart'
-    show
-        PaywallTrigger,
-        CalcwiseTheme,
-        CalcwiseStaggerItem,
-        CalcwisePageEntrance,
-        CalcwiseAdFooter,
-        RateWatchService,
-        CalcwiseReviewService,
-        ReverseSolveCard,
-        CalcwiseHeroCard;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/db/database_helper.dart';
@@ -53,7 +41,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   final _taxCtrl = TextEditingController(text: '1.1');
   final _insuranceCtrl = TextEditingController(text: '1750');
   final _hoaCtrl = TextEditingController(text: '0');
-  final _incomeCtrl = TextEditingController();
+  final _incomeCtrl = TextEditingController(text: '80000');
   double _monthlyIncome = 0.0;
   bool _advancedExpanded = false;
   String? _homePriceError;
@@ -62,13 +50,11 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   MortgageResult? _insightResult15yr;
   String? _insightCacheKey;
 
-  final _fmt =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-  final _fmtK = NumberFormat.compactCurrency(locale: 'en_US', symbol: '\$');
 
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('calculator');
     // Push controller defaults to provider on first frame so all tabs are in sync
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final n = ref.read(mortgageInputProvider.notifier);
@@ -276,6 +262,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               // Interest Rate
                               _buildField(s.interestRate, _rateCtrl,
                                   suffix: '%',
+                                  percent: true,
                                   required: true,
                                   helperText: isEs
                                       ? 'Tasa predeterminada de 2026 — actualiza con tu tasa real'
@@ -298,52 +285,62 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               const SizedBox(height: AppSpacing.lg),
                               const Divider(height: 1),
                               // Advanced toggle
-                              InkWell(
-                                onTap: () => setState(() =>
-                                    _advancedExpanded = !_advancedExpanded),
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.md),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: AppSpacing.smPlus),
-                                  child: Row(children: [
-                                    Icon(
-                                      _advancedExpanded
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
-                                      color: AppTheme.primary,
-                                    ),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    Expanded(
-                                      child: Text(s.advancedOptions,
-                                          style: const TextStyle(
-                                            color: AppTheme.primary,
-                                            fontWeight: FontWeight.w600,
-                                          )),
-                                    ),
-                                    if (_advancedExpanded)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: AppSpacing.sm,
-                                            vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.primary
-                                              .withValues(alpha: 0.10),
-                                          borderRadius: BorderRadius.circular(
-                                              AppRadius.mdPlus),
+                              Semantics(
+                                  label: _advancedExpanded
+                                      ? (isEs
+                                          ? 'Ocultar opciones avanzadas'
+                                          : 'Hide advanced options')
+                                      : (isEs
+                                          ? 'Mostrar opciones avanzadas'
+                                          : 'Show advanced options'),
+                                  button: true,
+                                  child: InkWell(
+                                    onTap: () => setState(() =>
+                                        _advancedExpanded = !_advancedExpanded),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.md),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: AppSpacing.smPlus),
+                                      child: Row(children: [
+                                        Icon(
+                                          _advancedExpanded
+                                              ? Icons.expand_less
+                                              : Icons.expand_more,
+                                          color: AppTheme.primary,
                                         ),
-                                        child: Text(
-                                          isEs ? 'Ocultar' : 'Hide',
-                                          style: const TextStyle(
-                                            fontSize: AppTextSize.xs,
-                                            color: AppTheme.primary,
-                                            fontWeight: FontWeight.w500,
+                                        const SizedBox(width: AppSpacing.sm),
+                                        Expanded(
+                                          child: Text(s.advancedOptions,
+                                              style: const TextStyle(
+                                                color: AppTheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                              )),
+                                        ),
+                                        if (_advancedExpanded)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: AppSpacing.sm,
+                                                vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.primary
+                                                  .withValues(alpha: 0.10),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      AppRadius.mdPlus),
+                                            ),
+                                            child: Text(
+                                              isEs ? 'Ocultar' : 'Hide',
+                                              style: const TextStyle(
+                                                fontSize: AppTextSize.xs,
+                                                color: AppTheme.primary,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                  ]),
-                                ),
-                              ),
+                                      ]),
+                                    ),
+                                  )), // Semantics + InkWell
                               if (_advancedExpanded) ...[
                                 Container(
                                   decoration: BoxDecoration(
@@ -356,6 +353,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   child: Column(children: [
                                     _buildField(s.propertyTaxRate, _taxCtrl,
                                         suffix: '%',
+                                        percent: true,
                                         onChanged: (v) =>
                                             notifier.updatePropertyTaxRate(
                                                 double.tryParse(v.replaceAll(
@@ -419,121 +417,153 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               // Breakdown card
-                                              _BreakdownCard(
-                                                  result: result,
-                                                  fmt: _fmt,
-                                                  fmtK: _fmtK,
-                                                  s: s,
-                                                  isEs: isEs),
+                                              CalcwiseStaggerItem(
+                                                index: 2,
+                                                child: _BreakdownCard(
+                                                    result: result,
+                                                    s: s,
+                                                    isEs: isEs),
+                                              ),
                                               // ── Reverse-Solve: max affordable home price ─
                                               const SizedBox(
                                                   height: AppSpacing.md),
-                                              ReverseSolveCard(
-                                                title: isEs
-                                                    ? '¿Qué precio puedo pagar?'
-                                                    : 'What home price can I afford?',
-                                                targetLabel: isEs
-                                                    ? 'Pago mensual objetivo'
-                                                    : 'Target monthly payment',
-                                                resultLabel: isEs
-                                                    ? 'Precio máximo'
-                                                    : 'Max home price',
-                                                prefix: '\$',
-                                                minBound: 50000,
-                                                maxBound: 2000000,
-                                                targetValue: 0,
-                                                compute: (homePrice) {
-                                                  // Monthly P&I for a candidate home price,
-                                                  // reusing the user's current down %, rate, term.
-                                                  final downPct =
-                                                      inputState.downPaymentPct;
-                                                  final loanAmount = homePrice *
-                                                      (1 - downPct / 100);
-                                                  final r =
-                                                      inputState.annualRatePct /
+                                              CalcwiseStaggerItem(
+                                                  index: 3,
+                                                  child: ReverseSolveCard(
+                                                    title: isEs
+                                                        ? '¿Qué precio puedo pagar?'
+                                                        : 'What home price can I afford?',
+                                                    targetLabel: isEs
+                                                        ? 'Pago mensual objetivo'
+                                                        : 'Target monthly payment',
+                                                    resultLabel: isEs
+                                                        ? 'Precio máximo'
+                                                        : 'Max home price',
+                                                    prefix: '\$',
+                                                    minBound: 50000,
+                                                    maxBound: 2000000,
+                                                    targetValue: 0,
+                                                    compute: (homePrice) {
+                                                      // Monthly P&I for a candidate home price,
+                                                      // reusing the user's current down %, rate, term.
+                                                      final downPct = inputState
+                                                          .downPaymentPct;
+                                                      final loanAmount =
+                                                          homePrice *
+                                                              (1 -
+                                                                  downPct /
+                                                                      100);
+                                                      final r = inputState
+                                                              .annualRatePct /
                                                           100 /
                                                           12;
-                                                  final n =
-                                                      inputState.termYears * 12;
-                                                  if (r == 0)
-                                                    return loanAmount / n;
-                                                  final f = pow(1 + r, n);
-                                                  return loanAmount *
-                                                      r *
-                                                      f /
-                                                      (f - 1);
-                                                },
-                                              ),
+                                                      final n =
+                                                          inputState.termYears *
+                                                              12;
+                                                      if (r == 0)
+                                                        return loanAmount / n;
+                                                      final f = pow(1 + r, n);
+                                                      return loanAmount *
+                                                          r *
+                                                          f /
+                                                          (f - 1);
+                                                    },
+                                                  )),
                                               // ── Stress Test Banner ─────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.sm),
-                                              Container(
-                                                width: double.infinity,
-                                                padding: const EdgeInsets.all(
-                                                    AppSpacing.mdPlus),
-                                                decoration: BoxDecoration(
-                                                  color: AppTheme.accentWarn
-                                                      .withValues(alpha: 0.08),
-                                                  border: Border.all(
-                                                      color: AppTheme.accentWarn
-                                                          .withValues(
-                                                              alpha: 0.4)),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          AppRadius.lg),
-                                                ),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(children: [
-                                                      const Icon(
-                                                          Icons
-                                                              .warning_amber_rounded,
+                                              CalcwiseStaggerItem(
+                                                  index: 4,
+                                                  child: Semantics(
+                                                      label: isEs
+                                                          ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}'
+                                                          : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}',
+                                                      child: Container(
+                                                        width: double.infinity,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(AppSpacing
+                                                                    .mdPlus),
+                                                        decoration:
+                                                            BoxDecoration(
                                                           color: AppTheme
-                                                              .accentWarn,
-                                                          size: 18),
-                                                      const SizedBox(
-                                                          width: AppRadius.sm),
-                                                      Text(
-                                                        isEs
-                                                            ? 'Prueba de Estrés (+2%)'
-                                                            : 'Stress Test (+2%)',
-                                                        style: const TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: AppTheme
-                                                              .accentWarn,
-                                                          fontSize:
-                                                              AppTextSize.body,
+                                                              .accentWarn
+                                                              .withValues(
+                                                                  alpha: 0.08),
+                                                          border: Border.all(
+                                                              color: AppTheme
+                                                                  .accentWarn
+                                                                  .withValues(
+                                                                      alpha:
+                                                                          0.4)),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      AppRadius
+                                                                          .lg),
                                                         ),
-                                                      ),
-                                                      InfoTooltip(
-                                                        title: isEs
-                                                            ? 'Prueba de Estrés'
-                                                            : 'Stress Test',
-                                                        body: isEs
-                                                            ? 'Su tasa de calificación es su tasa contractual + 2%. Los prestamistas usan esto para asegurarse de que pueda pagar si suben las tasas.'
-                                                            : 'Your qualifying rate is your contract rate + 2%. Lenders use this to ensure you can still afford payments if interest rates rise.',
-                                                      ),
-                                                    ]),
-                                                    const SizedBox(
-                                                        height: AppRadius.sm),
-                                                    Text(
-                                                      isEs
-                                                          ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${_fmt.format(result.stressTestMonthly)}'
-                                                          : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${_fmt.format(result.stressTestMonthly)}',
-                                                      style: const TextStyle(
-                                                        color:
-                                                            AppTheme.accentWarn,
-                                                        fontSize:
-                                                            AppTextSize.md,
-                                                        height: 1.4,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(children: [
+                                                              const Icon(
+                                                                  Icons
+                                                                      .warning_amber_rounded,
+                                                                  color: AppTheme
+                                                                      .accentWarn,
+                                                                  size: 18),
+                                                              const SizedBox(
+                                                                  width:
+                                                                      AppRadius
+                                                                          .sm),
+                                                              Text(
+                                                                isEs
+                                                                    ? 'Prueba de Estrés (+2%)'
+                                                                    : 'Stress Test (+2%)',
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: AppTheme
+                                                                      .accentWarn,
+                                                                  fontSize:
+                                                                      AppTextSize
+                                                                          .body,
+                                                                ),
+                                                              ),
+                                                              InfoTooltip(
+                                                                title: isEs
+                                                                    ? 'Prueba de Estrés'
+                                                                    : 'Stress Test',
+                                                                body: isEs
+                                                                    ? 'Su tasa de calificación es su tasa contractual + 2%. Los prestamistas usan esto para asegurarse de que pueda pagar si suben las tasas.'
+                                                                    : 'Your qualifying rate is your contract rate + 2%. Lenders use this to ensure you can still afford payments if interest rates rise.',
+                                                              ),
+                                                            ]),
+                                                            const SizedBox(
+                                                                height:
+                                                                    AppRadius
+                                                                        .sm),
+                                                            Text(
+                                                              isEs
+                                                                  ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}'
+                                                                  : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}',
+                                                              style:
+                                                                  const TextStyle(
+                                                                color: AppTheme
+                                                                    .accentWarn,
+                                                                fontSize:
+                                                                    AppTextSize
+                                                                        .md,
+                                                                height: 1.4,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ))), // Semantics (stress test) + CalcwiseStaggerItem
                                               // ── Smart Insights ─────────────────────────
                                               const SizedBox(
                                                   height: AppSpacing.md),
@@ -556,7 +586,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               const SizedBox(
                                                   height: AppSpacing.md),
                                               // Save button — primary CTA
-                                              ElevatedButton.icon(
+                                              FilledButton.icon(
                                                 onPressed: () {
                                                   HapticFeedback.mediumImpact();
                                                   _saveToHistory(
@@ -565,9 +595,15 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 icon: const Icon(
                                                     Icons.bookmark_add_rounded),
                                                 label: Text(s.saveCalc),
-                                                style: ElevatedButton.styleFrom(
+                                                style: FilledButton.styleFrom(
+                                                  backgroundColor:
+                                                      AppTheme.primary,
                                                   minimumSize: const Size(
                                                       double.infinity, 52),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              AppRadius.lg)),
                                                 ),
                                               ),
                                               const SizedBox(
@@ -579,7 +615,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                       bool>(
                                                     valueListenable:
                                                         freemiumService
-                                                            .isPremiumNotifier,
+                                                            .hasFullAccessNotifier,
                                                     builder: (context,
                                                         isPremium, _) {
                                                       return TextButton.icon(
@@ -590,7 +626,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                                       .exportMortgage(
                                                                           context,
                                                                           inputState,
-                                                                          result);
+                                                                          result,
+                                                                          isEs: isEs);
                                                                   AnalyticsService
                                                                       .instance
                                                                       .logPdfExported();
@@ -636,7 +673,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                                     await PdfExportService.exportMortgage(
                                                                         context,
                                                                         inputState,
-                                                                        result);
+                                                                        result,
+                                                                        isEs: isEs);
                                                                     await AnalyticsService
                                                                         .instance
                                                                         .logPdfExported();
@@ -733,26 +771,23 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                           return;
                                                         }
                                                       }
-                                                      final fmt =
-                                                          NumberFormat.currency(
-                                                              locale: 'en_US',
-                                                              symbol: r'$',
-                                                              decimalDigits: 0);
                                                       final text = isEs
                                                           ? '🏠 Resumen hipotecario\n'
-                                                              'Precio: ${fmt.format(inputState.homePrice)}\n'
-                                                              'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
+                                                              'Precio: ${AmountFormatter.ui(inputState.homePrice, 'USD')}\n'
+                                                              'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.ui(inputState.downPaymentDollar, 'USD')})\n'
                                                               'Tasa: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                                              'Mensual: ${fmt.format(result.monthly.pitiPayment)}\n'
-                                                              'Interés total: ${fmt.format(result.totalInterest)}\n'
-                                                              '— Calculado con Mortgage Calculator US'
+                                                              'Mensual: ${AmountFormatter.ui(result.monthly.pitiPayment, 'USD')}\n'
+                                                              'Interés total: ${AmountFormatter.ui(result.totalInterest, 'USD')}\n'
+                                                              '— Calculado con Mortgage Calculator US\n\n'
+                                                              '📄 Exporta el reporte completo en PDF →'
                                                           : '🏠 Mortgage Summary\n'
-                                                              'Price: ${fmt.format(inputState.homePrice)}\n'
-                                                              'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
+                                                              'Price: ${AmountFormatter.ui(inputState.homePrice, 'USD')}\n'
+                                                              'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.ui(inputState.downPaymentDollar, 'USD')})\n'
                                                               'Rate: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                                              'Monthly: ${fmt.format(result.monthly.pitiPayment)}\n'
-                                                              'Total Interest: ${fmt.format(result.totalInterest)}\n'
-                                                              '— Calculated with Mortgage Calculator US';
+                                                              'Monthly: ${AmountFormatter.ui(result.monthly.pitiPayment, 'USD')}\n'
+                                                              'Total Interest: ${AmountFormatter.ui(result.totalInterest, 'USD')}\n'
+                                                              '— Calculated with Mortgage Calculator US\n\n'
+                                                              '📄 Export the full PDF report in the app →';
                                                       try {
                                                         AnalyticsService
                                                             .instance
@@ -814,7 +849,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     : 'For informational purposes only. Not financial advice.',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                  fontSize: 10,
+                                                  fontSize: AppTextSize.xs,
                                                   color: Theme.of(context)
                                                       .colorScheme
                                                       .onSurface
@@ -854,7 +889,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                         ),
                                       ),
                               ),
-                              const SizedBox(height: 80),
+                              const SizedBox(
+                                  height: AppSpacing.listBottomInset),
                             ],
                           ),
                         ), // Form closes
@@ -947,40 +983,47 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     String? prefix,
     String? suffix,
     bool currency = false,
+    bool percent = false,
     bool required = false,
     String? errorText,
     String? helperText,
     required Function(String) onChanged,
   }) {
-    return TextFormField(
-      controller: ctrl,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: currency
-          ? [CurrencyInputFormatter()]
-          : [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
-      decoration: InputDecoration(
-        labelText: label,
-        prefixText: prefix,
-        suffixText: suffix,
-        errorText: errorText,
-        helperText: helperText,
-        helperStyle: const TextStyle(fontSize: 10),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg)),
-        contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+    return Semantics(
+      label: label,
+      textField: true,
+      child: TextFormField(
+        controller: ctrl,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: currency
+            ? [CurrencyInputFormatter()]
+            : percent
+                ? [PercentInputFormatter()]
+                : [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
+        decoration: InputDecoration(
+          labelText: label,
+          prefixText: prefix,
+          suffixText: suffix,
+          errorText: errorText,
+          helperText: helperText,
+          helperStyle: const TextStyle(fontSize: AppTextSize.xs),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.lg)),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
+        ),
+        validator: (v) {
+          final raw = (v ?? '').trim();
+          if (raw.isEmpty) return required ? 'Required' : null;
+          final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
+          if (cleaned.isEmpty) return 'Invalid';
+          final n = double.tryParse(cleaned);
+          if (n == null) return 'Invalid';
+          if (n < 0) return 'Must be ≥ 0';
+          return null;
+        },
+        onChanged: onChanged,
       ),
-      validator: (v) {
-        final raw = (v ?? '').trim();
-        if (raw.isEmpty) return required ? 'Required' : null;
-        final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-        if (cleaned.isEmpty) return 'Invalid';
-        final n = double.tryParse(cleaned);
-        if (n == null) return 'Invalid';
-        if (n < 0) return 'Must be ≥ 0';
-        return null;
-      },
-      onChanged: onChanged,
     );
   }
 }
@@ -994,26 +1037,35 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt =
-        NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-    return CalcwiseHeroCard(
-      label: s.monthlyPI as String,
-      value: result != null ? fmt.format(result!.monthly.piPayment) : '--',
-      secondary: result != null
-          ? '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}'
-          : null,
-      stats: result == null
-          ? null
-          : [
-              (
-                label: 'Total Interest',
-                value: fmt.format(result!.totalInterest),
-              ),
-              (
-                label: 'Total Cost',
-                value: fmt.format(result!.totalCost),
-              ),
-            ],
+    final piPayment = result != null
+        ? AmountFormatter.ui(result!.monthly.piPayment, 'USD')
+        : '--';
+    return Semantics(
+      label: result != null
+          ? 'Monthly principal and interest: $piPayment. '
+              'Total PITI: ${AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')}. '
+              'Total interest: ${AmountFormatter.ui(result!.totalInterest, 'USD')}. '
+              'Total cost: ${AmountFormatter.ui(result!.totalCost, 'USD')}.'
+          : 'Monthly payment: enter values above to calculate',
+      child: CalcwiseHeroCard(
+        label: s.monthlyPI as String,
+        value: piPayment,
+        secondary: result != null
+            ? '${s.totalPITI}: ${AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')}'
+            : null,
+        stats: result == null
+            ? null
+            : [
+                (
+                  label: 'Total Interest',
+                  value: AmountFormatter.ui(result!.totalInterest, 'USD'),
+                ),
+                (
+                  label: 'Total Cost',
+                  value: AmountFormatter.ui(result!.totalCost, 'USD'),
+                ),
+              ],
+      ),
     );
   }
 }
@@ -1107,28 +1159,14 @@ class _LoanTypeSelector extends ConsumerWidget {
       children: [
         Text(s.loanType, style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: 8,
-          children: LoanType.values.map((type) {
-            final selected = inputState.loanType == type;
-            return Semantics(
-              label:
-                  '${type.label} loan type, ${selected ? "selected" : "not selected"}',
-              child: ChoiceChip(
-                label: Text(type.label),
-                selected: selected,
-                selectedColor: AppTheme.primary,
-                labelStyle: TextStyle(
-                  color: selected ? Colors.white : AppTheme.labelGray,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                ),
-                onSelected: (_) {
-                  HapticFeedback.selectionClick();
-                  notifier.updateLoanType(type);
-                },
-              ),
-            );
-          }).toList(),
+        _ChipRow<LoanType>(
+          values: LoanType.values,
+          selected: inputState.loanType,
+          label: (t) => t.label,
+          onTap: (t) {
+            HapticFeedback.selectionClick();
+            notifier.updateLoanType(t);
+          },
         ),
       ],
     );
@@ -1303,20 +1341,25 @@ class _ModeBtn extends StatelessWidget {
       {required this.label, required this.selected, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.mdPlus, vertical: AppSpacing.mdPlus),
-          decoration: BoxDecoration(
-            color: selected ? AppTheme.primary : null,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+  Widget build(BuildContext context) => Semantics(
+        label: label == '\$' ? 'Dollar amount mode' : 'Percentage mode',
+        button: true,
+        selected: selected,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.mdPlus, vertical: AppSpacing.mdPlus),
+            decoration: BoxDecoration(
+              color: selected ? AppTheme.primary : null,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            child: Text(label,
+                style: TextStyle(
+                  color: selected ? Colors.white : AppTheme.labelGray,
+                  fontWeight: FontWeight.bold,
+                )),
           ),
-          child: Text(label,
-              style: TextStyle(
-                color: selected ? Colors.white : AppTheme.labelGray,
-                fontWeight: FontWeight.bold,
-              )),
         ),
       );
 }
@@ -1325,14 +1368,10 @@ class _ModeBtn extends StatelessWidget {
 
 class _BreakdownCard extends StatelessWidget {
   final MortgageResult? result;
-  final NumberFormat fmt;
-  final NumberFormat fmtK;
   final AppStrings s;
   final bool isEs;
   const _BreakdownCard(
       {this.result,
-      required this.fmt,
-      required this.fmtK,
       required this.s,
       required this.isEs});
 
@@ -1348,17 +1387,17 @@ class _BreakdownCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(children: [
-          _Row(s.principal, fmt.format(m.principal)),
-          _Row(s.interest, fmt.format(m.interest)),
-          _Row(s.propertyTax, fmt.format(m.propertyTax)),
-          _Row(s.homeInsurance, fmt.format(m.homeInsurance)),
-          if (m.hoa > 0) _Row(s.hoa, fmt.format(m.hoa)),
+          _Row(s.principal, AmountFormatter.ui(m.principal, 'USD')),
+          _Row(s.interest, AmountFormatter.ui(m.interest, 'USD')),
+          _Row(s.propertyTax, AmountFormatter.ui(m.propertyTax, 'USD')),
+          _Row(s.homeInsurance, AmountFormatter.ui(m.homeInsurance, 'USD')),
+          if (m.hoa > 0) _Row(s.hoa, AmountFormatter.ui(m.hoa, 'USD')),
           if (m.pmi > 0)
             _Row(
               result!.isUsda
                   ? s.usdaFeeLabel
                   : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
-              fmt.format(m.pmi),
+              AmountFormatter.ui(m.pmi, 'USD'),
               color: result!.isUsda
                   ? AppTheme.accentGood
                   : CalcwiseSemanticColors.warnIcon,
@@ -1379,10 +1418,10 @@ class _BreakdownCard extends StatelessWidget {
                     ),
             ),
           const Divider(height: 24),
-          _Row(s.totalPITI, fmt.format(m.pitiPayment), bold: true),
+          _Row(s.totalPITI, AmountFormatter.ui(m.pitiPayment, 'USD'), bold: true),
           const SizedBox(height: AppSpacing.sm),
-          _Row(s.totalInterest, fmtK.format(result!.totalInterest)),
-          _Row(s.totalCost, fmtK.format(result!.totalCost)),
+          _Row(s.totalInterest, AmountFormatter.ui(result!.totalInterest, 'USD')),
+          _Row(s.totalCost, AmountFormatter.ui(result!.totalCost, 'USD')),
           _Row(s.payoffDate,
               '${result!.payoffDate.month}/${result!.payoffDate.year}'),
           _Row(
@@ -1410,25 +1449,92 @@ class _Row extends StatelessWidget {
       {this.bold = false, this.color, this.tooltip});
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(label,
-                    style: TextStyle(color: color ?? AppTheme.labelGray)),
-                if (tooltip != null) tooltip!,
-              ],
-            ),
-            Text(value,
-                style: TextStyle(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-                  color: color ?? (bold ? AppTheme.primary : null),
-                )),
-          ],
+  Widget build(BuildContext context) => MergeSemantics(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label,
+                      style: TextStyle(color: color ?? AppTheme.labelGray)),
+                  if (tooltip != null) tooltip!,
+                ],
+              ),
+              Text(value,
+                  style: TextStyle(
+                    fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+                    color: color ?? (bold ? AppTheme.primary : null),
+                  )),
+            ],
+          ),
         ),
       );
+}
+
+// ── Generic pill chip row (same style as MortgageUK) ─────────────────────────
+
+class _ChipRow<T> extends StatelessWidget {
+  final List<T> values;
+  final T selected;
+  final String Function(T) label;
+  final void Function(T) onTap;
+
+  const _ChipRow({
+    required this.values,
+    required this.selected,
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs + 2,
+      children: values.map((v) {
+        final isSelected = v == selected;
+        return Semantics(
+          label: label(v),
+          selected: isSelected,
+          button: true,
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap(v);
+            },
+            child: AnimatedContainer(
+              duration: AppDuration.fast,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.xs + 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppTheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                border: Border.all(
+                  color: isSelected
+                      ? AppTheme.primary
+                      : CalcwiseTheme.of(context).cardBorder,
+                ),
+              ),
+              child: Text(
+                label(v),
+                style: TextStyle(
+                  fontSize: AppTextSize.sm,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : CalcwiseTheme.of(context).textSecondary,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 }

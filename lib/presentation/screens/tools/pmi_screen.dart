@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 class PmiScreen extends ConsumerStatefulWidget {
@@ -105,10 +102,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
 
         final totalPmiCost = (dropMonth != null) ? monthlyPmi * dropMonth : 0.0;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
-        final fmtWhole = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
+
 
         return Scaffold(
           appBar: AppBar(
@@ -155,7 +149,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                             fontSize: AppTextSize.bodyMd),
                       ),
                       Text(
-                        fmtWhole.format(downAmt),
+                        AmountFormatter.ui(downAmt, 'USD'),
                         style: const TextStyle(
                             color: AppTheme.primary,
                             fontWeight: FontWeight.bold),
@@ -206,8 +200,6 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                       monthlyPmi: monthlyPmi,
                       dropMonth: dropMonth,
                       totalPmiCost: totalPmiCost,
-                      fmt: fmt,
-                      fmtWhole: fmtWhole,
                     ),
 
                   const SizedBox(height: AppSpacing.xl),
@@ -293,8 +285,6 @@ class _PmiResultsCard extends StatelessWidget {
   final double monthlyPmi;
   final int? dropMonth;
   final double totalPmiCost;
-  final NumberFormat fmt;
-  final NumberFormat fmtWhole;
 
   const _PmiResultsCard({
     required this.isEs,
@@ -302,8 +292,6 @@ class _PmiResultsCard extends StatelessWidget {
     required this.monthlyPmi,
     required this.dropMonth,
     required this.totalPmiCost,
-    required this.fmt,
-    required this.fmtWhole,
   });
 
   @override
@@ -333,7 +321,7 @@ class _PmiResultsCard extends StatelessWidget {
               label: isEs
                   ? 'PMI mensual estimado (0.80%)'
                   : 'Est. Monthly PMI (0.80%)',
-              value: fmt.format(monthlyPmi),
+              value: AmountFormatter.ui(monthlyPmi, 'USD'),
               bold: true,
               color: CalcwiseSemanticColors.warnIcon,
             ),
@@ -349,7 +337,7 @@ class _PmiResultsCard extends StatelessWidget {
                 label: isEs
                     ? 'Costo total PMI hasta cancelación'
                     : 'Total PMI cost until auto-cancel',
-                value: fmtWhole.format(totalPmiCost),
+                value: AmountFormatter.ui(totalPmiCost, 'USD'),
                 bold: true,
               ),
           ],

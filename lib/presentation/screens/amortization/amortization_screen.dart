@@ -1,3 +1,4 @@
+import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -188,28 +189,36 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xxl),
-                    GestureDetector(
-                      onTap: () => tabSwitchNotifier.value = 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.xxl,
-                            vertical: AppSpacing.mdPlus),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary,
-                          borderRadius: BorderRadius.circular(AppRadius.mdPlus),
-                        ),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.calculate_rounded,
-                              color: Colors.white, size: 18),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(
-                              isEs ? 'Ir a la calculadora' : 'Go to Calculator',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600)),
-                        ]),
-                      ),
-                    ),
+                    Semantics(
+                        label:
+                            isEs ? 'Ir a la calculadora' : 'Go to Calculator',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () => tabSwitchNotifier.value = 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xxl,
+                                vertical: AppSpacing.mdPlus),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary,
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.mdPlus),
+                            ),
+                            child:
+                                Row(mainAxisSize: MainAxisSize.min, children: [
+                              const Icon(Icons.calculate_rounded,
+                                  color: Colors.white, size: 18),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                  isEs
+                                      ? 'Ir a la calculadora'
+                                      : 'Go to Calculator',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600)),
+                            ]),
+                          ),
+                        )),
                   ],
                 ),
               ),
@@ -218,8 +227,6 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
         }
 
         final schedule = result.schedule;
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
         final fmtDate = DateFormat('MMM yyyy');
         final years = _buildYearGroups(schedule, result.loanAmount);
 
@@ -231,7 +238,6 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                 child: _SummaryCard(
                     result: result,
                     inputState: inputState,
-                    fmt: fmt,
                     fmtDate: fmtDate,
                     s: s)),
 
@@ -277,10 +283,10 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                               ? (result.totalInterest / _total * 100).round()
                               : 0;
                           final _chartLabel = isEs
-                              ? 'Desglose total: ${fmt.format(result.loanAmount)} capital ($_principalPct%), '
-                                  '${fmt.format(result.totalInterest)} interés ($_interestPct%)'
-                              : 'Lifetime breakdown: ${fmt.format(result.loanAmount)} principal ($_principalPct%), '
-                                  '${fmt.format(result.totalInterest)} interest ($_interestPct%)';
+                              ? 'Desglose total: ${AmountFormatter.ui(result.loanAmount, 'USD')} capital ($_principalPct%), '
+                                  '${AmountFormatter.ui(result.totalInterest, 'USD')} interés ($_interestPct%)'
+                              : 'Lifetime breakdown: ${AmountFormatter.ui(result.loanAmount, 'USD')} principal ($_principalPct%), '
+                                  '${AmountFormatter.ui(result.totalInterest, 'USD')} interest ($_interestPct%)';
                           return Flex(
                             direction:
                                 isSmallScreen ? Axis.vertical : Axis.horizontal,
@@ -356,13 +362,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                     _LegendRow(
                                       color: AppTheme.primary,
                                       label: s.principal,
-                                      value: fmt.format(result.loanAmount),
+                                      value: AmountFormatter.ui(result.loanAmount, 'USD'),
                                     ),
                                     const SizedBox(height: AppSpacing.smPlus),
                                     _LegendRow(
                                       color: AppTheme.secondary,
                                       label: s.interest,
-                                      value: fmt.format(result.totalInterest),
+                                      value: AmountFormatter.ui(result.totalInterest, 'USD'),
                                       valueColor: AppTheme.secondary,
                                     ),
                                     const SizedBox(height: AppSpacing.smPlus),
@@ -383,8 +389,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                               fontSize: AppTextSize.md),
                                         ),
                                         Text(
-                                          fmt.format(result.loanAmount +
-                                              result.totalInterest),
+                                          AmountFormatter.ui(result.loanAmount +
+                                              result.totalInterest, 'USD'),
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: AppTextSize.md),
@@ -402,13 +408,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                       _LegendRow(
                                         color: AppTheme.primary,
                                         label: s.principal,
-                                        value: fmt.format(result.loanAmount),
+                                        value: AmountFormatter.ui(result.loanAmount, 'USD'),
                                       ),
                                       const SizedBox(height: AppSpacing.smPlus),
                                       _LegendRow(
                                         color: AppTheme.secondary,
                                         label: s.interest,
-                                        value: fmt.format(result.totalInterest),
+                                        value: AmountFormatter.ui(result.totalInterest, 'USD'),
                                         valueColor: AppTheme.secondary,
                                       ),
                                       const SizedBox(height: AppSpacing.smPlus),
@@ -429,8 +435,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                                 fontSize: AppTextSize.md),
                                           ),
                                           Text(
-                                            fmt.format(result.loanAmount +
-                                                result.totalInterest),
+                                            AmountFormatter.ui(result.loanAmount +
+                                                result.totalInterest, 'USD'),
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: AppTextSize.md),
@@ -466,77 +472,87 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                     ),
                     child: Row(children: [
                       Expanded(
-                          child: GestureDetector(
-                        onTap: () => _setViewMode(true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.smPlus),
-                          decoration: BoxDecoration(
-                            color: _yearlyView
-                                ? AppTheme.primary
-                                : Colors.transparent,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(7),
-                              bottomLeft: Radius.circular(7),
-                            ),
-                          ),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.calendar_today,
-                                    size: 16,
+                          child: Semantics(
+                              label: s.yearlyView,
+                              button: true,
+                              selected: _yearlyView,
+                              child: GestureDetector(
+                                onTap: () => _setViewMode(true),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.smPlus),
+                                  decoration: BoxDecoration(
                                     color: _yearlyView
-                                        ? Colors.white
-                                        : AppTheme.primary),
-                                const SizedBox(width: AppRadius.sm),
-                                Text(s.yearlyView,
-                                    style: TextStyle(
-                                        color: _yearlyView
-                                            ? Colors.white
-                                            : AppTheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: AppTextSize.md)),
-                              ]),
-                        ),
-                      )),
+                                        ? AppTheme.primary
+                                        : Colors.transparent,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(7),
+                                      bottomLeft: Radius.circular(7),
+                                    ),
+                                  ),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.calendar_today,
+                                            size: 16,
+                                            color: _yearlyView
+                                                ? Colors.white
+                                                : AppTheme.primary),
+                                        const SizedBox(width: AppRadius.sm),
+                                        Text(s.yearlyView,
+                                            style: TextStyle(
+                                                color: _yearlyView
+                                                    ? Colors.white
+                                                    : AppTheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: AppTextSize.md)),
+                                      ]),
+                                ),
+                              ))),
                       Container(
                           width: 1,
                           height: 38,
                           color: AppTheme.primary.withValues(alpha: 0.5)),
                       Expanded(
-                          child: GestureDetector(
-                        onTap: () => _setViewMode(false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.smPlus),
-                          decoration: BoxDecoration(
-                            color: !_yearlyView
-                                ? AppTheme.primary
-                                : Colors.transparent,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(7),
-                              bottomRight: Radius.circular(7),
-                            ),
-                          ),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.view_list,
-                                    size: 16,
+                          child: Semantics(
+                              label: s.monthlyView,
+                              button: true,
+                              selected: !_yearlyView,
+                              child: GestureDetector(
+                                onTap: () => _setViewMode(false),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.smPlus),
+                                  decoration: BoxDecoration(
                                     color: !_yearlyView
-                                        ? Colors.white
-                                        : AppTheme.primary),
-                                const SizedBox(width: AppRadius.sm),
-                                Text(s.monthlyView,
-                                    style: TextStyle(
-                                        color: !_yearlyView
-                                            ? Colors.white
-                                            : AppTheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: AppTextSize.md)),
-                              ]),
-                        ),
-                      )),
+                                        ? AppTheme.primary
+                                        : Colors.transparent,
+                                    borderRadius: const BorderRadius.only(
+                                      topRight: Radius.circular(7),
+                                      bottomRight: Radius.circular(7),
+                                    ),
+                                  ),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.view_list,
+                                            size: 16,
+                                            color: !_yearlyView
+                                                ? Colors.white
+                                                : AppTheme.primary),
+                                        const SizedBox(width: AppRadius.sm),
+                                        Text(s.monthlyView,
+                                            style: TextStyle(
+                                                color: !_yearlyView
+                                                    ? Colors.white
+                                                    : AppTheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: AppTextSize.md)),
+                                      ]),
+                                ),
+                              ))),
                     ]),
                   ),
                 ),
@@ -549,19 +565,18 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
             if (_yearlyView)
               _YearlyList(
                   years: years,
-                  fmt: fmt,
                   s: s,
                   isPremium: freemiumService.hasFullAccess)
             else ...[
               SliverToBoxAdapter(child: _MonthlyHeader(s: s)),
               _MonthlyList(
                   schedule: schedule,
-                  fmt: fmt,
                   s: s,
                   isPremium: freemiumService.hasFullAccess),
             ],
 
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            const SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.listBottomInset)),
           ]),
         );
       },
@@ -573,14 +588,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 class _SummaryCard extends StatelessWidget {
   final MortgageResult result;
   final MortgageInputState inputState;
-  final NumberFormat fmt;
   final DateFormat fmtDate;
   final AppStrings s;
 
   const _SummaryCard(
       {required this.result,
       required this.inputState,
-      required this.fmt,
       required this.fmtDate,
       required this.s});
 
@@ -609,12 +622,12 @@ class _SummaryCard extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         // Show home price + down payment for clarity
         _SummaryRow(s.homePrice,
-            '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
-        _SummaryRow(s.loanAmount, fmt.format(result.loanAmount)),
+            '${AmountFormatter.ui(inputState.homePrice, 'USD')}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
+        _SummaryRow(s.loanAmount, AmountFormatter.ui(result.loanAmount, 'USD')),
         _SummaryRow(
             s.payoffDate, fmtDate.format(result.payoffDate as DateTime)),
-        _SummaryRow(s.totalInterest, fmt.format(result.totalInterest)),
-        _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
+        _SummaryRow(s.totalInterest, AmountFormatter.ui(result.totalInterest, 'USD')),
+        _SummaryRow(s.totalPayments, AmountFormatter.ui(result.totalCost, 'USD')),
         if (result.pmiDropMonth != null)
           _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
       ]),
@@ -626,31 +639,31 @@ class _SummaryRow extends StatelessWidget {
   final String label, value;
   const _SummaryRow(this.label, this.value);
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(label,
-              style: const TextStyle(
-                  color: Colors.white70, fontSize: AppTextSize.md)),
-          Text(value,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: AppTextSize.md,
-                  fontWeight: FontWeight.w600)),
-        ]),
+  Widget build(BuildContext context) => MergeSemantics(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text(label,
+                style: const TextStyle(
+                    color: Colors.white70, fontSize: AppTextSize.md)),
+            Text(value,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: AppTextSize.md,
+                    fontWeight: FontWeight.w600)),
+          ]),
+        ),
       );
 }
 
 // ── Yearly accordion list ─────────────────────────────────────────────────────
 class _YearlyList extends StatelessWidget {
   final List<_YearGroup> years;
-  final NumberFormat fmt;
   final AppStrings s;
   final bool isPremium;
   const _YearlyList(
       {required this.years,
-      required this.fmt,
       required this.s,
       required this.isPremium});
 
@@ -667,7 +680,7 @@ class _YearlyList extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, i) {
           if (i < visibleYears.length) {
-            return _YearTile(group: visibleYears[i], fmt: fmt, s: s);
+            return _YearTile(group: visibleYears[i], s: s);
           }
           // Lock banner (only appended when locked)
           return _AmortLockBanner(
@@ -684,9 +697,8 @@ class _YearlyList extends StatelessWidget {
 
 class _YearTile extends StatefulWidget {
   final _YearGroup group;
-  final NumberFormat fmt;
   final AppStrings s;
-  const _YearTile({required this.group, required this.fmt, required this.s});
+  const _YearTile({required this.group, required this.s});
   @override
   State<_YearTile> createState() => _YearTileState();
 }
@@ -697,7 +709,6 @@ class _YearTileState extends State<_YearTile> {
   @override
   Widget build(BuildContext context) {
     final group = widget.group;
-    final fmt = widget.fmt;
     final s = widget.s;
     final isCurrentYear = group.isCurrentYear;
 
@@ -710,7 +721,7 @@ class _YearTileState extends State<_YearTile> {
 
     return Semantics(
       label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '
-          '${s.balance}: ${fmt.format(group.endBalance)}. '
+          '${s.balance}: ${AmountFormatter.ui(group.endBalance, 'USD')}. '
           '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
       child: Container(
         margin:
@@ -770,15 +781,15 @@ class _YearTileState extends State<_YearTile> {
                       Wrap(spacing: 6, runSpacing: 4, children: [
                         _MetricChip(
                             label: s.balance,
-                            value: fmt.format(group.endBalance),
+                            value: AmountFormatter.ui(group.endBalance, 'USD'),
                             color: AppTheme.primary),
                         _MetricChip(
                             label: s.interest,
-                            value: fmt.format(group.yearlyInterest),
+                            value: AmountFormatter.ui(group.yearlyInterest, 'USD'),
                             color: AppTheme.secondary),
                         _MetricChip(
                             label: s.principal,
-                            value: fmt.format(group.yearlyPrincipal),
+                            value: AmountFormatter.ui(group.yearlyPrincipal, 'USD'),
                             color: AppTheme.accentGood),
                       ]),
                       const SizedBox(height: AppSpacing.sm),
@@ -812,12 +823,12 @@ class _YearTileState extends State<_YearTile> {
                       ),
                       const SizedBox(height: AppSpacing.xxs),
                       Text('${group.pctPaid.toStringAsFixed(1)}% ${s.paid}',
-                          style: const TextStyle(fontSize: 10)),
+                          style: const TextStyle(fontSize: AppTextSize.xs)),
                     ]),
               ),
             ),
             // ── Expanded sub-months ────────────────────────────────────────
-            if (_expanded) _MonthSubTable(months: group.months, fmt: fmt, s: s),
+            if (_expanded) _MonthSubTable(months: group.months, s: s),
           ]),
         ),
       ),
@@ -839,17 +850,16 @@ class _Badge extends StatelessWidget {
         ),
         child: Text(label,
             style: TextStyle(
-                fontSize: 9, color: color, fontWeight: FontWeight.bold)),
+                fontSize: AppTextSize.xxs, color: color, fontWeight: FontWeight.bold)),
       );
 }
 
 // ── Sub-month table inside ExpansionTile ──────────────────────────────────────
 class _MonthSubTable extends StatelessWidget {
   final List<AmortizationEntry> months;
-  final NumberFormat fmt;
   final AppStrings s;
   const _MonthSubTable(
-      {required this.months, required this.fmt, required this.s});
+      {required this.months, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -881,7 +891,7 @@ class _MonthSubTable extends StatelessWidget {
                 : Theme.of(context).colorScheme.surface;
 
         return Semantics(
-          label: 'Month ${e.month}, balance ${fmt.format(e.balance)}',
+          label: 'Month ${e.month}, balance ${AmountFormatter.ui(e.balance, 'USD')}',
           child: Container(
             color: bg,
             padding: const EdgeInsets.symmetric(
@@ -889,16 +899,16 @@ class _MonthSubTable extends StatelessWidget {
             child: Row(children: [
               _Cell('${e.month}', flex: 1),
               _Cell('${e.date.month}/${e.date.year}', flex: 2),
-              _Cell(fmt.format(e.payment), flex: 2),
-              _Cell(fmt.format(e.interest), flex: 2),
-              _Cell(fmt.format(e.principal), flex: 2),
-              _Cell(fmt.format(e.balance), flex: 2),
+              _Cell(AmountFormatter.ui(e.payment, 'USD'), flex: 2),
+              _Cell(AmountFormatter.ui(e.interest, 'USD'), flex: 2),
+              _Cell(AmountFormatter.ui(e.principal, 'USD'), flex: 2),
+              _Cell(AmountFormatter.ui(e.balance, 'USD'), flex: 2),
               if (hasPmi)
                 _Cell(
                     e.pmiDropped
                         ? s.off
                         : e.pmiAmount > 0
-                            ? fmt.format(e.pmiAmount)
+                            ? AmountFormatter.ui(e.pmiAmount, 'USD')
                             : '-',
                     flex: 2),
             ]),
@@ -935,12 +945,10 @@ class _MonthlyHeader extends StatelessWidget {
 
 class _MonthlyList extends StatelessWidget {
   final List<AmortizationEntry> schedule;
-  final NumberFormat fmt;
   final AppStrings s;
   final bool isPremium;
   const _MonthlyList(
       {required this.schedule,
-      required this.fmt,
       required this.s,
       required this.isPremium});
 
@@ -968,10 +976,10 @@ class _MonthlyList extends StatelessWidget {
               child: Row(children: [
                 _Cell('${e.month}', flex: 1),
                 _Cell('${e.date.month}/${e.date.year}', flex: 2),
-                _Cell(fmt.format(e.payment), flex: 2),
-                _Cell(fmt.format(e.principal), flex: 2),
-                _Cell(fmt.format(e.interest), flex: 2),
-                _Cell(fmt.format(e.balance), flex: 2),
+                _Cell(AmountFormatter.ui(e.payment, 'USD'), flex: 2),
+                _Cell(AmountFormatter.ui(e.principal, 'USD'), flex: 2),
+                _Cell(AmountFormatter.ui(e.interest, 'USD'), flex: 2),
+                _Cell(AmountFormatter.ui(e.balance, 'USD'), flex: 2),
               ]),
             );
           }
@@ -1093,7 +1101,7 @@ class _MetricChip extends StatelessWidget {
           children: [
             Text(label,
                 style: TextStyle(
-                    fontSize: 9, color: color.withValues(alpha: 0.8))),
+                    fontSize: AppTextSize.xxs, color: color.withValues(alpha: 0.8))),
             Text(value,
                 style: TextStyle(
                     fontSize: AppTextSize.xs,
@@ -1166,7 +1174,9 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
         flex: flex,
         child: Text(text,
-            style: const TextStyle(fontSize: AppTheme.tableBodySize),
+            style: const TextStyle(
+                fontSize: AppTheme.tableBodySize,
+                fontFeatures: [FontFeature.tabularFigures()]),
             textAlign: TextAlign.right),
       );
 }

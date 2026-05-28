@@ -12,7 +12,7 @@ import '../../../domain/models/mortgage_input.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../main.dart' show isSpanishNotifier;
+import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'history_detail_screen.dart';
@@ -57,8 +57,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _compareMode = false;
   final Set<int> _selectedIds = {}; // ids of selected single rows
 
-  final _fmtUSD =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
   final _fmtDate = DateFormat('MMM d, yyyy – HH:mm');
 
   @override
@@ -259,7 +257,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     try {
       final result = MortgageCalculator.calculate(input);
       if (context.mounted) {
-        await PdfExportService.exportMortgage(context, inputState, result);
+        await PdfExportService.exportMortgage(context, inputState, result,
+            isEs: isSpanishNotifier.value);
       }
     } catch (e) {
       if (context.mounted) {
@@ -337,7 +336,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ]),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                '${_fmtUSD.format(homePrice)} · $loanType · ${annualRate.toStringAsFixed(2)}%',
+                '${AmountFormatter.ui(homePrice, 'USD')} · $loanType · ${annualRate.toStringAsFixed(2)}%',
                 style: TextStyle(
                     fontSize: AppTextSize.md, color: Color(0xFF475569)),
               ),
@@ -362,20 +361,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const SizedBox(height: AppSpacing.smPlus),
               _CompDetailRow(
                 label: isEs ? 'Mensual' : 'Monthly',
-                v30: _fmtUSD.format(m30),
-                v15: _fmtUSD.format(m15),
+                v30: AmountFormatter.ui(m30, 'USD'),
+                v15: AmountFormatter.ui(m15, 'USD'),
                 winnerIs15: m15 < m30,
               ),
               _CompDetailRow(
                 label: isEs ? 'Interés total' : 'Total Interest',
-                v30: _fmtUSD.format(i30),
-                v15: _fmtUSD.format(i15),
+                v30: AmountFormatter.ui(i30, 'USD'),
+                v15: AmountFormatter.ui(i15, 'USD'),
                 winnerIs15: i15 < i30,
               ),
               _CompDetailRow(
                 label: isEs ? 'Ahorro en interés' : 'Interest Saved',
                 v30: '—',
-                v15: _fmtUSD.format(i30 - i15),
+                v15: AmountFormatter.ui(i30 - i15, 'USD'),
                 winnerIs15: true,
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -391,10 +390,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 child: Text(
                   isEs
-                      ? 'El plan de 15 años ahorra ${_fmtUSD.format(i30 - i15)} en interés total, '
-                          'pagando ${_fmtUSD.format(m15 - m30)} más por mes.'
-                      : '15-year saves ${_fmtUSD.format(i30 - i15)} in total interest, '
-                          'paying ${_fmtUSD.format(m15 - m30)} more per month.',
+                      ? 'El plan de 15 años ahorra ${AmountFormatter.ui(i30 - i15, 'USD')} en interés total, '
+                          'pagando ${AmountFormatter.ui(m15 - m30, 'USD')} más por mes.'
+                      : '15-year saves ${AmountFormatter.ui(i30 - i15, 'USD')} in total interest, '
+                          'paying ${AmountFormatter.ui(m15 - m30, 'USD')} more per month.',
                   style: TextStyle(
                       fontSize: AppTextSize.md, color: Color(0xFF334155)),
                 ),
@@ -405,7 +404,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               _SectionTitle(isEs ? 'Exportar PDF' : 'Export PDF'),
               const SizedBox(height: AppSpacing.sm),
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (context, isPremium, _) =>
                     ValueListenableBuilder<bool>(
                   valueListenable: freemiumService.isRewardedNotifier,
@@ -588,7 +587,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 Expanded(
                   child: _firstLoad
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const _HistorySkeleton()
                       : RefreshIndicator(
                           onRefresh: _load,
                           child: CustomScrollView(
@@ -602,7 +601,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       AppSpacing.sm),
                                   child: ValueListenableBuilder<bool>(
                                     valueListenable:
-                                        freemiumService.isPremiumNotifier,
+                                        freemiumService.hasFullAccessNotifier,
                                     builder: (context, isPremium, _) {
                                       return Column(
                                         crossAxisAlignment:
@@ -766,43 +765,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               if (_items.isEmpty)
                                 SliverFillRemaining(
                                   hasScrollBody: false,
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.history,
-                                            size: 64,
-                                            color: const Color(0xFFCBD5E1)),
-                                        const SizedBox(height: AppSpacing.lg),
-                                        Text(
-                                          isEs
-                                              ? 'Sin historial aún'
-                                              : 'No history yet',
-                                          style: TextStyle(
-                                              color: Color(0xFF64748B),
-                                              fontSize: AppTextSize.bodyLg),
-                                        ),
-                                        const SizedBox(height: AppSpacing.sm),
-                                        Text(
-                                          isEs
-                                              ? 'Haz un cálculo para comenzar'
-                                              : 'Run a calculation to get started',
-                                          style: TextStyle(
-                                              color: Color(0xFF94A3B8),
-                                              fontSize: AppTextSize.md),
-                                        ),
-                                        const SizedBox(height: AppSpacing.xl),
-                                        FilledButton.icon(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          icon: const Icon(
-                                              Icons.calculate_rounded),
-                                          label: Text(isEs
-                                              ? 'Hacer mi primer cálculo'
-                                              : 'Run my first calculation'),
-                                        ),
-                                      ],
-                                    ),
+                                  child: CalcwiseEmptyState(
+                                    icon: Icons.history_rounded,
+                                    title: isEs
+                                        ? 'Sin cálculos aún'
+                                        : 'No calculations yet',
+                                    body: isEs
+                                        ? 'Guarda una hipoteca en la pestaña Calculadora para verla aquí.'
+                                        : 'Save a mortgage from the Calculator tab to see it here.',
+                                    actionLabel: isEs
+                                        ? 'Calcular ahora'
+                                        : 'Calculate now',
+                                    onAction: () => tabSwitchNotifier.value = 0,
                                   ),
                                 )
                               else
@@ -925,7 +899,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final id = row['id'] as int? ?? 0;
     final label = row['label'] as String?;
     final humanLabel =
-        '${_fmtUSD.format(homePrice)} · ${annualRate.toStringAsFixed(2)}% · ${termYears}${isEs ? 'a' : 'yr'}';
+        '${AmountFormatter.ui(homePrice, 'USD')} · ${annualRate.toStringAsFixed(2)}% · ${termYears}${isEs ? 'a' : 'yr'}';
 
     final isSelected = _selectedIds.contains(id);
     final canSelect = _compareMode && (_selectedIds.length < 2 || isSelected);
@@ -982,7 +956,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     BorderRadius.circular(AppRadius.sm)),
                             child: Text(loanType,
                                 style: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: AppTextSize.xs,
                                     fontWeight: FontWeight.w600,
                                     color: AppTheme.primary)),
                           ),
@@ -1005,7 +979,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               )
             else
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (context, isPremium, _) => IconButton(
                   icon: Icon(
                     isPremium
@@ -1072,7 +1046,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         size: 16, color: AppTheme.primary),
                     const SizedBox(width: AppRadius.sm),
                     Text(
-                      _fmtUSD.format(homePrice),
+                      AmountFormatter.ui(homePrice, 'USD'),
                       style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: AppTextSize.bodyMd,
@@ -1087,7 +1061,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           borderRadius: BorderRadius.circular(AppRadius.sm)),
                       child: Text(loanType,
                           style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: AppTextSize.xs,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.primary)),
                     ),
@@ -1097,17 +1071,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Row(children: [
                     _ScenarioPill(
                         label: isEs ? '30a' : '30yr',
-                        value: _fmtUSD.format(m30),
+                        value: AmountFormatter.ui(m30, 'USD'),
                         color: AppTheme.primary),
                     const SizedBox(width: AppSpacing.sm),
                     _ScenarioPill(
                         label: isEs ? '15a' : '15yr',
-                        value: _fmtUSD.format(m15),
+                        value: AmountFormatter.ui(m15, 'USD'),
                         color: AppTheme.accentGood),
                     const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: Text(
-                        '${isEs ? 'Ahorra' : 'Saves'} ${_fmtUSD.format(i30 - i15)}',
+                        '${isEs ? 'Ahorra' : 'Saves'} ${AmountFormatter.ui(i30 - i15, 'USD')}',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontSize: AppTextSize.xs,
@@ -1153,6 +1127,79 @@ class _HistoryScreenState extends State<HistoryScreen> {
 }
 
 // ── Reusable widgets ─────────────────────────────────────────────────────────
+
+class _HistorySkeleton extends StatelessWidget {
+  const _HistorySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: List.generate(
+            3,
+            (i) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.smPlus),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            _ShimmerBox(
+                                width: 120, height: 26, radius: AppRadius.md),
+                            const Spacer(),
+                            _ShimmerBox(
+                                width: 70, height: 22, radius: AppRadius.sm),
+                          ]),
+                          const SizedBox(height: 12),
+                          ...List.generate(
+                              4,
+                              (_) => Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 5),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _ShimmerBox(
+                                            width: 100, height: 13, radius: 4),
+                                        _ShimmerBox(
+                                            width: 70, height: 13, radius: 4),
+                                      ],
+                                    ),
+                                  )),
+                        ],
+                      ),
+                    ),
+                  ),
+                )),
+      ),
+    );
+  }
+}
+
+class _ShimmerBox extends StatelessWidget {
+  final double width, height, radius;
+  const _ShimmerBox(
+      {required this.width, required this.height, required this.radius});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+}
 
 class _ScenarioPill extends StatelessWidget {
   final String label;
@@ -1299,6 +1346,7 @@ class _CompareBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ct = CalcwiseTheme.of(context);
     const colorA = AppTheme.primary;
     const colorB = Color(0xFF475569); // secondary/slate
 
@@ -1362,8 +1410,8 @@ class _CompareBarChart extends StatelessWidget {
                           padding: const EdgeInsets.only(top: AppSpacing.xs),
                           child: Text(
                             groups[idx].$1,
-                            style: const TextStyle(
-                                fontSize: 10, color: Color(0xFF64748B)),
+                            style: TextStyle(
+                                fontSize: AppTextSize.xs, color: ct.textSecondary),
                             textAlign: TextAlign.center,
                           ),
                         );
@@ -1376,8 +1424,8 @@ class _CompareBarChart extends StatelessWidget {
                       reservedSize: 44,
                       getTitlesWidget: (v, _) => Text(
                         _kFormat(v),
-                        style: const TextStyle(
-                            fontSize: 9, color: Color(0xFF94A3B8)),
+                        style: TextStyle(
+                            fontSize: AppTextSize.xxs, color: ct.textSecondary),
                       ),
                     ),
                   ),
@@ -1475,8 +1523,6 @@ class _HistoryCompareScreen extends StatelessWidget {
     required this.isEs,
   });
 
-  static final _fmtUSD =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
   static final _fmtDate = DateFormat('MMM d, yyyy');
 
   String _colLabel(Map<String, dynamic> row) {
@@ -1488,7 +1534,7 @@ class _HistoryCompareScreen extends StatelessWidget {
         : _fmtDate.format(createdAt.toLocal());
   }
 
-  String _fmt(dynamic v) => _fmtUSD.format((v as num?)?.toDouble() ?? 0.0);
+  String _fmt(dynamic v) => AmountFormatter.ui((v as num?)?.toDouble() ?? 0.0, 'USD');
 
   Color _winner(double v1, double v2, {required bool lowerIsBetter}) {
     if (lowerIsBetter)
@@ -1653,7 +1699,7 @@ class _HistoryCompareScreen extends StatelessWidget {
                 labelB: col2,
                 isEs: isEs,
               ),
-              const SizedBox(height: 80),
+              const SizedBox(height: AppSpacing.listBottomInset),
             ]),
           ),
         ),

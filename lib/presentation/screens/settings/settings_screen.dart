@@ -38,6 +38,43 @@ class SettingsScreen extends StatelessWidget {
           title: s.settingsTitle,
           bottomNavigationBar: const CalcwiseAdFooter(),
           children: [
+            // ── Premium ────────────────────────────────────────
+            ValueListenableBuilder<bool>(
+              valueListenable: freemiumService.hasFullAccessNotifier,
+              builder: (context, isPremium, _) => CalcwiseSettingsSection(
+                title: 'Premium',
+                children: isPremium
+                    ? [
+                        ListTile(
+                          leading: const Icon(Icons.verified,
+                              color: AppTheme.accent),
+                          title: Text(s.premiumActive),
+                          subtitle: Text(s.premiumSubtitle),
+                        ),
+                      ]
+                    : [
+                        CalcwiseSettingsTile(
+                          icon: Icons.star_rounded,
+                          label: s.getPremium,
+                          subtitle: s.premiumSubtitle as String?,
+                          trailing: '\$2.99',
+                          onTap: () => IAPService.instance.buy(),
+                        ),
+                        CalcwiseSettingsTile(
+                          icon: Icons.restore,
+                          label: s.restorePurchase,
+                          onTap: () => IAPService.instance.restore(),
+                        ),
+                        if (kDebugMode)
+                          CalcwiseSettingsTile(
+                            icon: Icons.bug_report,
+                            label: 'Force Premium (DEV)',
+                            onTap: () => freemiumService.debugUnlockPremium(),
+                          ),
+                      ],
+              ),
+            ),
+            const Divider(height: 1),
             // ── Language ───────────────────────────────────────
             CalcwiseSettingsSection(
               title: s.language,
@@ -74,43 +111,6 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            const Divider(height: 1),
-            // ── Premium ────────────────────────────────────────
-            ValueListenableBuilder<bool>(
-              valueListenable: freemiumService.isPremiumNotifier,
-              builder: (context, isPremium, _) => CalcwiseSettingsSection(
-                title: 'Premium',
-                children: isPremium
-                    ? [
-                        ListTile(
-                          leading: const Icon(Icons.verified,
-                              color: CalcwiseSemanticColors.warnIcon),
-                          title: Text(s.premiumActive),
-                          subtitle: Text(s.premiumSubtitle),
-                        ),
-                      ]
-                    : [
-                        CalcwiseSettingsTile(
-                          icon: Icons.star_rounded,
-                          label: s.getPremium,
-                          subtitle: s.premiumSubtitle as String?,
-                          trailing: '\$2.99',
-                          onTap: () => IAPService.instance.buy(),
-                        ),
-                        CalcwiseSettingsTile(
-                          icon: Icons.restore,
-                          label: s.restorePurchase,
-                          onTap: () => IAPService.instance.restore(),
-                        ),
-                        if (kDebugMode)
-                          CalcwiseSettingsTile(
-                            icon: Icons.bug_report,
-                            label: 'Force Premium (DEV)',
-                            onTap: () => freemiumService.debugUnlockPremium(),
-                          ),
-                      ],
-              ),
             ),
             const Divider(height: 1),
             // ── Support ────────────────────────────────────────
@@ -161,7 +161,7 @@ class SettingsScreen extends StatelessWidget {
               child: Text(
                 s.disclaimer,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF475569),
+                      color: CalcwiseTheme.of(context).textSecondary,
                       fontStyle: FontStyle.italic,
                     ),
               ),
@@ -189,13 +189,18 @@ class _LangButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         decoration: BoxDecoration(
           color: selected ? color : Colors.transparent,
-          border: Border.all(color: selected ? color : const Color(0xFFCBD5E1)),
+          border: Border.all(
+              color: selected
+                  ? color
+                  : Theme.of(context).colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(AppRadius.mdPlus),
         ),
         alignment: Alignment.center,
         child: Text(label,
             style: TextStyle(
-              color: selected ? Colors.white : const Color(0xFF334155),
+              color: selected
+                  ? Colors.white
+                  : CalcwiseTheme.of(context).textSecondary,
               fontWeight: selected ? FontWeight.bold : FontWeight.normal,
             )),
       ),

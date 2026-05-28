@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/irr_engine.dart';
 import '../../../core/theme/app_theme.dart';
@@ -6,29 +7,30 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 // ── Color for Investment Return tool icon (emerald-teal) ──────────────────────
 const Color _kToolColor = Color(0xFF0D9488); // teal-600
 
-class InvestmentReturnScreen extends StatefulWidget {
+class InvestmentReturnScreen extends ConsumerStatefulWidget {
   const InvestmentReturnScreen({super.key});
 
   @override
-  State<InvestmentReturnScreen> createState() => _InvestmentReturnScreenState();
+  ConsumerState<InvestmentReturnScreen> createState() =>
+      _InvestmentReturnScreenState();
 }
 
-class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
+class _InvestmentReturnScreenState
+    extends ConsumerState<InvestmentReturnScreen> {
   // ── Controllers ──────────────────────────────────────────────────────────
-  final _priceCtrl = TextEditingController(text: '400000');
+  late final TextEditingController _priceCtrl;
   final _rentCtrl = TextEditingController(text: '2500');
   final _discountCtrl = TextEditingController(text: '10');
 
   // ── State ─────────────────────────────────────────────────────────────────
-  double _downPct = 20.0;
+  late double _downPct;
   double _appreciation = 3.0;
   int _holdYears = 10;
   bool _analyticsLogged = false;
@@ -36,9 +38,21 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
   static const List<int> _holdOptions = [5, 10, 15, 20];
 
   // ── Interest rate used for mortgage calculation ───────────────────────────
-  static const double _defaultRate = 7.0;
+  late double _defaultRate;
   static const int _defaultTerm = 30;
   static const double _expenseRatio = 0.30; // 30% of gross rent
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill from current calculator values
+    final input = ref.read(mortgageInputProvider);
+    final price = input.homePrice > 0 ? input.homePrice : 400000;
+    _downPct = input.downPaymentPct.clamp(5.0, 50.0);
+    _defaultRate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+    _priceCtrl = TextEditingController(
+        text: NumberFormat('#,##0').format(price.round()));
+  }
 
   @override
   void dispose() {
@@ -126,9 +140,6 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
       builder: (context, isEs, _) {
         final result = _calculate();
 
-        final fmtCur = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
-
         return Scaffold(
           appBar: AppBar(
             title: Text(isEs ? 'Retorno de Inversión' : 'Investment Return'),
@@ -165,7 +176,7 @@ class _InvestmentReturnScreenState extends State<InvestmentReturnScreen> {
                     value: _downPct,
                     valueSuffix: '%',
                     displayValue:
-                        result != null ? fmtCur.format(result.downAmt) : '—',
+                        result != null ? AmountFormatter.ui(result.downAmt, 'USD') : '—',
                     min: 3.0,
                     max: 50.0,
                     divisions: 470,
@@ -305,7 +316,7 @@ class _ResultsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: freemiumService.isPremiumNotifier,
+      valueListenable: freemiumService.hasFullAccessNotifier,
       builder: (context, isPremium, _) {
         return ValueListenableBuilder<bool>(
           valueListenable: freemiumService.isRewardedNotifier,
@@ -344,8 +355,6 @@ class _ResultsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmtCur =
-        NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
     final verdict = _verdict(result.irr);
     final verdictColor = _verdictColor(verdict);
     final verdictLabel = _verdictLabel(verdict, isEs);
@@ -437,7 +446,7 @@ class _ResultsCard extends StatelessWidget {
               _Row(
                 label: isEs ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
                 value: '${result.monthlyCF >= 0 ? '+' : ''}'
-                    '${fmtCur.format(result.monthlyCF)}',
+                    '${AmountFormatter.ui(result.monthlyCF, 'USD')}',
                 color: result.monthlyCF >= 0
                     ? AppTheme.accentGood
                     : CalcwiseSemanticColors.errorDark,
@@ -447,13 +456,13 @@ class _ResultsCard extends StatelessWidget {
                 label: isEs
                     ? 'Inversión inicial (enganche + cierre)'
                     : 'Initial Investment (down + closing)',
-                value: fmtCur.format(result.initialInv),
+                value: AmountFormatter.ui(result.initialInv, 'USD'),
               ),
               _Row(
                 label: isEs
                     ? 'Pago hipotecario mensual (7%, 30 años)'
                     : 'Monthly Mortgage Payment (7%, 30yr)',
-                value: fmtCur.format(result.mortgageMo),
+                value: AmountFormatter.ui(result.mortgageMo, 'USD'),
               ),
               const Divider(height: 24),
 
@@ -471,7 +480,7 @@ class _ResultsCard extends StatelessWidget {
                     ? 'VPN (valor presente neto)'
                     : 'NPV (Net Present Value)',
                 value: '${result.npv >= 0 ? '+' : ''}'
-                    '${fmtCur.format(result.npv)}',
+                    '${AmountFormatter.ui(result.npv, 'USD')}',
                 color: result.npv >= 0
                     ? AppTheme.accentGood
                     : CalcwiseSemanticColors.errorDark,

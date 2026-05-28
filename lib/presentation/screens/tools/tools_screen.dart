@@ -14,6 +14,9 @@ import 'va_screen.dart';
 import 'usda_screen.dart';
 import 'pmi_calculator_screen.dart';
 import 'points_screen.dart';
+import 'dti_screen.dart';
+import 'heloc_calc_screen.dart';
+import 'closing_costs_screen.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 
 class ToolsScreen extends StatelessWidget {
@@ -36,6 +39,23 @@ class ToolsScreen extends StatelessWidget {
                 context,
                 PageRouteBuilder<void>(
                   pageBuilder: (_, __, ___) => const ExtraPaymentsScreen(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: AppDuration.base,
+                )),
+          ),
+          _ToolItem(
+            icon: Icons.balance_rounded,
+            iconSelected: Icons.balance,
+            color: const Color(0xFF0891B2), // cyan-600
+            title: isEs ? 'Relación Deuda-Ingreso' : 'DTI Calculator',
+            subtitle: isEs
+                ? 'Verifica tu elegibilidad con prestamistas'
+                : 'Check lender eligibility & max payment',
+            onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder<void>(
+                  pageBuilder: (_, __, ___) => const DtiScreen(),
                   transitionsBuilder: (_, anim, __, child) =>
                       FadeTransition(opacity: anim, child: child),
                   transitionDuration: AppDuration.base,
@@ -91,7 +111,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.trending_up_rounded,
             iconSelected: Icons.trending_up,
-            color: const Color(0xFF0D9488), // teal-600
+            color: AppTheme.toolInvestment,
             title: s.toolInvestment,
             subtitle: s.toolInvestmentSub,
             onTap: () => Navigator.push(
@@ -106,7 +126,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.home_rounded,
             iconSelected: Icons.home_rounded,
-            color: const Color(0xFF1E3A8A), // FHA navy
+            color: AppTheme.toolFha,
             title: isEs ? 'Préstamo FHA' : 'FHA Loan',
             subtitle: isEs
                 ? 'Calcula MIP y pago total FHA'
@@ -124,7 +144,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.military_tech_rounded,
             iconSelected: Icons.military_tech,
-            color: const Color(0xFFB91C1C), // VA red
+            color: AppTheme.toolVa,
             title: isEs ? 'Préstamo VA' : 'VA Loan',
             subtitle: isEs
                 ? 'Tarifa de financiación y pago VA'
@@ -142,7 +162,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.agriculture_rounded,
             iconSelected: Icons.agriculture,
-            color: const Color(0xFF15803D), // USDA green
+            color: AppTheme.toolUsda,
             title: isEs ? 'Préstamo USDA' : 'USDA Loan',
             subtitle: isEs
                 ? 'Préstamo rural con 0% inicial'
@@ -160,7 +180,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.shield_rounded,
             iconSelected: Icons.shield,
-            color: const Color(0xFF7C3AED), // purple-600
+            color: AppTheme.toolPmiDetail,
             title: isEs ? 'PMI detallado' : 'PMI Detail',
             subtitle: isEs
                 ? 'Tasa por puntaje crediticio y LTV'
@@ -178,7 +198,7 @@ class ToolsScreen extends StatelessWidget {
           _ToolItem(
             icon: Icons.percent_rounded,
             iconSelected: Icons.percent,
-            color: const Color(0xFFEA580C), // orange-600
+            color: AppTheme.toolPoints,
             title: isEs ? 'Puntos de descuento' : 'Discount Points',
             subtitle: isEs
                 ? 'Equilibrio y ahorro de comprar puntos'
@@ -192,6 +212,40 @@ class ToolsScreen extends StatelessWidget {
                 transitionDuration: AppDuration.base,
               ),
             ),
+          ),
+          _ToolItem(
+            icon: Icons.account_balance_rounded,
+            iconSelected: Icons.account_balance,
+            color: Color(0xFF0D9488), // teal
+            title: isEs ? 'Calculadora HELOC' : 'HELOC Calculator',
+            subtitle: isEs
+                ? 'Línea de crédito sobre el capital de tu hogar'
+                : 'Home equity line of credit estimator',
+            onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder<void>(
+                  pageBuilder: (_, __, ___) => const HelocCalcScreen(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: AppDuration.base,
+                )),
+          ),
+          _ToolItem(
+            icon: Icons.receipt_long_rounded,
+            iconSelected: Icons.receipt_long,
+            color: Color(0xFFEA580C), // deep orange
+            title: isEs ? 'Costos de Cierre' : 'Closing Costs by State',
+            subtitle: isEs
+                ? 'Estima costos de cierre por estado'
+                : 'Estimate closing costs by US state',
+            onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder<void>(
+                  pageBuilder: (_, __, ___) => const ClosingCostsScreen(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: AppDuration.base,
+                )),
           ),
           _ToolItem(
             icon: Icons.history_rounded,
@@ -217,6 +271,7 @@ class ToolsScreen extends StatelessWidget {
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
           body: SingleChildScrollView(
+            key: const PageStorageKey('tools_hub'),
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

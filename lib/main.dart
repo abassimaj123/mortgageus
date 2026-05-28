@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:calcwise_core/calcwise_core.dart'
-    hide CrashlyticsService, iapErrorNotifier;
+    hide CrashlyticsService, iapErrorNotifier, PaywallHard;
 import 'core/ads/ad_config.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +19,12 @@ import 'presentation/screens/comparator/comparator_screen.dart';
 import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/tools/tools_screen.dart';
 import 'presentation/screens/affordability/affordability_screen.dart';
+import 'presentation/screens/history/history_screen.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'l10n/strings_en.dart';
 import 'l10n/strings_es.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'presentation/widgets/paywall_hard.dart';
 
 // Global language notifier — false = English, true = Spanish
 final ValueNotifier<bool> isSpanishNotifier = ValueNotifier<bool>(false);
@@ -36,7 +38,10 @@ final ValueNotifier<Map<String, double>?> preFillNotifier =
     ValueNotifier<Map<String, double>?>(null);
 
 // Paywall session service — centralized, namespaced by appKey
-final paywallSession = PaywallSessionService(appKey: 'mortgageus');
+final paywallSession = PaywallSessionService(
+  appKey: 'mortgageus',
+  hasFullAccess: () => freemiumService.hasFullAccess,
+);
 
 // Ad service — backed by calcwise_core
 final adService = CalcwiseAdService(
@@ -117,6 +122,20 @@ class MortgageUSApp extends StatelessWidget {
               '/home': (_) => const _MainShell(),
             },
             debugShowCheckedModeBanner: false,
+            builder: (context, child) {
+              if (!MediaQuery.of(context).disableAnimations) return child!;
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  pageTransitionsTheme: const PageTransitionsTheme(
+                    builders: {
+                      TargetPlatform.android: _NoAnimPageTransitionsBuilder(),
+                      TargetPlatform.iOS: _NoAnimPageTransitionsBuilder(),
+                    },
+                  ),
+                ),
+                child: child!,
+              );
+            },
           ),
         );
       },
@@ -191,6 +210,8 @@ class _MainShellState extends State<_MainShell> {
           return s.affordTitle;
         case 4:
           return s.toolsTitle;
+        case 5:
+          return s.navHistory;
         default:
           return s.appTitle;
       }
@@ -205,6 +226,8 @@ class _MainShellState extends State<_MainShell> {
           return s.affordTitle;
         case 4:
           return s.toolsTitle;
+        case 5:
+          return s.navHistory;
         default:
           return s.appTitle;
       }
@@ -217,6 +240,7 @@ class _MainShellState extends State<_MainShell> {
     ComparatorScreen(),
     AffordabilityScreen(),
     ToolsScreen(),
+    HistoryScreen(),
   ];
 
   @override
@@ -247,6 +271,7 @@ class _MainShellState extends State<_MainShell> {
                     ),
                   ),
                   onRewardAd: () => CalcwiseRewardAdSheet.show(context),
+                  onPremium: () => PaywallHard.show(context),
                 ),
               ],
             ),
@@ -274,7 +299,8 @@ class _MainShellState extends State<_MainShell> {
                   'schedule',
                   'comparator',
                   'affordability',
-                  'tools'
+                  'tools',
+                  'history'
                 ];
                 if (i < _tabNames.length) {
                   AnalyticsService.instance.logTabChanged(_tabNames[i]);
@@ -311,9 +337,26 @@ class _MainShellState extends State<_MainShell> {
                     icon: const Icon(Icons.build_rounded),
                     selectedIcon: const Icon(Icons.build_rounded),
                     label: s.navTools),
+                NavigationDestination(
+                    icon: const Icon(Icons.history_rounded),
+                    selectedIcon: const Icon(Icons.history),
+                    label: s.navHistory),
               ],
             ),
           );
         },
       );
+}
+
+class _NoAnimPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _NoAnimPageTransitionsBuilder();
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) =>
+      child;
 }

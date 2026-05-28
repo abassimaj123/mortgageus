@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../presentation/providers/mortgage_providers.dart';
 import '../../domain/models/mortgage_result.dart';
 import '../../domain/models/loan_type.dart';
@@ -37,42 +39,78 @@ class PdfExportService {
   static Future<void> exportMortgage(
     BuildContext context,
     MortgageInputState input,
-    MortgageResult result,
-  ) async {
+    MortgageResult result, {
+    bool isEs = false,
+  }) async {
     final pdf = pw.Document();
 
     // ── Page 1 : full summary ─────────────────────────────────────────────
     pdf.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildSummaryPage(input, result),
+      build: (_) => _buildSummaryPage(input, result, isEs: isEs),
     ));
 
     // ── Pages 2+ : amortization schedule (auto-paginated) ─────────────────
     pdf.addPage(pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.fromLTRB(36, 28, 36, 28),
-      header: (ctx) => _amortHeader(input, result, ctx.pageNumber),
-      footer: (ctx) => _footer(ctx),
+      header: (ctx) => _amortHeader(input, result, ctx.pageNumber, isEs: isEs),
+      footer: (ctx) => _footer(ctx, isEs: isEs),
       build: (_) => [
-        ..._buildYearlySection(result),
+        ..._buildYearlySection(result, isEs: isEs),
         pw.SizedBox(height: 18),
-        ..._buildMonthlySection(result),
+        ..._buildMonthlySection(result, isEs: isEs),
       ],
     ));
 
-    await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename:
-          'MortgageUS_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf',
-    );
+    final pdfBytes = await pdf.save();
+    final tmpDir = await getTemporaryDirectory();
+    final pdfFile = File(
+        '${tmpDir.path}/MortgageUS_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
+    await pdfFile.writeAsBytes(pdfBytes);
+    await Share.shareXFiles(
+        [XFile(pdfFile.path, mimeType: 'application/pdf')]);
   }
 
   // ── Page 1 builder ────────────────────────────────────────────────────────
 
   static pw.Widget _buildSummaryPage(
-      MortgageInputState input, MortgageResult result) {
+      MortgageInputState input, MortgageResult result,
+      {bool isEs = false}) {
     final now = DateTime.now();
+    // ── Translated strings ──
+    final tReport = isEs ? 'Informe de Cálculo Hipotecario' : 'Mortgage Calculation Report';
+    final tLoanDetails = isEs ? 'DETALLES DEL PRÉSTAMO' : 'LOAN DETAILS';
+    final tHomePrice = isEs ? 'Precio de la casa' : 'Home Price';
+    final tDownPayment = isEs ? 'Enganche' : 'Down Payment';
+    final tLoanAmount = isEs ? 'Monto del préstamo' : 'Loan Amount';
+    final tInterestRate = isEs ? 'Tasa de interés' : 'Interest Rate';
+    final tLoanTerm = isEs ? 'Plazo' : 'Loan Term';
+    final tYears = isEs ? 'años' : 'years';
+    final tLoanType = isEs ? 'Tipo de préstamo' : 'Loan Type';
+    final tLtv = 'LTV';
+    final tClassification = isEs ? 'Clasificación' : 'Classification';
+    final tJumbo = isEs ? 'PRÉSTAMO JUMBO' : 'JUMBO LOAN';
+    final tTotalCostSection = isEs ? 'COSTO TOTAL' : 'TOTAL COST';
+    final tTotalInterest = isEs ? 'Interés total' : 'Total Interest';
+    final tTotalCost = isEs ? 'Costo total' : 'Total Cost';
+    final tPayoffDate = isEs ? 'Fecha de liquidación' : 'Payoff Date';
+    final tPmi = 'PMI';
+    final tMonthlyPmi = isEs ? 'PMI mensual' : 'Monthly PMI';
+    final tPmiDropsAt = isEs ? 'PMI cae en' : 'PMI Drops at';
+    final tMonth = isEs ? 'Mes' : 'Month';
+    final tPmiNote = isEs ? 'Se requiere 80% LTV para cancelar' : '80% LTV required to cancel';
+    final tMonthlyBreakdown = isEs ? 'DESGLOSE MENSUAL' : 'MONTHLY BREAKDOWN';
+    final tPandI = isEs ? 'Capital e Interés' : 'P & I';
+    final tPrincipal = isEs ? '  Capital' : '  Principal';
+    final tInterest = isEs ? '  Interés' : '  Interest';
+    final tPropertyTax = isEs ? 'Impuesto predial' : 'Property Tax';
+    final tHomeInsurance = isEs ? 'Seguro del hogar' : 'Home Insurance';
+    final tHoa = 'HOA';
+    final tTotal = isEs ? 'Total (PITI)' : 'Total (PITI)';
+    final tPrincipalVsInterest = isEs ? 'CAPITAL vs INTERÉS' : 'PRINCIPAL vs INTEREST';
+
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -89,7 +127,7 @@ class PdfExportService {
                           fontSize: AppTextSize.title,
                           fontWeight: pw.FontWeight.bold,
                           color: _navy)),
-                  pw.Text('Mortgage Calculation Report',
+                  pw.Text(tReport,
                       style: const pw.TextStyle(
                           fontSize: AppTextSize.xs, color: PdfColors.grey700)),
                 ]),
@@ -110,37 +148,37 @@ class PdfExportService {
             // Left column
             pw.Expanded(
                 child: pw.Column(children: [
-              _sectionBox('LOAN DETAILS', [
-                _row2('Home Price', _usd0.format(input.homePrice)),
-                _row2('Down Payment',
+              _sectionBox(tLoanDetails, [
+                _row2(tHomePrice, _usd0.format(input.homePrice)),
+                _row2(tDownPayment,
                     '${_usd0.format(input.downPaymentDollar)} (${input.downPaymentPct.toStringAsFixed(1)}%)'),
-                _row2('Loan Amount', _usd0.format(result.loanAmount)),
-                _row2('Interest Rate',
+                _row2(tLoanAmount, _usd0.format(result.loanAmount)),
+                _row2(tInterestRate,
                     '${input.annualRatePct.toStringAsFixed(2)}%'),
-                _row2('Loan Term', '${input.termYears} years'),
-                _row2('Loan Type', input.loanType.label),
-                _row2('LTV', '${result.currentLtv.toStringAsFixed(1)}%'),
+                _row2(tLoanTerm, '${input.termYears} $tYears'),
+                _row2(tLoanType, input.loanType.label),
+                _row2(tLtv, '${result.currentLtv.toStringAsFixed(1)}%'),
                 if (result.isJumbo)
-                  _row2('Classification', 'JUMBO LOAN', highlight: true),
+                  _row2(tClassification, tJumbo, highlight: true),
               ]),
               pw.SizedBox(height: 10),
-              _sectionBox('TOTAL COST', [
-                _row2('Total Interest', _usd0.format(result.totalInterest),
+              _sectionBox(tTotalCostSection, [
+                _row2(tTotalInterest, _usd0.format(result.totalInterest),
                     highlight: false),
-                _row2('Total Cost', _usd0.format(result.totalCost), bold: true),
-                _row2('Payoff Date',
+                _row2(tTotalCost, _usd0.format(result.totalCost), bold: true),
+                _row2(tPayoffDate,
                     DateFormat('MMM yyyy').format(result.payoffDate)),
               ]),
               if (result.hasPmi) ...[
                 pw.SizedBox(height: 10),
-                _sectionBox('PMI', [
-                  _row2('Monthly PMI', _usd2.format(result.monthly.pmi)),
+                _sectionBox(tPmi, [
+                  _row2(tMonthlyPmi, _usd2.format(result.monthly.pmi)),
                   _row2(
-                      'PMI Drops at',
+                      tPmiDropsAt,
                       result.pmiDropMonth != null
-                          ? 'Month ${result.pmiDropMonth} (${(result.pmiDropMonth! / 12).ceil()} yr)'
+                          ? '$tMonth ${result.pmiDropMonth} (${(result.pmiDropMonth! / 12).ceil()} yr)'
                           : '—'),
-                  _row2('Note', '80% LTV required to cancel', small: true),
+                  _row2('Note', tPmiNote, small: true),
                 ]),
               ],
             ])),
@@ -148,43 +186,46 @@ class PdfExportService {
             // Right column
             pw.Expanded(
                 child: pw.Column(children: [
-              _sectionBox('MONTHLY BREAKDOWN', [
-                _row2('P & I', _usd2.format(result.monthly.piPayment),
+              _sectionBox(tMonthlyBreakdown, [
+                _row2(tPandI, _usd2.format(result.monthly.piPayment),
                     bold: true, color: _navy),
-                _row2('  Principal', _usd2.format(result.monthly.principal)),
-                _row2('  Interest', _usd2.format(result.monthly.interest)),
+                _row2(tPrincipal, _usd2.format(result.monthly.principal)),
+                _row2(tInterest, _usd2.format(result.monthly.interest)),
                 pw.Divider(color: PdfColors.grey300, height: 6),
-                _row2('Property Tax', _usd2.format(result.monthly.propertyTax)),
-                _row2('Home Insurance',
+                _row2(tPropertyTax, _usd2.format(result.monthly.propertyTax)),
+                _row2(tHomeInsurance,
                     _usd2.format(result.monthly.homeInsurance)),
                 if (input.hoaMonthly > 0)
-                  _row2('HOA', _usd2.format(result.monthly.hoa)),
+                  _row2(tHoa, _usd2.format(result.monthly.hoa)),
                 if (result.hasPmi)
-                  _row2('PMI', _usd2.format(result.monthly.pmi)),
+                  _row2(tPmi, _usd2.format(result.monthly.pmi)),
                 pw.Divider(color: PdfColors.grey300, height: 6),
-                _row2('Total (PITI)', _usd2.format(result.monthly.pitiPayment),
+                _row2(tTotal, _usd2.format(result.monthly.pitiPayment),
                     bold: true, color: _navy),
               ]),
               pw.SizedBox(height: 10),
               // ── Cost breakdown bar ──
-              _costBar(result),
+              _costBar(result, isEs: isEs, label: tPrincipalVsInterest),
             ])),
           ],
         ),
 
         pw.Spacer(),
-        _footerNote(),
+        _footerNote(isEs: isEs),
       ],
     );
   }
 
   // ── Cost breakdown visual bar ─────────────────────────────────────────────
 
-  static pw.Widget _costBar(MortgageResult result) {
+  static pw.Widget _costBar(MortgageResult result,
+      {bool isEs = false, String? label}) {
     final total = result.totalCost;
     final loanPct = total > 0 ? result.loanAmount / total : 0.0;
     final intPct = total > 0 ? result.totalInterest / total : 0.0;
-    return _sectionBox('PRINCIPAL vs INTEREST', [
+    final tPrincipal = isEs ? 'Capital' : 'Principal';
+    final tInterest = isEs ? 'Interés' : 'Interest';
+    return _sectionBox(label ?? (isEs ? 'CAPITAL vs INTERÉS' : 'PRINCIPAL vs INTEREST'), [
       pw.SizedBox(height: 6),
       pw.Row(children: [
         pw.Expanded(
@@ -221,13 +262,13 @@ class PdfExportService {
         pw.Row(children: [
           pw.Container(width: 8, height: 8, color: _navy),
           pw.SizedBox(width: 4),
-          pw.Text('Principal: ${_usd0.format(result.loanAmount)}',
+          pw.Text('$tPrincipal: ${_usd0.format(result.loanAmount)}',
               style: const pw.TextStyle(fontSize: 8)),
         ]),
         pw.Row(children: [
           pw.Container(width: 8, height: 8, color: _gold),
           pw.SizedBox(width: 4),
-          pw.Text('Interest: ${_usd0.format(result.totalInterest)}',
+          pw.Text('$tInterest: ${_usd0.format(result.totalInterest)}',
               style: const pw.TextStyle(fontSize: 8)),
         ]),
       ]),
@@ -236,9 +277,11 @@ class PdfExportService {
 
   // ── Yearly amortization section ───────────────────────────────────────────
 
-  static List<pw.Widget> _buildYearlySection(MortgageResult result) {
+  static List<pw.Widget> _buildYearlySection(MortgageResult result,
+      {bool isEs = false}) {
     final schedule = result.schedule;
     final yearlyData = <List<String>>[];
+    final tYear = isEs ? 'Año' : 'Year';
 
     final totalYears = (schedule.length / 12.0).ceil();
     for (int yr = 1; yr <= totalYears; yr++) {
@@ -253,7 +296,7 @@ class PdfExportService {
       final cumInt = slice.last.cumulativeInterest;
 
       yearlyData.add([
-        'Year $yr',
+        '$tYear $yr',
         _usd0.format(annualPmt),
         _usd0.format(annualPrin),
         _usd0.format(annualInt),
@@ -263,16 +306,18 @@ class PdfExportService {
     }
 
     return [
-      _tableTitle('YEARLY AMORTIZATION SUMMARY'),
+      _tableTitle(isEs
+          ? 'RESUMEN DE AMORTIZACIÓN ANUAL'
+          : 'YEARLY AMORTIZATION SUMMARY'),
       pw.SizedBox(height: 6),
       pw.TableHelper.fromTextArray(
         headers: [
-          'Year',
-          'Total Pmt',
-          'Principal',
-          'Interest',
-          'Balance',
-          'Cum. Interest'
+          isEs ? 'Año' : 'Year',
+          isEs ? 'Pago total' : 'Total Pmt',
+          isEs ? 'Capital' : 'Principal',
+          isEs ? 'Interés' : 'Interest',
+          isEs ? 'Saldo' : 'Balance',
+          isEs ? 'Int. acum.' : 'Cum. Interest'
         ],
         data: yearlyData,
         headerStyle: pw.TextStyle(
@@ -307,7 +352,8 @@ class PdfExportService {
 
   // ── Monthly amortization section ──────────────────────────────────────────
 
-  static List<pw.Widget> _buildMonthlySection(MortgageResult result) {
+  static List<pw.Widget> _buildMonthlySection(MortgageResult result,
+      {bool isEs = false}) {
     final rows = result.schedule
         .map((e) => [
               e.month.toString(),
@@ -322,18 +368,20 @@ class PdfExportService {
         .toList();
 
     return [
-      _tableTitle('FULL MONTHLY AMORTIZATION SCHEDULE'),
+      _tableTitle(isEs
+          ? 'TABLA DE AMORTIZACIÓN MENSUAL COMPLETA'
+          : 'FULL MONTHLY AMORTIZATION SCHEDULE'),
       pw.SizedBox(height: 6),
       pw.TableHelper.fromTextArray(
         headers: [
-          'Mo.',
-          'Date',
-          'Payment',
-          'Principal',
-          'Interest',
+          isEs ? 'Mes' : 'Mo.',
+          isEs ? 'Fecha' : 'Date',
+          isEs ? 'Pago' : 'Payment',
+          isEs ? 'Capital' : 'Principal',
+          isEs ? 'Interés' : 'Interest',
           'PMI',
-          'Balance',
-          'Cum. Int.'
+          isEs ? 'Saldo' : 'Balance',
+          isEs ? 'Int. acum.' : 'Cum. Int.'
         ],
         data: rows,
         headerStyle: pw.TextStyle(
@@ -373,7 +421,8 @@ class PdfExportService {
   // ── Amortization page header ──────────────────────────────────────────────
 
   static pw.Widget _amortHeader(
-          MortgageInputState input, MortgageResult result, int page) =>
+          MortgageInputState input, MortgageResult result, int page,
+          {bool isEs = false}) =>
       pw.Container(
         padding: const pw.EdgeInsets.only(bottom: 6),
         decoration: const pw.BoxDecoration(
@@ -381,15 +430,18 @@ class PdfExportService {
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text('MortgageUS — Amortization Schedule',
+            pw.Text(
+                isEs
+                    ? 'MortgageUS — Tabla de Amortización'
+                    : 'MortgageUS — Amortization Schedule',
                 style: pw.TextStyle(
                     fontSize: 8, fontWeight: pw.FontWeight.bold, color: _navy)),
             pw.Text(
               '${_usd0.format(input.homePrice)} · '
               '${input.annualRatePct.toStringAsFixed(2)}% · '
-              '${input.termYears}yr · '
+              '${input.termYears}${isEs ? 'a' : 'yr'} · '
               '${input.loanType.label}'
-              '  |  Page $page',
+              '  |  ${isEs ? 'Pág.' : 'Page'} $page',
               style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
             ),
           ],
@@ -398,7 +450,7 @@ class PdfExportService {
 
   // ── Footer ────────────────────────────────────────────────────────────────
 
-  static pw.Widget _footer(pw.Context ctx) => pw.Container(
+  static pw.Widget _footer(pw.Context ctx, {bool isEs = false}) => pw.Container(
         padding: const pw.EdgeInsets.only(top: 4),
         decoration: const pw.BoxDecoration(
             border: pw.Border(
@@ -406,20 +458,26 @@ class PdfExportService {
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text('For illustration purposes only. Not financial advice.',
+            pw.Text(
+                isEs
+                    ? 'Solo para ilustración. No es asesoramiento financiero.'
+                    : 'For illustration purposes only. Not financial advice.',
                 style:
                     const pw.TextStyle(fontSize: 7, color: PdfColors.grey500)),
-            pw.Text('Page ${ctx.pageNumber} of ${ctx.pagesCount}',
+            pw.Text(
+                '${isEs ? 'Pág.' : 'Page'} ${ctx.pageNumber} ${isEs ? 'de' : 'of'} ${ctx.pagesCount}',
                 style:
                     const pw.TextStyle(fontSize: 7, color: PdfColors.grey500)),
           ],
         ),
       );
 
-  static pw.Widget _footerNote() => pw.Column(children: [
+  static pw.Widget _footerNote({bool isEs = false}) => pw.Column(children: [
         pw.Divider(color: PdfColors.grey300, height: 12),
         pw.Text(
-          'Generated by MortgageUS · For illustration purposes only. Not financial advice.',
+          isEs
+              ? 'Generado por MortgageUS · Solo para ilustración. No es asesoramiento financiero.'
+              : 'Generated by MortgageUS · For illustration purposes only. Not financial advice.',
           style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey500),
         ),
       ]);

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// Points / Discount Calculator
@@ -70,10 +67,7 @@ class _PointsScreenState extends State<PointsScreen> {
         final breakeven = monthlySav > 0 ? pointsCost / monthlySav : null;
         final lifetimeSav = monthlySav * _term * 12 - pointsCost;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
-        final fmtWhole = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
+
 
         String breakevenStr() {
           if (breakeven == null) return isEs ? 'N/A' : 'N/A';
@@ -146,12 +140,12 @@ class _PointsScreenState extends State<PointsScreen> {
                         onChanged: (v) => setState(() => _points = v),
                         onChangeEnd: (_) => _onInteraction(),
                       ),
-                      Wrap(spacing: 8, children: [
+                      Wrap(spacing: AppSpacing.sm, children: [
                         for (final t in const [15, 20, 30])
-                          ChoiceChip(
-                            label: Text('$t yr'),
+                          _TermChip(
+                            label: '$t yr',
                             selected: _term == t,
-                            onSelected: (_) {
+                            onTap: () {
                               setState(() => _term = t);
                               _onInteraction();
                             },
@@ -187,7 +181,7 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Costo de los puntos'
                                             : 'Points Cost',
-                                        value: fmtWhole.format(pointsCost),
+                                        value: AmountFormatter.ui(pointsCost, 'USD'),
                                         color:
                                             CalcwiseSemanticColors.alertText),
                                     _Row(
@@ -198,16 +192,16 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Pago original'
                                             : 'Original Payment',
-                                        value: fmt.format(origPay)),
+                                        value: AmountFormatter.ui(origPay, 'USD')),
                                     _Row(
                                         label:
                                             isEs ? 'Pago nuevo' : 'New Payment',
-                                        value: fmt.format(newPay)),
+                                        value: AmountFormatter.ui(newPay, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Ahorro mensual'
                                             : 'Monthly Savings',
-                                        value: fmt.format(monthlySav),
+                                        value: AmountFormatter.ui(monthlySav, 'USD'),
                                         bold: true,
                                         color: AppTheme.accentGood),
                                     const Divider(height: 24),
@@ -221,7 +215,7 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Ahorro neto ($_term años)'
                                             : 'Net Savings ($_term yrs)',
-                                        value: fmtWhole.format(lifetimeSav),
+                                        value: AmountFormatter.ui(lifetimeSav, 'USD'),
                                         bold: true,
                                         color: lifetimeSav >= 0
                                             ? AppTheme.accentGood
@@ -306,4 +300,43 @@ class _Row extends StatelessWidget {
           ],
         ),
       );
+}
+
+class _TermChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _TermChip(
+      {required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.xs + 2),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppTheme.primary
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+          border: Border.all(
+            color: selected ? AppTheme.primary : Theme.of(context).dividerColor,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: AppTextSize.sm,
+            fontWeight: FontWeight.w500,
+            color: selected
+                ? Colors.white
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
 }

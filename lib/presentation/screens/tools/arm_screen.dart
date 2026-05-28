@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/arm_result.dart';
@@ -17,7 +16,7 @@ class ArmScreen extends ConsumerStatefulWidget {
   ConsumerState<ArmScreen> createState() => _ArmScreenState();
 }
 
-class _ArmScreenState extends ConsumerState<ArmScreen> {
+class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixin {
   final _loanCtrl = TextEditingController();
   final _initRateCtrl = TextEditingController(text: '6.0');
   final _adjRateCtrl = TextEditingController(text: '7.5');
@@ -26,9 +25,6 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
   ARMResult? _result;
   String? _loanError;
 
-  final _fmt =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-  final _fmtK = NumberFormat.compactCurrency(locale: 'en_US', symbol: '\$');
 
   static const _fixedOptions = [5, 7, 10];
   static const _termOptions = [15, 20, 30];
@@ -43,6 +39,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
       if (loan > 0) {
         _loanCtrl.text = loan.toStringAsFixed(0);
       }
+      if (mounted) _calculate();
     });
   }
 
@@ -137,7 +134,10 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                               color: sel ? Colors.white : null,
                               fontWeight: FontWeight.w600,
                             ),
-                            onSelected: (_) => setState(() => _fixedYears = y),
+                            onSelected: (_) {
+                              setState(() => _fixedYears = y);
+                              _calculate();
+                            },
                           ),
                         ),
                       ));
@@ -176,7 +176,10 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                               color: sel ? Colors.white : null,
                               fontWeight: FontWeight.w600,
                             ),
-                            onSelected: (_) => setState(() => _termYears = y),
+                            onSelected: (_) {
+                              setState(() => _termYears = y);
+                              _calculate();
+                            },
                           ),
                         ),
                       ));
@@ -202,32 +205,17 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    // ── Calculate button ──────────────────────────────────
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _calculate,
-                        style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(AppSpacing.lg)),
-                        child: Text(
-                          isEs ? 'Calcular ARM' : 'Calculate ARM',
-                          style: const TextStyle(fontSize: AppTextSize.bodyLg),
-                        ),
-                      ),
-                    ),
                     // ── Results ───────────────────────────────────────────
                     if (r != null) ...[
                       const SizedBox(height: AppSpacing.xxl),
                       _ResultCard(
                           r: r,
-                          fmt: _fmt,
-                          fmtK: _fmtK,
                           s: s,
                           isEs: isEs,
                           fixedYears: _fixedYears,
                           termYears: _termYears),
                     ],
-                    const SizedBox(height: 80),
+                    const SizedBox(height: AppSpacing.listBottomInset),
                   ]),
             )),
             const CalcwiseAdFooter(),
@@ -259,6 +247,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
         contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
+      onChanged: (_) => scheduleCalc(_calculate),
     );
   }
 }
@@ -267,16 +256,12 @@ class _ArmScreenState extends ConsumerState<ArmScreen> {
 
 class _ResultCard extends StatelessWidget {
   final ARMResult r;
-  final NumberFormat fmt;
-  final NumberFormat fmtK;
   final AppStrings s;
   final bool isEs;
   final int fixedYears;
   final int termYears;
   const _ResultCard({
     required this.r,
-    required this.fmt,
-    required this.fmtK,
     required this.s,
     required this.isEs,
     required this.fixedYears,
@@ -297,7 +282,7 @@ class _ResultCard extends StatelessWidget {
               ? 'Pago durante\nperíodo fijo'
               : 'Payment during\nfixed period',
           sublabel: '${fixedYears}yr @ ${s.armMode}',
-          value: fmt.format(r.payment1),
+          value: AmountFormatter.ui(r.payment1, 'USD'),
           color: AppTheme.primary,
         )),
         const SizedBox(width: AppSpacing.md),
@@ -307,7 +292,7 @@ class _ResultCard extends StatelessWidget {
           sublabel: isEs
               ? 'años ${fixedYears + 1}–$termYears'
               : 'yr ${fixedYears + 1}–$termYears',
-          value: fmt.format(r.payment2),
+          value: AmountFormatter.ui(r.payment2, 'USD'),
           color: r.payment2 > r.payment1
               ? AppTheme.accentWarn
               : AppTheme.accentGood,
@@ -323,19 +308,19 @@ class _ResultCard extends StatelessWidget {
           child: Column(children: [
             _Row(
               isEs ? 'Saldo al reset' : 'Balance at reset',
-              fmt.format(r.balanceAtReset),
+              AmountFormatter.ui(r.balanceAtReset, 'USD'),
             ),
             const Divider(height: 20),
-            _Row(s.armTotalInterest, fmtK.format(r.totalInterest)),
+            _Row(s.armTotalInterest, AmountFormatter.ui(r.totalInterest, 'USD')),
             _Row(
               isEs
                   ? 'Interés (tasa fija equivalente)'
                   : 'Interest (equivalent fixed rate)',
-              fmtK.format(r.fixedTotalInterest),
+              AmountFormatter.ui(r.fixedTotalInterest, 'USD'),
             ),
             _Row(
               isEs ? 'Diferencia vs. fija' : 'Difference vs. fixed',
-              '${armCheaper ? "-" : "+"}${fmtK.format(interestDiff.abs())}',
+              '${armCheaper ? "-" : "+"}${AmountFormatter.ui(interestDiff.abs(), 'USD')}',
               color: armCheaper ? AppTheme.accentGood : AppTheme.accentWarn,
               bold: true,
             ),
@@ -405,7 +390,7 @@ class _PhaseCard extends StatelessWidget {
           Text(sublabel,
               textAlign: TextAlign.center,
               style:
-                  TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10)),
+                  TextStyle(color: color.withValues(alpha: 0.7), fontSize: AppTextSize.xs)),
           const SizedBox(height: AppSpacing.sm),
           Text(value,
               textAlign: TextAlign.center,

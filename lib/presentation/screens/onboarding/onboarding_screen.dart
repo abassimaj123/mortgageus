@@ -14,15 +14,25 @@ class OnboardingScreen extends StatelessWidget {
             title: 'Your Smart\nMortgage Calculator',
             subtitle:
                 'Monthly payment, amortization & property breakdown — all in one place.',
-            pills: ['51 States', '2026 Rates', 'Amortization'],
+            pills: ['Spanish/Español', 'FHA·VA·USDA', 'DTI Calc', '51 States'],
             titleFr: 'Votre calculatrice\nhypothécaire',
             subtitleFr:
                 'Versement mensuel, amortissement et bilan immobilier — tout en un.',
-            pillsFr: ['51 États', 'Taux 2026', 'Amortissement'],
+            pillsFr: [
+              'Spanish/Español',
+              'FHA·VA·USDA',
+              'Calcul DTI',
+              '51 États'
+            ],
             titleEs: 'Tu calculadora\nhipotecaria',
             subtitleEs:
                 'Pago mensual, amortización y análisis de propiedad — todo en uno.',
-            pillsEs: ['51 Estados', 'Tasas 2026', 'Amortización'],
+            pillsEs: [
+              'Spanish/Español',
+              'FHA·VA·USDA',
+              'Calc. DTI',
+              '51 Estados'
+            ],
           ),
           OnboardingPage(
             icon: Icons.bar_chart_rounded,
@@ -38,6 +48,21 @@ class OnboardingScreen extends StatelessWidget {
             subtitleEs:
                 'Cambia entre 15 y 30 años o tasa fija vs variable — al instante.',
             pillsEs: ['Tasa fija', 'ARM', '15 vs 30 años'],
+          ),
+          OnboardingPage(
+            icon: Icons.history_rounded,
+            title: 'Save Every\nScenario',
+            subtitle:
+                'Your calculations are saved automatically. Revisit and compare anytime.',
+            pills: ['History', 'PDF Export', 'Share'],
+            titleFr: 'Sauvegardez vos\nscénarios',
+            subtitleFr:
+                'Vos calculs sont sauvegardés automatiquement. Retrouvez-les et comparez.',
+            pillsFr: ['Historique', 'Export PDF', 'Partager'],
+            titleEs: 'Guarda todos\ntus escenarios',
+            subtitleEs:
+                'Tus cálculos se guardan automáticamente. Recupéralos y compara cuando quieras.',
+            pillsEs: ['Historial', 'Exportar PDF', 'Compartir'],
           ),
         ],
       );

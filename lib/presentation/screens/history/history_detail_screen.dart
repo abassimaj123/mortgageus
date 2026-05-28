@@ -14,6 +14,8 @@ import '../../../l10n/strings_es.dart';
 import '../../../main.dart' show isSpanishNotifier;
 import 'history_screen.dart' show HistoryScreen;
 import 'package:calcwise_core/calcwise_core.dart';
+import '../../widgets/paywall_hard.dart';
+import '../../../core/services/analytics_service.dart';
 
 class HistoryDetailScreen extends StatefulWidget {
   final Map<String, dynamic> row;
@@ -178,95 +180,141 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             top: false,
             left: false,
             right: false,
-            child: ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
               children: [
-                // ── Inputs card ───────────────────────────────────────
-                _SectionCard(
-                  title: isEs ? 'Parámetros' : 'Inputs',
-                  icon: Icons.input_rounded,
-                  children: [
-                    _Row(isEs ? 'Precio de la casa' : 'Home Price',
-                        AmountFormatter.ui(homePrice, 'USD')),
-                    _Row(isEs ? 'Enganche' : 'Down Payment',
-                        '${downPercent.toStringAsFixed(1)}% (${AmountFormatter.ui(downAmount, 'USD')})'),
-                    _Row(isEs ? 'Tasa anual' : 'Annual Rate',
-                        '${annualRate.toStringAsFixed(2)}%'),
-                    _Row(isEs ? 'Plazo' : 'Loan Term',
-                        '$termYears ${isEs ? 'años' : 'years'}'),
-                    _Row(isEs ? 'Tipo de préstamo' : 'Loan Type', loanType),
-                    _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
-                        AmountFormatter.ui(loanAmount, 'USD')),
-                    if (taxRate > 0)
-                      _Row(isEs ? 'Impuesto predial' : 'Property Tax Rate',
-                          '${taxRate.toStringAsFixed(2)}%'),
-                    if (insurance > 0)
-                      _Row(isEs ? 'Seguro' : 'Home Insurance',
-                          AmountFormatter.ui(insurance, 'USD')),
-                    if (hoa > 0)
-                      _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
-                          AmountFormatter.ui(hoa, 'USD')),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-
-                // ── Results card ──────────────────────────────────────
-                _SectionCard(
-                  title: isEs ? 'Resultados' : 'Results',
-                  icon: Icons.bar_chart_rounded,
-                  children: [
-                    _Row(
-                      isEs ? 'Pago mensual (PITI)' : 'Monthly Payment (PITI)',
-                      AmountFormatter.ui(monthlyPayment, 'USD'),
-                      highlight: AppTheme.primary,
-                      bold: true,
-                    ),
-                    _Row(isEs ? 'Interés total' : 'Total Interest',
-                        AmountFormatter.ui(totalInterest, 'USD')),
-                    _Row(isEs ? 'Costo total' : 'Total Cost',
-                        AmountFormatter.ui(totalCost, 'USD'),
-                        bold: true),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // ── PDF export button ──────────────────────────────────
-                ValueListenableBuilder<bool>(
-                  valueListenable: freemiumService.hasFullAccessNotifier,
-                  builder: (context, isPremium, _) => SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: isPremium
-                          ? () => _exportPdf(context, isEs)
-                          : () => PdfExportService.showUnlockOrPay(
-                              context, () => _exportPdf(context, isEs)),
-                      icon: Icon(
-                          isPremium
-                              ? Icons.picture_as_pdf_rounded
-                              : Icons.lock_outline,
-                          size: 18),
-                      label: Text(isPremium
-                          ? (isEs ? 'Exportar PDF' : 'Export PDF')
-                          : (isEs
-                              ? 'Exportar PDF — Premium'
-                              : 'Export PDF — Premium')),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isPremium
-                            ? AppTheme.primary
-                            : const Color(0xFFE2E8F0),
-                        foregroundColor:
-                            isPremium ? Colors.white : const Color(0xFF475569),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.mdPlus),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    children: [
+                      // ── Inputs card ───────────────────────────────────────
+                      _SectionCard(
+                        title: isEs ? 'Parámetros' : 'Inputs',
+                        icon: Icons.input_rounded,
+                        children: [
+                          _Row(isEs ? 'Precio de la casa' : 'Home Price',
+                              AmountFormatter.ui(homePrice, 'USD')),
+                          _Row(isEs ? 'Enganche' : 'Down Payment',
+                              '${downPercent.toStringAsFixed(1)}% (${AmountFormatter.ui(downAmount, 'USD')})'),
+                          _Row(isEs ? 'Tasa anual' : 'Annual Rate',
+                              '${annualRate.toStringAsFixed(2)}%'),
+                          _Row(isEs ? 'Plazo' : 'Loan Term',
+                              '$termYears ${isEs ? 'años' : 'years'}'),
+                          _Row(isEs ? 'Tipo de préstamo' : 'Loan Type',
+                              loanType),
+                          _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
+                              AmountFormatter.ui(loanAmount, 'USD')),
+                          if (taxRate > 0)
+                            _Row(
+                                isEs
+                                    ? 'Impuesto predial'
+                                    : 'Property Tax Rate',
+                                '${taxRate.toStringAsFixed(2)}%'),
+                          if (insurance > 0)
+                            _Row(isEs ? 'Seguro' : 'Home Insurance',
+                                AmountFormatter.ui(insurance, 'USD')),
+                          if (hoa > 0)
+                            _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
+                                AmountFormatter.ui(hoa, 'USD')),
+                        ],
                       ),
-                    ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      // ── Results card ──────────────────────────────────────
+                      _SectionCard(
+                        title: isEs ? 'Resultados' : 'Results',
+                        icon: Icons.bar_chart_rounded,
+                        children: [
+                          _Row(
+                            isEs
+                                ? 'Pago mensual (PITI)'
+                                : 'Monthly Payment (PITI)',
+                            AmountFormatter.ui(monthlyPayment, 'USD'),
+                            highlight: AppTheme.primary,
+                            bold: true,
+                          ),
+                          _Row(isEs ? 'Interés total' : 'Total Interest',
+                              AmountFormatter.ui(totalInterest, 'USD')),
+                          _Row(isEs ? 'Costo total' : 'Total Cost',
+                              AmountFormatter.ui(totalCost, 'USD'),
+                              bold: true),
+                        ],
+                      ),
+                    ],
                   ),
+                ),
+                _BottomBar(
+                  isEs: isEs,
+                  onExport: () => _exportPdf(context, isEs),
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+// ── Bottom bar ─────────────────────────────────────────────────────────────────
+
+class _BottomBar extends StatelessWidget {
+  final bool isEs;
+  final Future<void> Function() onExport;
+
+  const _BottomBar({required this.isEs, required this.onExport});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: freemiumService.hasFullAccessNotifier,
+      builder: (_, isPremium, __) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor:
+                      isPremium ? AppTheme.primary : CalcwiseTheme.of(context).surfaceHigh,
+                  foregroundColor:
+                      isPremium ? Colors.white : CalcwiseTheme.of(context).textSecondary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.lg)),
+                  side: isPremium
+                      ? BorderSide.none
+                      : BorderSide(color: CalcwiseTheme.of(context).cardBorder),
+                ),
+                icon: Icon(
+                    isPremium
+                        ? Icons.picture_as_pdf_rounded
+                        : Icons.lock_rounded,
+                    size: 20),
+                label: Text(
+                    isEs ? 'Exportar PDF' : 'Export PDF',
+                    style: const TextStyle(
+                        fontSize: AppTextSize.body,
+                        fontWeight: FontWeight.w600)),
+                onPressed: () async {
+                  if (!isPremium && !freemiumService.isRewarded) {
+                    if (context.mounted) await PaywallHard.show(context);
+                    return;
+                  }
+                  if (!context.mounted) return;
+                  await onExport();
+                  try {
+                    AnalyticsService.instance.logExportStarted();
+                  } catch (_) {}
+                },
+              ),
+            ),
+          ),
+          if (!isPremium) const CalcwiseAdFooter(),
+        ],
+      ),
     );
   }
 }

@@ -25,8 +25,6 @@ class HistoryDetailScreen extends StatefulWidget {
 }
 
 class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
-  final _fmtUSD =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
   final _fmtDate = DateFormat('MMMM d, yyyy – HH:mm');
 
   // ── Helpers ────────────────────────────────────────────────────────────────
@@ -189,25 +187,25 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   icon: Icons.input_rounded,
                   children: [
                     _Row(isEs ? 'Precio de la casa' : 'Home Price',
-                        _fmtUSD.format(homePrice)),
+                        AmountFormatter.format(homePrice, 'USD')),
                     _Row(isEs ? 'Enganche' : 'Down Payment',
-                        '${downPercent.toStringAsFixed(1)}% (${_fmtUSD.format(downAmount)})'),
+                        '${downPercent.toStringAsFixed(1)}% (${AmountFormatter.format(downAmount, 'USD')})'),
                     _Row(isEs ? 'Tasa anual' : 'Annual Rate',
                         '${annualRate.toStringAsFixed(2)}%'),
                     _Row(isEs ? 'Plazo' : 'Loan Term',
                         '$termYears ${isEs ? 'años' : 'years'}'),
                     _Row(isEs ? 'Tipo de préstamo' : 'Loan Type', loanType),
                     _Row(isEs ? 'Monto del préstamo' : 'Loan Amount',
-                        _fmtUSD.format(loanAmount)),
+                        AmountFormatter.format(loanAmount, 'USD')),
                     if (taxRate > 0)
                       _Row(isEs ? 'Impuesto predial' : 'Property Tax Rate',
                           '${taxRate.toStringAsFixed(2)}%'),
                     if (insurance > 0)
                       _Row(isEs ? 'Seguro' : 'Home Insurance',
-                          _fmtUSD.format(insurance)),
+                          AmountFormatter.format(insurance, 'USD')),
                     if (hoa > 0)
                       _Row(isEs ? 'HOA mensual' : 'HOA Monthly',
-                          _fmtUSD.format(hoa)),
+                          AmountFormatter.format(hoa, 'USD')),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -219,14 +217,14 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   children: [
                     _Row(
                       isEs ? 'Pago mensual (PITI)' : 'Monthly Payment (PITI)',
-                      _fmtUSD.format(monthlyPayment),
+                      AmountFormatter.format(monthlyPayment, 'USD'),
                       highlight: AppTheme.primary,
                       bold: true,
                     ),
                     _Row(isEs ? 'Interés total' : 'Total Interest',
-                        _fmtUSD.format(totalInterest)),
+                        AmountFormatter.format(totalInterest, 'USD')),
                     _Row(isEs ? 'Costo total' : 'Total Cost',
-                        _fmtUSD.format(totalCost),
+                        AmountFormatter.format(totalCost, 'USD'),
                         bold: true),
                   ],
                 ),

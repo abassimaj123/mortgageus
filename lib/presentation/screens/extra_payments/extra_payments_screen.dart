@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
@@ -9,8 +8,6 @@ import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../main.dart' show adService, paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
@@ -30,8 +27,6 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
 
   ExtraPaymentResult? _result;
   bool _interacted = false;
-  final _fmt =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
 
   @override
   void initState() {
@@ -141,7 +136,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                    Text('${s.loan} ${_fmt.format(loan)}',
+                                    Text('${s.loan} ${AmountFormatter.format(loan, 'USD')}',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: AppTheme.primary,
@@ -197,7 +192,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                     color: Colors.white, size: 36),
                                 const SizedBox(height: AppSpacing.sm),
                                 Text(
-                                  '${s.youCouldSave} ${_fmt.format(r.interestSaved)}',
+                                  '${s.youCouldSave} ${AmountFormatter.format(r.interestSaved, 'USD')}',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: AppTextSize.titleMd,
@@ -206,7 +201,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                   textAlign: TextAlign.center,
                                 ),
                                 Text(
-                                  '${s.byPaying} ${_fmt.format(extraMonthly)} ${s.extraPerMonth}',
+                                  '${s.byPaying} ${AmountFormatter.format(extraMonthly, 'USD')} ${s.extraPerMonth}',
                                   style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: AppTextSize.body),
@@ -237,11 +232,11 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                       color: AppTheme.accentGood),
                                   const Divider(height: 24),
                                   _ResultRow(s.origTotalInt,
-                                      _fmt.format(r.originalTotalInterest)),
+                                      AmountFormatter.format(r.originalTotalInterest, 'USD')),
                                   _ResultRow(s.newTotalInt,
-                                      _fmt.format(r.newTotalInterest)),
+                                      AmountFormatter.format(r.newTotalInterest, 'USD')),
                                   _ResultRow(s.interestSavedRow,
-                                      _fmt.format(r.interestSaved),
+                                      AmountFormatter.format(r.interestSaved, 'USD'),
                                       color: AppTheme.accentGood, bold: true),
                                 ]),
                               ),
@@ -256,11 +251,11 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                   onPressed: () async {
                                     final text = isEs
                                         ? '💰 Pagos Extra\n'
-                                            'Ahorro en intereses: ${_fmt.format(r.interestSaved)}\n'
+                                            'Ahorro en intereses: ${AmountFormatter.format(r.interestSaved, 'USD')}\n'
                                             'Tiempo ahorrado: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
                                             '— MortgageUS'
                                         : '💰 Extra Payments\n'
-                                            'Interest saved: ${_fmt.format(r.interestSaved)}\n'
+                                            'Interest saved: ${AmountFormatter.format(r.interestSaved, 'USD')}\n'
                                             'Time saved: ${r.yearsSaved} ${s.years} ${r.remMonthsSaved} ${s.months}\n'
                                             '— MortgageUS';
                                     await Share.share(text);

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// FHA Loan Calculator
@@ -73,10 +70,6 @@ class _FhaScreenState extends State<FhaScreen> {
         final ins = _parse(_insCtrl.text);
         final total = pAndI + monthlyMip + tax + ins;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
-        final fmtWhole = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
 
         return Scaffold(
           appBar: AppBar(
@@ -133,7 +126,7 @@ class _FhaScreenState extends State<FhaScreen> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppTextSize.bodyMd)),
-                            Text(fmtWhole.format(down),
+                            Text(AmountFormatter.format(down, 'USD'),
                                 style: const TextStyle(
                                     color: AppTheme.primary,
                                     fontWeight: FontWeight.bold)),
@@ -262,30 +255,30 @@ class _FhaScreenState extends State<FhaScreen> {
                                           label: isEs
                                               ? 'Monto del préstamo'
                                               : 'Loan Amount',
-                                          value: fmtWhole.format(loan)),
+                                          value: AmountFormatter.format(loan, 'USD')),
                                       _Row(
                                           label: isEs
                                               ? 'MIP inicial (1.75%)'
                                               : 'Upfront MIP (1.75%)',
-                                          value: fmtWhole.format(upfrontMip)),
+                                          value: AmountFormatter.format(upfrontMip, 'USD')),
                                       _Row(
                                           label: isEs
                                               ? 'MIP mensual (${(annualMipRate * 100).toStringAsFixed(2)}%)'
                                               : 'Monthly MIP (${(annualMipRate * 100).toStringAsFixed(2)}%)',
-                                          value: fmt.format(monthlyMip),
+                                          value: AmountFormatter.format(monthlyMip, 'USD'),
                                           color:
                                               CalcwiseSemanticColors.alertText),
                                       _Row(
                                           label: isEs
                                               ? 'Capital + Interés'
                                               : 'P & I',
-                                          value: fmt.format(pAndI)),
+                                          value: AmountFormatter.format(pAndI, 'USD')),
                                       const Divider(height: 24),
                                       _Row(
                                           label: isEs
                                               ? 'Pago total mensual'
                                               : 'Total Monthly Payment',
-                                          value: fmt.format(total),
+                                          value: AmountFormatter.format(total, 'USD'),
                                           bold: true,
                                           color: AppTheme.primary),
                                     ]),

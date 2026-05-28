@@ -1,21 +1,9 @@
 import 'dart:async';
 import 'dart:math' show pow;
-import 'package:calcwise_core/calcwise_core.dart'
-    show
-        PaywallTrigger,
-        CalcwiseTheme,
-        CalcwiseStaggerItem,
-        CalcwisePageEntrance,
-        CalcwiseAdFooter,
-        RateWatchService,
-        CalcwiseReviewService,
-        ReverseSolveCard,
-        CalcwiseHeroCard;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/db/database_helper.dart';
@@ -62,9 +50,6 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   MortgageResult? _insightResult15yr;
   String? _insightCacheKey;
 
-  final _fmt =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-  final _fmtK = NumberFormat.compactCurrency(locale: 'en_US', symbol: '\$');
 
   @override
   void initState() {
@@ -436,8 +421,6 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 index: 2,
                                                 child: _BreakdownCard(
                                                     result: result,
-                                                    fmt: _fmt,
-                                                    fmtK: _fmtK,
                                                     s: s,
                                                     isEs: isEs),
                                               ),
@@ -493,8 +476,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                   index: 4,
                                                   child: Semantics(
                                                       label: isEs
-                                                          ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${_fmt.format(result.stressTestMonthly)}'
-                                                          : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${_fmt.format(result.stressTestMonthly)}',
+                                                          ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${AmountFormatter.format(result.stressTestMonthly, 'USD')}'
+                                                          : 'Stress test: if rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, monthly P&I would be ${AmountFormatter.format(result.stressTestMonthly, 'USD')}',
                                                       child: Container(
                                                         width: double.infinity,
                                                         padding:
@@ -566,8 +549,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                                         .sm),
                                                             Text(
                                                               isEs
-                                                                  ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${_fmt.format(result.stressTestMonthly)}'
-                                                                  : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${_fmt.format(result.stressTestMonthly)}',
+                                                                  ? 'Si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería: ${AmountFormatter.format(result.stressTestMonthly, 'USD')}'
+                                                                  : 'If your rate rises to ${result.stressTestRate.toStringAsFixed(2)}%, your monthly P&I would be: ${AmountFormatter.format(result.stressTestMonthly, 'USD')}',
                                                               style:
                                                                   const TextStyle(
                                                                 color: AppTheme
@@ -788,26 +771,21 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                           return;
                                                         }
                                                       }
-                                                      final fmt =
-                                                          NumberFormat.currency(
-                                                              locale: 'en_US',
-                                                              symbol: r'$',
-                                                              decimalDigits: 0);
                                                       final text = isEs
                                                           ? '🏠 Resumen hipotecario\n'
-                                                              'Precio: ${fmt.format(inputState.homePrice)}\n'
-                                                              'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
+                                                              'Precio: ${AmountFormatter.format(inputState.homePrice, 'USD')}\n'
+                                                              'Inicial: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.format(inputState.downPaymentDollar, 'USD')})\n'
                                                               'Tasa: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                                              'Mensual: ${fmt.format(result.monthly.pitiPayment)}\n'
-                                                              'Interés total: ${fmt.format(result.totalInterest)}\n'
+                                                              'Mensual: ${AmountFormatter.format(result.monthly.pitiPayment, 'USD')}\n'
+                                                              'Interés total: ${AmountFormatter.format(result.totalInterest, 'USD')}\n'
                                                               '— Calculado con Mortgage Calculator US\n\n'
                                                               '📄 Exporta el reporte completo en PDF →'
                                                           : '🏠 Mortgage Summary\n'
-                                                              'Price: ${fmt.format(inputState.homePrice)}\n'
-                                                              'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${fmt.format(inputState.downPaymentDollar)})\n'
+                                                              'Price: ${AmountFormatter.format(inputState.homePrice, 'USD')}\n'
+                                                              'Down: ${inputState.downPaymentPct.toStringAsFixed(1)}% (${AmountFormatter.format(inputState.downPaymentDollar, 'USD')})\n'
                                                               'Rate: ${inputState.annualRatePct.toStringAsFixed(2)}%\n'
-                                                              'Monthly: ${fmt.format(result.monthly.pitiPayment)}\n'
-                                                              'Total Interest: ${fmt.format(result.totalInterest)}\n'
+                                                              'Monthly: ${AmountFormatter.format(result.monthly.pitiPayment, 'USD')}\n'
+                                                              'Total Interest: ${AmountFormatter.format(result.totalInterest, 'USD')}\n'
                                                               '— Calculated with Mortgage Calculator US\n\n'
                                                               '📄 Export the full PDF report in the app →';
                                                       try {
@@ -1059,33 +1037,32 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt =
-        NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-    final piPayment =
-        result != null ? fmt.format(result!.monthly.piPayment) : '--';
+    final piPayment = result != null
+        ? AmountFormatter.format(result!.monthly.piPayment, 'USD')
+        : '--';
     return Semantics(
       label: result != null
           ? 'Monthly principal and interest: $piPayment. '
-              'Total PITI: ${fmt.format(result!.monthly.pitiPayment)}. '
-              'Total interest: ${fmt.format(result!.totalInterest)}. '
-              'Total cost: ${fmt.format(result!.totalCost)}.'
+              'Total PITI: ${AmountFormatter.format(result!.monthly.pitiPayment, 'USD')}. '
+              'Total interest: ${AmountFormatter.format(result!.totalInterest, 'USD')}. '
+              'Total cost: ${AmountFormatter.format(result!.totalCost, 'USD')}.'
           : 'Monthly payment: enter values above to calculate',
       child: CalcwiseHeroCard(
         label: s.monthlyPI as String,
         value: piPayment,
         secondary: result != null
-            ? '${s.totalPITI}: ${fmt.format(result!.monthly.pitiPayment)}'
+            ? '${s.totalPITI}: ${AmountFormatter.format(result!.monthly.pitiPayment, 'USD')}'
             : null,
         stats: result == null
             ? null
             : [
                 (
                   label: 'Total Interest',
-                  value: fmt.format(result!.totalInterest),
+                  value: AmountFormatter.format(result!.totalInterest, 'USD'),
                 ),
                 (
                   label: 'Total Cost',
-                  value: fmt.format(result!.totalCost),
+                  value: AmountFormatter.format(result!.totalCost, 'USD'),
                 ),
               ],
       ),
@@ -1391,14 +1368,10 @@ class _ModeBtn extends StatelessWidget {
 
 class _BreakdownCard extends StatelessWidget {
   final MortgageResult? result;
-  final NumberFormat fmt;
-  final NumberFormat fmtK;
   final AppStrings s;
   final bool isEs;
   const _BreakdownCard(
       {this.result,
-      required this.fmt,
-      required this.fmtK,
       required this.s,
       required this.isEs});
 
@@ -1414,17 +1387,17 @@ class _BreakdownCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(children: [
-          _Row(s.principal, fmt.format(m.principal)),
-          _Row(s.interest, fmt.format(m.interest)),
-          _Row(s.propertyTax, fmt.format(m.propertyTax)),
-          _Row(s.homeInsurance, fmt.format(m.homeInsurance)),
-          if (m.hoa > 0) _Row(s.hoa, fmt.format(m.hoa)),
+          _Row(s.principal, AmountFormatter.format(m.principal, 'USD')),
+          _Row(s.interest, AmountFormatter.format(m.interest, 'USD')),
+          _Row(s.propertyTax, AmountFormatter.format(m.propertyTax, 'USD')),
+          _Row(s.homeInsurance, AmountFormatter.format(m.homeInsurance, 'USD')),
+          if (m.hoa > 0) _Row(s.hoa, AmountFormatter.format(m.hoa, 'USD')),
           if (m.pmi > 0)
             _Row(
               result!.isUsda
                   ? s.usdaFeeLabel
                   : '${s.pmiDropsAt} ${result!.pmiDropMonth ?? "?"}${s.mo})',
-              fmt.format(m.pmi),
+              AmountFormatter.format(m.pmi, 'USD'),
               color: result!.isUsda
                   ? AppTheme.accentGood
                   : CalcwiseSemanticColors.warnIcon,
@@ -1445,10 +1418,10 @@ class _BreakdownCard extends StatelessWidget {
                     ),
             ),
           const Divider(height: 24),
-          _Row(s.totalPITI, fmt.format(m.pitiPayment), bold: true),
+          _Row(s.totalPITI, AmountFormatter.format(m.pitiPayment, 'USD'), bold: true),
           const SizedBox(height: AppSpacing.sm),
-          _Row(s.totalInterest, fmtK.format(result!.totalInterest)),
-          _Row(s.totalCost, fmtK.format(result!.totalCost)),
+          _Row(s.totalInterest, AmountFormatter.format(result!.totalInterest, 'USD')),
+          _Row(s.totalCost, AmountFormatter.format(result!.totalCost, 'USD')),
           _Row(s.payoffDate,
               '${result!.payoffDate.month}/${result!.payoffDate.year}'),
           _Row(

@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:calcwise_core/calcwise_core.dart'
-    hide CrashlyticsService, iapErrorNotifier;
+    hide CrashlyticsService, iapErrorNotifier, PaywallHard;
 import 'core/ads/ad_config.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +38,10 @@ final ValueNotifier<Map<String, double>?> preFillNotifier =
     ValueNotifier<Map<String, double>?>(null);
 
 // Paywall session service — centralized, namespaced by appKey
-final paywallSession = PaywallSessionService(appKey: 'mortgageus');
+final paywallSession = PaywallSessionService(
+  appKey: 'mortgageus',
+  hasFullAccess: () => freemiumService.hasFullAccess,
+);
 
 // Ad service — backed by calcwise_core
 final adService = CalcwiseAdService(

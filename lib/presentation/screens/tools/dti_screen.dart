@@ -7,8 +7,6 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// DTI (Debt-to-Income) Ratio Calculator
@@ -58,7 +56,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
       }
     }
 
-    _annualIncomeCtrl = TextEditingController();
+    _annualIncomeCtrl = TextEditingController(text: '72000');
     _pitiCtrl = TextEditingController(
         text: estimatedPiti > 0
             ? NumberFormat('#,##0').format(estimatedPiti.round())
@@ -118,10 +116,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
         final maxMortgagePayment =
             monthlyIncome > 0 ? monthlyIncome * 0.28 : 0.0;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
-        final fmtDec = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
+
 
         return Scaffold(
           appBar: AppBar(
@@ -162,8 +157,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           isEs
-                              ? 'Ingreso mensual: ${fmt.format(monthlyIncome)}'
-                              : 'Monthly income: ${fmt.format(monthlyIncome)}',
+                              ? 'Ingreso mensual: ${AmountFormatter.format(monthlyIncome, 'USD')}'
+                              : 'Monthly income: ${AmountFormatter.format(monthlyIncome, 'USD')}',
                           style: const TextStyle(
                               fontSize: AppTextSize.sm,
                               color: Color(0xFF64748B)),
@@ -353,7 +348,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                           ),
                                           const SizedBox(height: AppSpacing.xs),
                                           Text(
-                                            '${fmt.format(maxMortgagePayment)}/mo',
+                                            '${AmountFormatter.format(maxMortgagePayment, 'USD')}/mo',
                                             style: const TextStyle(
                                               fontSize: AppTextSize.titleMd,
                                               fontWeight: FontWeight.w800,
@@ -363,8 +358,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                           const SizedBox(height: AppSpacing.xs),
                                           Text(
                                             isEs
-                                                ? 'Basado en tu ingreso mensual de ${fmt.format(monthlyIncome)}'
-                                                : 'Based on your monthly income of ${fmt.format(monthlyIncome)}',
+                                                ? 'Basado en tu ingreso mensual de ${AmountFormatter.format(monthlyIncome, 'USD')}'
+                                                : 'Based on your monthly income of ${AmountFormatter.format(monthlyIncome, 'USD')}',
                                             style: const TextStyle(
                                                 fontSize: AppTextSize.xs,
                                                 color: AppTheme.labelGray),

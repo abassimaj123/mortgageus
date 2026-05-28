@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
@@ -7,8 +6,6 @@ import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../domain/models/refinance_result.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../main.dart' show adService, paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
@@ -30,8 +27,6 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
 
   RefinanceResult? _result;
   String? _balanceError;
-  final _fmt =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
 
   bool _interacted = false;
 
@@ -169,14 +164,14 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                           child: Column(children: [
                                             _ResultRow(
                                                 s.currentPayment,
-                                                _fmt.format(
-                                                    r.oldMonthlyPayment)),
+                                                AmountFormatter.format(
+                                                    r.oldMonthlyPayment, 'USD')),
                                             _ResultRow(
                                                 s.newPayment,
-                                                _fmt.format(
-                                                    r.newMonthlyPayment)),
+                                                AmountFormatter.format(
+                                                    r.newMonthlyPayment, 'USD')),
                                             _ResultRow(s.monthlySavings,
-                                                _fmt.format(r.monthlySavings),
+                                                AmountFormatter.format(r.monthlySavings, 'USD'),
                                                 color: r.monthlySavings > 0
                                                     ? AppTheme.accentGood
                                                     : CalcwiseSemanticColors
@@ -196,8 +191,8 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                                             ' (${(r.breakEvenMonths / 12).toStringAsFixed(1)} yrs)'),
                                             _ResultRow(
                                                 s.totalSavings,
-                                                _fmt.format(
-                                                    r.totalSavingsOverLife),
+                                                AmountFormatter.format(
+                                                    r.totalSavingsOverLife, 'USD'),
                                                 color:
                                                     r.totalSavingsOverLife > 0
                                                         ? AppTheme.accentGood
@@ -252,14 +247,14 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                             onPressed: () async {
                                               final text = isEs
                                                   ? '📊 Refinanciamiento\n'
-                                                      'Pago actual: ${_fmt.format(r!.oldMonthlyPayment)}/mes\n'
-                                                      'Nuevo pago: ${_fmt.format(r!.newMonthlyPayment)}/mes\n'
-                                                      'Ahorro mensual: ${_fmt.format(r!.monthlySavings)}\n'
+                                                      'Pago actual: ${AmountFormatter.format(r!.oldMonthlyPayment, 'USD')}/mes\n'
+                                                      'Nuevo pago: ${AmountFormatter.format(r!.newMonthlyPayment, 'USD')}/mes\n'
+                                                      'Ahorro mensual: ${AmountFormatter.format(r!.monthlySavings, 'USD')}\n'
                                                       '— MortgageUS'
                                                   : '📊 Refinance Summary\n'
-                                                      'Current payment: ${_fmt.format(r!.oldMonthlyPayment)}/mo\n'
-                                                      'New payment: ${_fmt.format(r!.newMonthlyPayment)}/mo\n'
-                                                      'Monthly savings: ${_fmt.format(r!.monthlySavings)}\n'
+                                                      'Current payment: ${AmountFormatter.format(r!.oldMonthlyPayment, 'USD')}/mo\n'
+                                                      'New payment: ${AmountFormatter.format(r!.newMonthlyPayment, 'USD')}/mo\n'
+                                                      'Monthly savings: ${AmountFormatter.format(r!.monthlySavings, 'USD')}\n'
                                                       '— MortgageUS';
                                               await Share.share(text);
                                             },

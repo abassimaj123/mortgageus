@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// Closing Costs by State Calculator
@@ -236,8 +233,7 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
         final total = lines.fold<double>(0.0, (s, l) => s + l.amount);
         final pct = homePrice > 0 ? total / homePrice * 100.0 : 0.0;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
+
 
         return Scaffold(
           appBar: AppBar(
@@ -406,7 +402,7 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                           label: isEs
                               ? 'Total Estimado'
                               : 'Estimated Closing Costs',
-                          value: fmt.format(total),
+                          value: AmountFormatter.format(total, 'USD'),
                           subValue:
                               '${pct.toStringAsFixed(1)}% ${isEs ? "del precio" : "of home price"}',
                           color: const Color(0xFFEA580C),
@@ -461,7 +457,7 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                             const Divider(height: 1),
                             ...lines.map((l) => _LineItemRow(
                                   label: isEs ? l.labelEs : l.labelEn,
-                                  amount: fmt.format(l.amount),
+                                  amount: AmountFormatter.format(l.amount, 'USD'),
                                   pct: total > 0
                                       ? l.amount / total * 100.0
                                       : 0.0,
@@ -481,7 +477,7 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                                         color: AppTheme.primary),
                                   ),
                                   Text(
-                                    fmt.format(total),
+                                    AmountFormatter.format(total, 'USD'),
                                     style: const TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: AppTextSize.bodyMd,

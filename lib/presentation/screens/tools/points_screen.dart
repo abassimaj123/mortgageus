@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// Points / Discount Calculator
@@ -70,10 +67,7 @@ class _PointsScreenState extends State<PointsScreen> {
         final breakeven = monthlySav > 0 ? pointsCost / monthlySav : null;
         final lifetimeSav = monthlySav * _term * 12 - pointsCost;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
-        final fmtWhole = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
+
 
         String breakevenStr() {
           if (breakeven == null) return isEs ? 'N/A' : 'N/A';
@@ -187,7 +181,7 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Costo de los puntos'
                                             : 'Points Cost',
-                                        value: fmtWhole.format(pointsCost),
+                                        value: AmountFormatter.format(pointsCost, 'USD'),
                                         color:
                                             CalcwiseSemanticColors.alertText),
                                     _Row(
@@ -198,16 +192,16 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Pago original'
                                             : 'Original Payment',
-                                        value: fmt.format(origPay)),
+                                        value: AmountFormatter.format(origPay, 'USD')),
                                     _Row(
                                         label:
                                             isEs ? 'Pago nuevo' : 'New Payment',
-                                        value: fmt.format(newPay)),
+                                        value: AmountFormatter.format(newPay, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Ahorro mensual'
                                             : 'Monthly Savings',
-                                        value: fmt.format(monthlySav),
+                                        value: AmountFormatter.format(monthlySav, 'USD'),
                                         bold: true,
                                         color: AppTheme.accentGood),
                                     const Divider(height: 24),
@@ -221,7 +215,7 @@ class _PointsScreenState extends State<PointsScreen> {
                                         label: isEs
                                             ? 'Ahorro neto ($_term años)'
                                             : 'Net Savings ($_term yrs)',
-                                        value: fmtWhole.format(lifetimeSav),
+                                        value: AmountFormatter.format(lifetimeSav, 'USD'),
                                         bold: true,
                                         color: lifetimeSav >= 0
                                             ? AppTheme.accentGood

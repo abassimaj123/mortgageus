@@ -9,8 +9,6 @@ import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 // ── Color for Investment Return tool icon (emerald-teal) ──────────────────────
@@ -142,9 +140,6 @@ class _InvestmentReturnScreenState
       builder: (context, isEs, _) {
         final result = _calculate();
 
-        final fmtCur = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
-
         return Scaffold(
           appBar: AppBar(
             title: Text(isEs ? 'Retorno de Inversión' : 'Investment Return'),
@@ -181,7 +176,7 @@ class _InvestmentReturnScreenState
                     value: _downPct,
                     valueSuffix: '%',
                     displayValue:
-                        result != null ? fmtCur.format(result.downAmt) : '—',
+                        result != null ? AmountFormatter.format(result.downAmt, 'USD') : '—',
                     min: 3.0,
                     max: 50.0,
                     divisions: 470,
@@ -360,8 +355,6 @@ class _ResultsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmtCur =
-        NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
     final verdict = _verdict(result.irr);
     final verdictColor = _verdictColor(verdict);
     final verdictLabel = _verdictLabel(verdict, isEs);
@@ -453,7 +446,7 @@ class _ResultsCard extends StatelessWidget {
               _Row(
                 label: isEs ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
                 value: '${result.monthlyCF >= 0 ? '+' : ''}'
-                    '${fmtCur.format(result.monthlyCF)}',
+                    '${AmountFormatter.format(result.monthlyCF, 'USD')}',
                 color: result.monthlyCF >= 0
                     ? AppTheme.accentGood
                     : CalcwiseSemanticColors.errorDark,
@@ -463,13 +456,13 @@ class _ResultsCard extends StatelessWidget {
                 label: isEs
                     ? 'Inversión inicial (enganche + cierre)'
                     : 'Initial Investment (down + closing)',
-                value: fmtCur.format(result.initialInv),
+                value: AmountFormatter.format(result.initialInv, 'USD'),
               ),
               _Row(
                 label: isEs
                     ? 'Pago hipotecario mensual (7%, 30 años)'
                     : 'Monthly Mortgage Payment (7%, 30yr)',
-                value: fmtCur.format(result.mortgageMo),
+                value: AmountFormatter.format(result.mortgageMo, 'USD'),
               ),
               const Divider(height: 24),
 
@@ -487,7 +480,7 @@ class _ResultsCard extends StatelessWidget {
                     ? 'VPN (valor presente neto)'
                     : 'NPV (Net Present Value)',
                 value: '${result.npv >= 0 ? '+' : ''}'
-                    '${fmtCur.format(result.npv)}',
+                    '${AmountFormatter.format(result.npv, 'USD')}',
                 color: result.npv >= 0
                     ? AppTheme.accentGood
                     : CalcwiseSemanticColors.errorDark,

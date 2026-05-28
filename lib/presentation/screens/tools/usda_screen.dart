@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// USDA Loan Calculator
@@ -77,10 +74,7 @@ class _UsdaScreenState extends State<UsdaScreen> {
         final ins = _parse(_insCtrl.text);
         final total = pAndI + monthlyFee + tax + ins;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
-        final fmtWhole = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
+
 
         return Scaffold(
           appBar: AppBar(
@@ -241,15 +235,15 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                           child: Text(
                                               (incomeOk && _rural)
                                                   ? (isEs
-                                                      ? 'Elegible (límite ${fmtWhole.format(maxIncome)})'
-                                                      : 'Eligible (limit ${fmtWhole.format(maxIncome)})')
+                                                      ? 'Elegible (límite ${AmountFormatter.format(maxIncome, 'USD')})'
+                                                      : 'Eligible (limit ${AmountFormatter.format(maxIncome, 'USD')})')
                                                   : !_rural
                                                       ? (isEs
                                                           ? 'Zona no elegible'
                                                           : 'Area not eligible')
                                                       : (isEs
-                                                          ? 'Ingreso supera ${fmtWhole.format(maxIncome)}'
-                                                          : 'Income exceeds ${fmtWhole.format(maxIncome)}'),
+                                                          ? 'Ingreso supera ${AmountFormatter.format(maxIncome, 'USD')}'
+                                                          : 'Income exceeds ${AmountFormatter.format(maxIncome, 'USD')}'),
                                               style: TextStyle(
                                                   color: (incomeOk && _rural)
                                                       ? CalcwiseSemanticColors
@@ -266,30 +260,30 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                         label: isEs
                                             ? 'Tarifa garantía inicial (1%)'
                                             : 'Upfront Guarantee Fee (1%)',
-                                        value: fmtWhole.format(upfrontFee)),
+                                        value: AmountFormatter.format(upfrontFee, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Monto del préstamo'
                                             : 'Loan Amount',
-                                        value: fmtWhole.format(loan)),
+                                        value: AmountFormatter.format(loan, 'USD')),
                                     _Row(
                                         label: isEs
                                             ? 'Tarifa anual mensualizada (0.35%)'
                                             : 'Monthly Annual Fee (0.35%)',
-                                        value: fmt.format(monthlyFee),
+                                        value: AmountFormatter.format(monthlyFee, 'USD'),
                                         color:
                                             CalcwiseSemanticColors.alertText),
                                     _Row(
                                         label: isEs
                                             ? 'Capital + Interés'
                                             : 'P & I',
-                                        value: fmt.format(pAndI)),
+                                        value: AmountFormatter.format(pAndI, 'USD')),
                                     const Divider(height: 24),
                                     _Row(
                                         label: isEs
                                             ? 'Pago total mensual'
                                             : 'Total Monthly Payment',
-                                        value: fmt.format(total),
+                                        value: AmountFormatter.format(total, 'USD'),
                                         bold: true,
                                         color: AppTheme.primary),
                                   ]),

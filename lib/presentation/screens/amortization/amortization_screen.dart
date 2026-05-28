@@ -227,8 +227,6 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
         }
 
         final schedule = result.schedule;
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
         final fmtDate = DateFormat('MMM yyyy');
         final years = _buildYearGroups(schedule, result.loanAmount);
 
@@ -240,7 +238,6 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                 child: _SummaryCard(
                     result: result,
                     inputState: inputState,
-                    fmt: fmt,
                     fmtDate: fmtDate,
                     s: s)),
 
@@ -286,10 +283,10 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                               ? (result.totalInterest / _total * 100).round()
                               : 0;
                           final _chartLabel = isEs
-                              ? 'Desglose total: ${fmt.format(result.loanAmount)} capital ($_principalPct%), '
-                                  '${fmt.format(result.totalInterest)} interés ($_interestPct%)'
-                              : 'Lifetime breakdown: ${fmt.format(result.loanAmount)} principal ($_principalPct%), '
-                                  '${fmt.format(result.totalInterest)} interest ($_interestPct%)';
+                              ? 'Desglose total: ${AmountFormatter.format(result.loanAmount, 'USD')} capital ($_principalPct%), '
+                                  '${AmountFormatter.format(result.totalInterest, 'USD')} interés ($_interestPct%)'
+                              : 'Lifetime breakdown: ${AmountFormatter.format(result.loanAmount, 'USD')} principal ($_principalPct%), '
+                                  '${AmountFormatter.format(result.totalInterest, 'USD')} interest ($_interestPct%)';
                           return Flex(
                             direction:
                                 isSmallScreen ? Axis.vertical : Axis.horizontal,
@@ -365,13 +362,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                     _LegendRow(
                                       color: AppTheme.primary,
                                       label: s.principal,
-                                      value: fmt.format(result.loanAmount),
+                                      value: AmountFormatter.format(result.loanAmount, 'USD'),
                                     ),
                                     const SizedBox(height: AppSpacing.smPlus),
                                     _LegendRow(
                                       color: AppTheme.secondary,
                                       label: s.interest,
-                                      value: fmt.format(result.totalInterest),
+                                      value: AmountFormatter.format(result.totalInterest, 'USD'),
                                       valueColor: AppTheme.secondary,
                                     ),
                                     const SizedBox(height: AppSpacing.smPlus),
@@ -392,8 +389,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                               fontSize: AppTextSize.md),
                                         ),
                                         Text(
-                                          fmt.format(result.loanAmount +
-                                              result.totalInterest),
+                                          AmountFormatter.format(result.loanAmount +
+                                              result.totalInterest, 'USD'),
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: AppTextSize.md),
@@ -411,13 +408,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                       _LegendRow(
                                         color: AppTheme.primary,
                                         label: s.principal,
-                                        value: fmt.format(result.loanAmount),
+                                        value: AmountFormatter.format(result.loanAmount, 'USD'),
                                       ),
                                       const SizedBox(height: AppSpacing.smPlus),
                                       _LegendRow(
                                         color: AppTheme.secondary,
                                         label: s.interest,
-                                        value: fmt.format(result.totalInterest),
+                                        value: AmountFormatter.format(result.totalInterest, 'USD'),
                                         valueColor: AppTheme.secondary,
                                       ),
                                       const SizedBox(height: AppSpacing.smPlus),
@@ -438,8 +435,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                                 fontSize: AppTextSize.md),
                                           ),
                                           Text(
-                                            fmt.format(result.loanAmount +
-                                                result.totalInterest),
+                                            AmountFormatter.format(result.loanAmount +
+                                                result.totalInterest, 'USD'),
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: AppTextSize.md),
@@ -568,14 +565,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
             if (_yearlyView)
               _YearlyList(
                   years: years,
-                  fmt: fmt,
                   s: s,
                   isPremium: freemiumService.hasFullAccess)
             else ...[
               SliverToBoxAdapter(child: _MonthlyHeader(s: s)),
               _MonthlyList(
                   schedule: schedule,
-                  fmt: fmt,
                   s: s,
                   isPremium: freemiumService.hasFullAccess),
             ],
@@ -593,14 +588,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 class _SummaryCard extends StatelessWidget {
   final MortgageResult result;
   final MortgageInputState inputState;
-  final NumberFormat fmt;
   final DateFormat fmtDate;
   final AppStrings s;
 
   const _SummaryCard(
       {required this.result,
       required this.inputState,
-      required this.fmt,
       required this.fmtDate,
       required this.s});
 
@@ -629,12 +622,12 @@ class _SummaryCard extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         // Show home price + down payment for clarity
         _SummaryRow(s.homePrice,
-            '${fmt.format(inputState.homePrice)}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
-        _SummaryRow(s.loanAmount, fmt.format(result.loanAmount)),
+            '${AmountFormatter.format(inputState.homePrice, 'USD')}  (${inputState.downPaymentPct.toStringAsFixed(0)}% down)'),
+        _SummaryRow(s.loanAmount, AmountFormatter.format(result.loanAmount, 'USD')),
         _SummaryRow(
             s.payoffDate, fmtDate.format(result.payoffDate as DateTime)),
-        _SummaryRow(s.totalInterest, fmt.format(result.totalInterest)),
-        _SummaryRow(s.totalPayments, fmt.format(result.totalCost)),
+        _SummaryRow(s.totalInterest, AmountFormatter.format(result.totalInterest, 'USD')),
+        _SummaryRow(s.totalPayments, AmountFormatter.format(result.totalCost, 'USD')),
         if (result.pmiDropMonth != null)
           _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
       ]),
@@ -667,12 +660,10 @@ class _SummaryRow extends StatelessWidget {
 // ── Yearly accordion list ─────────────────────────────────────────────────────
 class _YearlyList extends StatelessWidget {
   final List<_YearGroup> years;
-  final NumberFormat fmt;
   final AppStrings s;
   final bool isPremium;
   const _YearlyList(
       {required this.years,
-      required this.fmt,
       required this.s,
       required this.isPremium});
 
@@ -689,7 +680,7 @@ class _YearlyList extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, i) {
           if (i < visibleYears.length) {
-            return _YearTile(group: visibleYears[i], fmt: fmt, s: s);
+            return _YearTile(group: visibleYears[i], s: s);
           }
           // Lock banner (only appended when locked)
           return _AmortLockBanner(
@@ -706,9 +697,8 @@ class _YearlyList extends StatelessWidget {
 
 class _YearTile extends StatefulWidget {
   final _YearGroup group;
-  final NumberFormat fmt;
   final AppStrings s;
-  const _YearTile({required this.group, required this.fmt, required this.s});
+  const _YearTile({required this.group, required this.s});
   @override
   State<_YearTile> createState() => _YearTileState();
 }
@@ -719,7 +709,6 @@ class _YearTileState extends State<_YearTile> {
   @override
   Widget build(BuildContext context) {
     final group = widget.group;
-    final fmt = widget.fmt;
     final s = widget.s;
     final isCurrentYear = group.isCurrentYear;
 
@@ -732,7 +721,7 @@ class _YearTileState extends State<_YearTile> {
 
     return Semantics(
       label: '${s.year} ${group.yearIndex} ${group.calendarYear}. '
-          '${s.balance}: ${fmt.format(group.endBalance)}. '
+          '${s.balance}: ${AmountFormatter.format(group.endBalance, 'USD')}. '
           '${group.pctPaid.toStringAsFixed(0)}% ${s.paid}.',
       child: Container(
         margin:
@@ -792,15 +781,15 @@ class _YearTileState extends State<_YearTile> {
                       Wrap(spacing: 6, runSpacing: 4, children: [
                         _MetricChip(
                             label: s.balance,
-                            value: fmt.format(group.endBalance),
+                            value: AmountFormatter.format(group.endBalance, 'USD'),
                             color: AppTheme.primary),
                         _MetricChip(
                             label: s.interest,
-                            value: fmt.format(group.yearlyInterest),
+                            value: AmountFormatter.format(group.yearlyInterest, 'USD'),
                             color: AppTheme.secondary),
                         _MetricChip(
                             label: s.principal,
-                            value: fmt.format(group.yearlyPrincipal),
+                            value: AmountFormatter.format(group.yearlyPrincipal, 'USD'),
                             color: AppTheme.accentGood),
                       ]),
                       const SizedBox(height: AppSpacing.sm),
@@ -839,7 +828,7 @@ class _YearTileState extends State<_YearTile> {
               ),
             ),
             // ── Expanded sub-months ────────────────────────────────────────
-            if (_expanded) _MonthSubTable(months: group.months, fmt: fmt, s: s),
+            if (_expanded) _MonthSubTable(months: group.months, s: s),
           ]),
         ),
       ),
@@ -868,10 +857,9 @@ class _Badge extends StatelessWidget {
 // ── Sub-month table inside ExpansionTile ──────────────────────────────────────
 class _MonthSubTable extends StatelessWidget {
   final List<AmortizationEntry> months;
-  final NumberFormat fmt;
   final AppStrings s;
   const _MonthSubTable(
-      {required this.months, required this.fmt, required this.s});
+      {required this.months, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -903,7 +891,7 @@ class _MonthSubTable extends StatelessWidget {
                 : Theme.of(context).colorScheme.surface;
 
         return Semantics(
-          label: 'Month ${e.month}, balance ${fmt.format(e.balance)}',
+          label: 'Month ${e.month}, balance ${AmountFormatter.format(e.balance, 'USD')}',
           child: Container(
             color: bg,
             padding: const EdgeInsets.symmetric(
@@ -911,16 +899,16 @@ class _MonthSubTable extends StatelessWidget {
             child: Row(children: [
               _Cell('${e.month}', flex: 1),
               _Cell('${e.date.month}/${e.date.year}', flex: 2),
-              _Cell(fmt.format(e.payment), flex: 2),
-              _Cell(fmt.format(e.interest), flex: 2),
-              _Cell(fmt.format(e.principal), flex: 2),
-              _Cell(fmt.format(e.balance), flex: 2),
+              _Cell(AmountFormatter.format(e.payment, 'USD'), flex: 2),
+              _Cell(AmountFormatter.format(e.interest, 'USD'), flex: 2),
+              _Cell(AmountFormatter.format(e.principal, 'USD'), flex: 2),
+              _Cell(AmountFormatter.format(e.balance, 'USD'), flex: 2),
               if (hasPmi)
                 _Cell(
                     e.pmiDropped
                         ? s.off
                         : e.pmiAmount > 0
-                            ? fmt.format(e.pmiAmount)
+                            ? AmountFormatter.format(e.pmiAmount, 'USD')
                             : '-',
                     flex: 2),
             ]),
@@ -957,12 +945,10 @@ class _MonthlyHeader extends StatelessWidget {
 
 class _MonthlyList extends StatelessWidget {
   final List<AmortizationEntry> schedule;
-  final NumberFormat fmt;
   final AppStrings s;
   final bool isPremium;
   const _MonthlyList(
       {required this.schedule,
-      required this.fmt,
       required this.s,
       required this.isPremium});
 
@@ -990,10 +976,10 @@ class _MonthlyList extends StatelessWidget {
               child: Row(children: [
                 _Cell('${e.month}', flex: 1),
                 _Cell('${e.date.month}/${e.date.year}', flex: 2),
-                _Cell(fmt.format(e.payment), flex: 2),
-                _Cell(fmt.format(e.principal), flex: 2),
-                _Cell(fmt.format(e.interest), flex: 2),
-                _Cell(fmt.format(e.balance), flex: 2),
+                _Cell(AmountFormatter.format(e.payment, 'USD'), flex: 2),
+                _Cell(AmountFormatter.format(e.principal, 'USD'), flex: 2),
+                _Cell(AmountFormatter.format(e.interest, 'USD'), flex: 2),
+                _Cell(AmountFormatter.format(e.balance, 'USD'), flex: 2),
               ]),
             );
           }

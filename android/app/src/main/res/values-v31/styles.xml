@@ -6,8 +6,9 @@
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">false</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-        <item name="android:windowSplashScreenBackground">#1B3A6B</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/animated_splash_dots</item>
+        <item name="android:windowSplashScreenBackground">#1B3A6B</item>
+        
         <item name="android:windowSplashScreenIconBackgroundColor">#1B3A6B</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.

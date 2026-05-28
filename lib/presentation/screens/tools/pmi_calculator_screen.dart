@@ -7,8 +7,6 @@ import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// PMI Standalone Calculator
@@ -140,8 +138,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
         final m78 = _monthsToLtv(
             loan: loan, price: price, targetLtv: 0.78, ratePct: rate);
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
+
 
         String fmtMonths(int? m) {
           if (m == null) return isEs ? 'N/A' : 'N/A';
@@ -304,7 +301,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
                                             label: isEs
                                                 ? 'PMI mensual'
                                                 : 'Monthly PMI',
-                                            value: fmt.format(monthly),
+                                            value: AmountFormatter.format(monthly, 'USD'),
                                             bold: true,
                                             color: CalcwiseSemanticColors
                                                 .alertText),

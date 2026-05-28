@@ -5,8 +5,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
-import 'package:calcwise_core/calcwise_core.dart'
-    show PaywallTrigger, CalcwiseAdFooter, CalcwisePageEntrance;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// HELOC Calculator
@@ -103,10 +101,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
         final drawExceedsEquity = drawAmount > availableEquity;
         final ltvTooHigh = ltvAfterDraw > 90.0;
 
-        final fmt = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 0);
-        final fmtDec = NumberFormat.currency(
-            locale: 'en_US', symbol: '\$', decimalDigits: 2);
+
 
         // ─────────────────────────────────────────────────────────────────────
         return Scaffold(
@@ -184,7 +179,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                           ),
                           if (availableEquity > 0)
                             Text(
-                              '${isEs ? 'Disp:' : 'Avail:'} ${fmt.format(availableEquity)}',
+                              '${isEs ? 'Disp:' : 'Avail:'} ${AmountFormatter.format(availableEquity, 'USD')}',
                               style: const TextStyle(
                                   fontSize: AppTextSize.sm,
                                   color: Color(0xFF64748B)),
@@ -334,7 +329,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                         _HeroCard(
                           label:
                               isEs ? 'Capital Disponible' : 'Available Equity',
-                          value: fmt.format(availableEquity),
+                          value: AmountFormatter.format(availableEquity, 'USD'),
                           icon: Icons.account_balance_rounded,
                           color: const Color(0xFF0D9488),
                         ),
@@ -347,7 +342,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                               label: isEs
                                   ? 'Pago Solo Interés'
                                   : 'Interest-Only Payment',
-                              value: '${fmtDec.format(monthlyInterestOnly)}/mo',
+                              value: '${AmountFormatter.format(monthlyInterestOnly, 'USD')}/mo',
                               color: const Color(0xFF0D9488),
                             ),
                           ),
@@ -356,7 +351,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                             child: _ResultMini(
                               label:
                                   isEs ? 'Pago de Repago' : 'Repayment Payment',
-                              value: '${fmtDec.format(monthlyRepayment)}/mo',
+                              value: '${AmountFormatter.format(monthlyRepayment, 'USD')}/mo',
                               color: AppTheme.primary,
                             ),
                           ),
@@ -366,7 +361,7 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                           label: isEs
                               ? 'Costo Total del HELOC'
                               : 'Total Cost of HELOC',
-                          value: fmt.format(totalCost),
+                          value: AmountFormatter.format(totalCost, 'USD'),
                           color: AppTheme.accentWarn,
                           wide: true,
                         ),

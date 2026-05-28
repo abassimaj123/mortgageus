@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../presentation/providers/mortgage_providers.dart';
 import '../../domain/models/mortgage_result.dart';
 import '../../domain/models/loan_type.dart';
@@ -62,11 +64,13 @@ class PdfExportService {
       ],
     ));
 
-    await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename:
-          'MortgageUS_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf',
-    );
+    final pdfBytes = await pdf.save();
+    final tmpDir = await getTemporaryDirectory();
+    final pdfFile = File(
+        '${tmpDir.path}/MortgageUS_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
+    await pdfFile.writeAsBytes(pdfBytes);
+    await Share.shareXFiles(
+        [XFile(pdfFile.path, mimeType: 'application/pdf')]);
   }
 
   // ── Page 1 builder ────────────────────────────────────────────────────────

@@ -45,6 +45,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   double _monthlyIncome = 0.0;
   bool _advancedExpanded = false;
   String? _homePriceError;
+  Timer? _autoSaveTimer;
 
   // Cached 15-yr comparison result — recomputed only when inputs change.
   MortgageResult? _insightResult15yr;
@@ -97,8 +98,16 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     }
   }
 
+  void _scheduleAutoSave() {
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) _saveToHistory();
+    });
+  }
+
   @override
   void dispose() {
+    _autoSaveTimer?.cancel();
     preFillNotifier.removeListener(_onPreFill);
     _homePriceCtrl.dispose();
     _downPayCtrl.dispose();
@@ -195,6 +204,13 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     final result = ref.watch(mortgageResultProvider);
     final inputState = ref.watch(mortgageInputProvider);
     final notifier = ref.read(mortgageInputProvider.notifier);
+
+    // Auto-save: whenever a valid result is produced, schedule a debounced save.
+    ref.listen<MortgageResult?>(mortgageResultProvider, (previous, next) {
+      if (next != null && next.loanAmount > 0) {
+        _scheduleAutoSave();
+      }
+    });
 
     // Recompute 15-yr cached result when inputs change (no-ops when key is same).
     if (result != null) _recompute15yr(inputState, result);

@@ -171,11 +171,17 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                     children: [
                       Text('3%',
                           style: TextStyle(
-                              color: Color(0xFF64748B),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.65),
                               fontSize: AppTextSize.sm)),
                       Text('25%',
                           style: TextStyle(
-                              color: Color(0xFF64748B),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.65),
                               fontSize: AppTextSize.sm)),
                     ],
                   ),
@@ -188,7 +194,11 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                         isEs
                             ? 'Ingresa un precio válido'
                             : 'Enter a valid home price',
-                        style: TextStyle(color: Color(0xFF64748B)),
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.65)),
                       ),
                     )
                   else if (!hasPmi)
@@ -367,7 +377,8 @@ class _Row extends StatelessWidget {
             Flexible(
               child: Text(label,
                   style: TextStyle(
-                      color: Color(0xFF334155), fontSize: AppTextSize.body)),
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: AppTextSize.body)),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(

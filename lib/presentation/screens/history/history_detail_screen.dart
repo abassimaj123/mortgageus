@@ -380,7 +380,11 @@ class _Row extends StatelessWidget {
             Expanded(
               child: Text(label,
                   style: TextStyle(
-                      fontSize: AppTextSize.body, color: Color(0xFF475569))),
+                      fontSize: AppTextSize.body,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.65))),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(value,

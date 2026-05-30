@@ -237,8 +237,11 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
                                     isEs
                                         ? 'Ingresa un precio válido'
                                         : 'Enter a valid home price',
-                                    style: const TextStyle(
-                                        color: Color(0xFF64748B))))
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.65))))
                             : annual == 0
                                 ? Container(
                                     key: const ValueKey('nopmi'),
@@ -382,8 +385,9 @@ class _Row extends StatelessWidget {
           children: [
             Flexible(
               child: Text(label,
-                  style: const TextStyle(
-                      color: Color(0xFF334155), fontSize: AppTextSize.body)),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: AppTextSize.body)),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(

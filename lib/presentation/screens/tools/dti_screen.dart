@@ -159,9 +159,12 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                           isEs
                               ? 'Ingreso mensual: ${AmountFormatter.ui(monthlyIncome, 'USD')}'
                               : 'Monthly income: ${AmountFormatter.ui(monthlyIncome, 'USD')}',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: AppTextSize.sm,
-                              color: Color(0xFF64748B)),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.65)),
                         ),
                       ],
 
@@ -178,8 +181,12 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                         isEs
                             ? 'Principal + Interés + Impuestos + Seguro'
                             : 'Principal + Interest + Taxes + Insurance',
-                        style: const TextStyle(
-                            fontSize: AppTextSize.sm, color: Color(0xFF64748B)),
+                        style: TextStyle(
+                            fontSize: AppTextSize.sm,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.65)),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       TextFormField(
@@ -274,8 +281,11 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                                       ? 'Ingresa tu ingreso anual para ver resultados'
                                       : 'Enter your annual income to see results',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      color: Color(0xFF64748B),
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.65),
                                       fontSize: AppTextSize.md),
                                 ),
                               )
@@ -474,8 +484,12 @@ class _DtiGauge extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         fontSize: AppTextSize.bodyMd)),
                 Text(subtitle,
-                    style: const TextStyle(
-                        fontSize: AppTextSize.sm, color: Color(0xFF64748B))),
+                    style: TextStyle(
+                        fontSize: AppTextSize.sm,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.65))),
               ]),
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Text(
@@ -683,8 +697,12 @@ class _LenderVerdict extends StatelessWidget {
                   : (isEs
                       ? 'Front ≤ ${maxFront.toInt()}% · Back ≤ ${maxBack.toInt()}%'
                       : 'Front ≤ ${maxFront.toInt()}% · Back ≤ ${maxBack.toInt()}%'),
-              style: const TextStyle(
-                  fontSize: AppTextSize.xs, color: Color(0xFF64748B)),
+              style: TextStyle(
+                  fontSize: AppTextSize.xs,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.65)),
             ),
           ]),
         ),

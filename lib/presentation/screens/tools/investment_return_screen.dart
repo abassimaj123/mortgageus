@@ -271,7 +271,11 @@ class _InvestmentReturnScreenState
                         isEs
                             ? 'Ingresa un precio y renta válidos'
                             : 'Enter a valid price and rent',
-                        style: const TextStyle(color: Color(0xFF64748B)),
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.65)),
                       ),
                     )
                   else
@@ -635,8 +639,12 @@ class _VerdictLegend extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text('${e.$1} ${e.$2}',
-                      style: const TextStyle(
-                          fontSize: AppTextSize.xs, color: Color(0xFF64748B))),
+                      style: TextStyle(
+                          fontSize: AppTextSize.xs,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.65))),
                 ],
               ))
           .toList(),
@@ -773,11 +781,19 @@ class _SliderRow extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(minLabel,
-                  style: const TextStyle(
-                      color: Color(0xFF64748B), fontSize: AppTextSize.sm)),
+                  style: TextStyle(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.65),
+                      fontSize: AppTextSize.sm)),
               Text(maxLabel,
-                  style: const TextStyle(
-                      color: Color(0xFF64748B), fontSize: AppTextSize.sm)),
+                  style: TextStyle(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.65),
+                      fontSize: AppTextSize.sm)),
             ],
           ),
         ],
@@ -795,10 +811,10 @@ class _SectionLabel extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: AppTextSize.bodyMd,
-              color: Color(0xFF1E293B)),
+              color: Theme.of(context).colorScheme.onSurface),
         ),
       );
 }
@@ -824,8 +840,9 @@ class _Row extends StatelessWidget {
           children: [
             Flexible(
               child: Text(label,
-                  style: const TextStyle(
-                      color: Color(0xFF334155), fontSize: AppTextSize.body)),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: AppTextSize.body)),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(

@@ -349,7 +349,10 @@ class _ToolCard extends StatelessWidget {
                       const SizedBox(height: AppSpacing.xxs),
                       Text(item.subtitle,
                           style: TextStyle(
-                              color: Color(0xFF64748B),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.65),
                               fontSize: AppTextSize.sm)),
                     ],
                   ),

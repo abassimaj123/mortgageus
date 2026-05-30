@@ -180,9 +180,12 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                           if (availableEquity > 0)
                             Text(
                               '${isEs ? 'Disp:' : 'Avail:'} ${AmountFormatter.ui(availableEquity, 'USD')}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: AppTextSize.sm,
-                                  color: Color(0xFF64748B)),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.65)),
                             ),
                         ],
                       ),
@@ -200,15 +203,21 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
+                        children: [
                           Text('75%',
                               style: TextStyle(
                                   fontSize: AppTextSize.sm,
-                                  color: Color(0xFF64748B))),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.65))),
                           Text('90%',
                               style: TextStyle(
                                   fontSize: AppTextSize.sm,
-                                  color: Color(0xFF64748B))),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.65))),
                         ],
                       ),
 
@@ -391,9 +400,12 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                                 isEs
                                     ? 'LTV después del retiro'
                                     : 'LTV after draw',
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: AppTextSize.body,
-                                    color: Color(0xFF64748B)),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.65)),
                               ),
                               Text(
                                 '${ltvAfterDraw.toStringAsFixed(1)}%',
@@ -506,7 +518,10 @@ class _ChipRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: selected == v
                         ? AppTheme.primary
-                        : const Color(0xFF64748B),
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.65),
                   ),
                 ))
             .toList(),
@@ -598,8 +613,12 @@ class _ResultMini extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: const TextStyle(
-                    fontSize: AppTextSize.xs, color: Color(0xFF64748B))),
+                style: TextStyle(
+                    fontSize: AppTextSize.xs,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.65))),
             const SizedBox(height: AppSpacing.xxs),
             Text(value,
                 style: TextStyle(

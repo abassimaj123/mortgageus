@@ -339,7 +339,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Text(
                 '${AmountFormatter.ui(homePrice, 'USD')} · $loanType · ${annualRate.toStringAsFixed(2)}%',
                 style: TextStyle(
-                    fontSize: AppTextSize.md, color: Color(0xFF475569)),
+                    fontSize: AppTextSize.md,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.65)),
               ),
               Text(_fmtDate.format(createdAt.toLocal()),
                   style: TextStyle(
@@ -396,7 +400,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       : '15-year saves ${AmountFormatter.ui(i30 - i15, 'USD')} in total interest, '
                           'paying ${AmountFormatter.ui(m15 - m30, 'USD')} more per month.',
                   style: TextStyle(
-                      fontSize: AppTextSize.md, color: Color(0xFF334155)),
+                      fontSize: AppTextSize.md,
+                      color: Theme.of(context).colorScheme.onSurface),
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -426,7 +431,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               size: 18,
                               color: unlocked
                                   ? AppTheme.primary
-                                  : const Color(0xFF64748B)),
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.65)),
                           label: Text(
                               unlocked
                                   ? (isEs ? 'PDF — 30 años' : 'PDF — 30-Year')
@@ -436,7 +444,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               style: TextStyle(
                                   color: unlocked
                                       ? AppTheme.primary
-                                      : const Color(0xFF64748B))),
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.65))),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 vertical: AppSpacing.md),
@@ -462,7 +473,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               size: 18,
                               color: unlocked
                                   ? AppTheme.accentGood
-                                  : const Color(0xFF64748B)),
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.65)),
                           label: Text(
                               unlocked
                                   ? (isEs ? 'PDF — 15 años' : 'PDF — 15-Year')
@@ -472,7 +486,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               style: TextStyle(
                                   color: unlocked
                                       ? AppTheme.accentGood
-                                      : const Color(0xFF64748B))),
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.65))),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 vertical: AppSpacing.md),
@@ -619,7 +636,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                     ? '${_items.length} ${isEs ? 'entradas guardadas' : 'entries saved'}'
                                                     : '${_items.length} / ${MonetizationConfig.freeCalculationLimit} ${isEs ? 'guardados' : 'saved'}',
                                                 style: TextStyle(
-                                                    color: Color(0xFF475569),
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withValues(alpha: 0.65),
                                                     fontSize: AppTextSize.md),
                                               ),
                                             ),
@@ -744,7 +764,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                       : 'Max ${MonetizationConfig.freeCalculationLimit} entries for free users',
                                                   style: TextStyle(
                                                       fontSize: AppTextSize.sm,
-                                                      color: Color(0xFF475569)),
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withValues(
+                                                              alpha: 0.65)),
                                                 ),
                                               ),
                                               TextButton(
@@ -1275,7 +1299,8 @@ class _CompDetailRow extends StatelessWidget {
               flex: 3,
               child: Text(label,
                   style: TextStyle(
-                      color: Color(0xFF334155), fontSize: AppTextSize.md))),
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: AppTextSize.md))),
           Expanded(
               flex: 4,
               child: _CellBox(v30,
@@ -1325,7 +1350,7 @@ class _SectionTitle extends StatelessWidget {
       style: TextStyle(
           fontSize: AppTextSize.xs,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF64748B),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
           letterSpacing: 0.8));
 }
 
@@ -1514,8 +1539,12 @@ class _BarLegendDot extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-                fontSize: AppTextSize.xs, color: Color(0xFF475569)),
+            style: TextStyle(
+                fontSize: AppTextSize.xs,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.65)),
           ),
         ],
       );
@@ -1684,16 +1713,24 @@ class _HistoryCompareScreen extends StatelessWidget {
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   isEs ? 'Mejor valor' : 'Better value',
-                  style: const TextStyle(
-                      fontSize: AppTextSize.sm, color: Color(0xFF64748B)),
+                  style: TextStyle(
+                      fontSize: AppTextSize.sm,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.65)),
                 ),
                 const SizedBox(width: AppSpacing.lg),
                 const Icon(Icons.circle, size: 10, color: Color(0xFFEF4444)),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   isEs ? 'Valor más alto' : 'Higher value',
-                  style: const TextStyle(
-                      fontSize: AppTextSize.sm, color: Color(0xFF64748B)),
+                  style: TextStyle(
+                      fontSize: AppTextSize.sm,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.65)),
                 ),
               ]),
               const SizedBox(height: AppSpacing.xxl),
@@ -1743,8 +1780,9 @@ class _CompareRowWidget extends StatelessWidget {
         Expanded(
           flex: 3,
           child: Text(row.label,
-              style: const TextStyle(
-                  fontSize: AppTextSize.md, color: Color(0xFF334155))),
+              style: TextStyle(
+                  fontSize: AppTextSize.md,
+                  color: Theme.of(context).colorScheme.onSurface)),
         ),
         Expanded(
           flex: 4,

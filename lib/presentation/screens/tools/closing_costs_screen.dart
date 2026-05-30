@@ -349,7 +349,10 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                                     fontWeight: FontWeight.w600,
                                     color: _loanType == t
                                         ? AppTheme.primary
-                                        : const Color(0xFF64748B),
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.65),
                                   ),
                                 ))
                             .toList(),
@@ -447,9 +450,12 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
                                   ),
                                   Text(
                                     isEs ? 'Monto' : 'Amount',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontSize: AppTextSize.sm,
-                                        color: Color(0xFF64748B)),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.65)),
                                   ),
                                 ],
                               ),
@@ -589,7 +595,12 @@ class _ToggleOption extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: AppTextSize.body,
-                color: selected ? AppTheme.primary : const Color(0xFF64748B),
+                color: selected
+                    ? AppTheme.primary
+                    : Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.65),
               ),
             ),
           ),
@@ -722,9 +733,12 @@ class _BarChart extends StatelessWidget {
                       Flexible(
                         child: Text(
                           isEs ? line.labelEs : line.labelEn,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: AppTextSize.sm,
-                              color: Color(0xFF64748B)),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.65)),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -790,9 +804,9 @@ class _LineItemRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(label,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: AppTextSize.body,
-                          color: Color(0xFF334155))),
+                          color: Theme.of(context).colorScheme.onSurface)),
                   Text('${pct.toStringAsFixed(1)}% of total',
                       style: const TextStyle(
                           fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
@@ -801,10 +815,10 @@ class _LineItemRow extends StatelessWidget {
             ),
             Text(
               amount,
-              style: const TextStyle(
+              style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: AppTextSize.body,
-                  color: Color(0xFF1E293B)),
+                  color: Theme.of(context).colorScheme.onSurface),
             ),
           ],
         ),

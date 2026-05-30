@@ -356,7 +356,8 @@ class _ResultsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final verdict = _verdict(result.irr);
-    final verdictColor = _verdictColor(verdict);
+    final verdictColor =
+        _verdictColor(verdict, Theme.of(context).brightness);
     final verdictLabel = _verdictLabel(verdict, isEs);
 
     Widget blurred(Widget child) {
@@ -449,7 +450,7 @@ class _ResultsCard extends StatelessWidget {
                     '${AmountFormatter.ui(result.monthlyCF, 'USD')}',
                 color: result.monthlyCF >= 0
                     ? AppTheme.accentGood
-                    : CalcwiseSemanticColors.errorDark,
+                    : CalcwiseSemanticColors.error(Theme.of(context).brightness),
                 bold: true,
               ),
               _Row(
@@ -483,7 +484,7 @@ class _ResultsCard extends StatelessWidget {
                     '${AmountFormatter.ui(result.npv, 'USD')}',
                 color: result.npv >= 0
                     ? AppTheme.accentGood
-                    : CalcwiseSemanticColors.errorDark,
+                    : CalcwiseSemanticColors.error(Theme.of(context).brightness),
                 bold: true,
               ),
               const Divider(height: 24),
@@ -608,13 +609,15 @@ class _VerdictLegend extends StatelessWidget {
             ('Excelente', 'IRR > 15%', AppTheme.accentGood),
             ('Bueno', 'IRR 10–15%', const Color(0xFF2196F3)),
             ('Regular', 'IRR 6–10%', AppTheme.accentWarn),
-            ('Bajo', 'IRR < 6%', CalcwiseSemanticColors.errorDark),
+            ('Bajo', 'IRR < 6%',
+                CalcwiseSemanticColors.error(Theme.of(context).brightness)),
           ]
         : [
             ('Excellent', 'IRR > 15%', AppTheme.accentGood),
             ('Good', 'IRR 10–15%', const Color(0xFF2196F3)),
             ('Fair', 'IRR 6–10%', AppTheme.accentWarn),
-            ('Poor', 'IRR < 6%', CalcwiseSemanticColors.errorDark),
+            ('Poor', 'IRR < 6%',
+                CalcwiseSemanticColors.error(Theme.of(context).brightness)),
           ];
 
     return Wrap(
@@ -849,11 +852,11 @@ _Verdict _verdict(double irr) {
   return _Verdict.poor;
 }
 
-Color _verdictColor(_Verdict v) => switch (v) {
+Color _verdictColor(_Verdict v, Brightness b) => switch (v) {
       _Verdict.excellent => AppTheme.accentGood,
       _Verdict.good => const Color(0xFF2196F3),
       _Verdict.fair => AppTheme.accentWarn,
-      _Verdict.poor => CalcwiseSemanticColors.errorDark,
+      _Verdict.poor => CalcwiseSemanticColors.error(b),
     };
 
 IconData _verdictIcon(_Verdict v) => switch (v) {

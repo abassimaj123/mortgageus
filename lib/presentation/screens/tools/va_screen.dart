@@ -230,8 +230,8 @@ class _VaScreenState extends State<VaScreen> {
                                             ? 'Tarifa de financiación \$'
                                             : 'Funding Fee \$',
                                         value: AmountFormatter.ui(fundingFee, 'USD'),
-                                        color:
-                                            CalcwiseSemanticColors.alertText),
+                                        color: CalcwiseSemanticColors.alert(
+                                            Theme.of(context).brightness)),
                                     _Row(
                                         label: isEs
                                             ? 'Monto del préstamo (con tarifa)'

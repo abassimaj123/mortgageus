@@ -1291,7 +1291,8 @@ class _AffordabilityBadge extends StatelessWidget {
       badgeColor = AppTheme.accentWarn;
       badgeLabel = isEs ? 'Al Límite' : 'At the Limit';
     } else {
-      badgeColor = CalcwiseSemanticColors.errorDark;
+      badgeColor =
+          CalcwiseSemanticColors.error(Theme.of(context).brightness);
       badgeLabel = isEs ? 'Supera el Límite' : 'Over Limit';
     }
 

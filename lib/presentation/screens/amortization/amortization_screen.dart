@@ -714,9 +714,11 @@ class _YearTileState extends State<_YearTile> {
 
     final badges = <Widget>[];
     if (group.hasPmiDrop)
-      badges.add(_Badge(s.pmiRemoved, CalcwiseSemanticColors.successDeep));
+      badges.add(_Badge(s.pmiRemoved,
+          CalcwiseSemanticColors.success(Theme.of(context).brightness)));
     if (group.isHalfway)
-      badges.add(_Badge(s.halfway, CalcwiseSemanticColors.infoIcon));
+      badges.add(_Badge(
+          s.halfway, CalcwiseSemanticColors.info(Theme.of(context).brightness)));
     if (group.isLastYear) badges.add(_Badge(s.paidOff, AppTheme.secondary));
 
     return Semantics(

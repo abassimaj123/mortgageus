@@ -312,7 +312,7 @@ class _PmiResultsCard extends StatelessWidget {
               label: isEs ? 'Relación LTV' : 'LTV Ratio',
               value: '${ltv.toStringAsFixed(1)}%',
               color: ltv > 95
-                  ? CalcwiseSemanticColors.errorDark
+                  ? CalcwiseSemanticColors.error(Theme.of(context).brightness)
                   : ltv > 80
                       ? CalcwiseSemanticColors.warnIcon
                       : AppTheme.accentGood,

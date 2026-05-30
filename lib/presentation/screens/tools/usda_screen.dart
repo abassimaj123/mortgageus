@@ -271,8 +271,8 @@ class _UsdaScreenState extends State<UsdaScreen> {
                                             ? 'Tarifa anual mensualizada (0.35%)'
                                             : 'Monthly Annual Fee (0.35%)',
                                         value: AmountFormatter.ui(monthlyFee, 'USD'),
-                                        color:
-                                            CalcwiseSemanticColors.alertText),
+                                        color: CalcwiseSemanticColors.alert(
+                                            Theme.of(context).brightness)),
                                     _Row(
                                         label: isEs
                                             ? 'Capital + Interés'

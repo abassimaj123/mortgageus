@@ -401,10 +401,12 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                                   fontWeight: FontWeight.w700,
                                   fontSize: AppTextSize.bodyMd,
                                   color: ltvAfterDraw > 90.0
-                                      ? CalcwiseSemanticColors.errorDark
+                                      ? CalcwiseSemanticColors.error(
+                                          Theme.of(context).brightness)
                                       : ltvAfterDraw > 80.0
                                           ? AppTheme.accentWarn
-                                          : CalcwiseSemanticColors.successDark,
+                                          : CalcwiseSemanticColors.success(
+                                              Theme.of(context).brightness),
                                 ),
                               ),
                             ],

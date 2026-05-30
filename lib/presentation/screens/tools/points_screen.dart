@@ -182,8 +182,8 @@ class _PointsScreenState extends State<PointsScreen> {
                                             ? 'Costo de los puntos'
                                             : 'Points Cost',
                                         value: AmountFormatter.ui(pointsCost, 'USD'),
-                                        color:
-                                            CalcwiseSemanticColors.alertText),
+                                        color: CalcwiseSemanticColors.alert(
+                                            Theme.of(context).brightness)),
                                     _Row(
                                         label: isEs ? 'Tasa nueva' : 'New Rate',
                                         value:
@@ -219,7 +219,8 @@ class _PointsScreenState extends State<PointsScreen> {
                                         bold: true,
                                         color: lifetimeSav >= 0
                                             ? AppTheme.accentGood
-                                            : CalcwiseSemanticColors.errorDark),
+                                            : CalcwiseSemanticColors.error(
+                                                Theme.of(context).brightness)),
                                   ]),
                                 ),
                               ),

@@ -432,10 +432,10 @@ class _DtiGauge extends StatelessWidget {
     required this.isEs,
   });
 
-  Color get _color {
-    if (dti <= goodThreshold) return CalcwiseSemanticColors.successDark;
+  Color _colorFor(Brightness b) {
+    if (dti <= goodThreshold) return CalcwiseSemanticColors.success(b);
     if (dti <= warnThreshold) return AppTheme.accentWarn;
-    return CalcwiseSemanticColors.errorDark;
+    return CalcwiseSemanticColors.error(b);
   }
 
   String get _verdict {
@@ -446,7 +446,7 @@ class _DtiGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _color;
+    final color = _colorFor(Theme.of(context).brightness);
     final pct = dti.clamp(0.0, 70.0);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -526,7 +526,8 @@ class _DtiGauge extends StatelessWidget {
               Text('${goodThreshold.toInt()}%',
                   style: TextStyle(
                       fontSize: AppTextSize.xs,
-                      color: CalcwiseSemanticColors.successDark,
+                      color: CalcwiseSemanticColors.success(
+                          Theme.of(context).brightness),
                       fontWeight: FontWeight.w600)),
               Text('${warnThreshold.toInt()}%',
                   style: TextStyle(
@@ -536,7 +537,8 @@ class _DtiGauge extends StatelessWidget {
               Text('70%+',
                   style: TextStyle(
                       fontSize: AppTextSize.xs,
-                      color: CalcwiseSemanticColors.errorDark,
+                      color: CalcwiseSemanticColors.error(
+                          Theme.of(context).brightness),
                       fontWeight: FontWeight.w600)),
             ],
           ),
@@ -646,7 +648,14 @@ class _LenderVerdict extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final passes = _passes;
-    final color = passes
+    // Icon sits on the neutral row surface → theme-aware so it stays visible
+    // in dark mode.
+    final iconColor = passes
+        ? CalcwiseSemanticColors.success(Theme.of(context).brightness)
+        : CalcwiseSemanticColors.error(Theme.of(context).brightness);
+    // Badge text lives inside the fixed-light successBg/errorBg → keep the dark
+    // shade so the bg+text pair stays readable.
+    final badgeTextColor = passes
         ? CalcwiseSemanticColors.successDark
         : CalcwiseSemanticColors.errorDark;
     final bg = passes
@@ -658,7 +667,7 @@ class _LenderVerdict extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
       child: Row(children: [
-        Icon(icon, color: color, size: 20),
+        Icon(icon, color: iconColor, size: 20),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child:
@@ -693,7 +702,7 @@ class _LenderVerdict extends StatelessWidget {
             style: TextStyle(
                 fontSize: AppTextSize.xs,
                 fontWeight: FontWeight.w700,
-                color: color),
+                color: badgeTextColor),
           ),
         ),
       ]),

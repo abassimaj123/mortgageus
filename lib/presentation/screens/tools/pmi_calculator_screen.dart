@@ -303,8 +303,8 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
                                                 : 'Monthly PMI',
                                             value: AmountFormatter.ui(monthly, 'USD'),
                                             bold: true,
-                                            color: CalcwiseSemanticColors
-                                                .alertText),
+                                            color: CalcwiseSemanticColors.alert(
+                                                Theme.of(context).brightness)),
                                         const Divider(height: 24),
                                         _Row(
                                             label: isEs

@@ -154,8 +154,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(isEs ? 'Eliminar' : 'Delete',
-                style:
-                    const TextStyle(color: CalcwiseSemanticColors.errorDark)),
+                style: TextStyle(
+                    color: CalcwiseSemanticColors.error(
+                        Theme.of(ctx).brightness))),
           ),
         ],
       ),
@@ -496,17 +497,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     await Future.delayed(const Duration(milliseconds: 200));
                     if (context.mounted) _deleteComparison(cid, context);
                   },
-                  icon: const Icon(Icons.delete_outline,
-                      size: 18, color: CalcwiseSemanticColors.errorDark),
+                  icon: Icon(Icons.delete_outline,
+                      size: 18,
+                      color: CalcwiseSemanticColors.error(
+                          Theme.of(context).brightness)),
                   label: Text(
                       isEs ? 'Eliminar comparación' : 'Delete comparison',
-                      style: const TextStyle(
-                          color: CalcwiseSemanticColors.errorDark)),
+                      style: TextStyle(
+                          color: CalcwiseSemanticColors.error(
+                              Theme.of(context).brightness))),
                   style: OutlinedButton.styleFrom(
                     padding:
                         const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    side: const BorderSide(
-                        color: CalcwiseSemanticColors.errorDark),
+                    side: BorderSide(
+                        color: CalcwiseSemanticColors.error(
+                            Theme.of(context).brightness)),
                   ),
                 ),
               ),
@@ -660,20 +665,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                   if (confirm == true)
                                                     _clearAll();
                                                 },
-                                                icon: const Icon(
+                                                icon: Icon(
                                                     Icons.delete_sweep,
                                                     size: 18,
                                                     color:
                                                         CalcwiseSemanticColors
-                                                            .errorDark),
+                                                            .error(Theme.of(
+                                                                    context)
+                                                                .brightness)),
                                                 label: Text(
                                                     isEs
                                                         ? 'Borrar todo'
                                                         : 'Clear all',
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                         color:
                                                             CalcwiseSemanticColors
-                                                                .errorDark)),
+                                                                .error(Theme.of(
+                                                                        context)
+                                                                    .brightness))),
                                               ),
                                           ]),
                                           if (_compareMode) ...[
@@ -1111,8 +1120,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       _showComparisonDetail(context, pair, cid, isEs),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline,
-                      color: CalcwiseSemanticColors.errorDark, size: 20),
+                  icon: Icon(Icons.delete_outline,
+                      color: CalcwiseSemanticColors.error(
+                          Theme.of(context).brightness),
+                      size: 20),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(AppRadius.sm),
                   onPressed: () => _deleteComparison(cid, context),

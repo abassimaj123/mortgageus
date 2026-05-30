@@ -175,7 +175,8 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                                 color: r.monthlySavings > 0
                                                     ? AppTheme.accentGood
                                                     : CalcwiseSemanticColors
-                                                        .errorDark),
+                                                        .error(Theme.of(context)
+                                                            .brightness)),
                                             const Divider(height: 24),
                                             _ResultRow(
                                                 s.breakEven,
@@ -197,7 +198,9 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                                     r.totalSavingsOverLife > 0
                                                         ? AppTheme.accentGood
                                                         : CalcwiseSemanticColors
-                                                            .errorDark),
+                                                            .error(Theme.of(
+                                                                    context)
+                                                                .brightness)),
                                             const SizedBox(
                                                 height: AppSpacing.md),
                                             Container(

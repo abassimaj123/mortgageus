@@ -1,32 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// FHA Loan Calculator
 /// Min 3.5% down. Upfront MIP = 1.75% of loan (financed).
 /// Annual MIP: LTV > 95% → 0.55%/yr ; LTV ≤ 95% → 0.50%/yr.
-class FhaScreen extends StatefulWidget {
+class FhaScreen extends ConsumerStatefulWidget {
   const FhaScreen({super.key});
 
   @override
-  State<FhaScreen> createState() => _FhaScreenState();
+  ConsumerState<FhaScreen> createState() => _FhaScreenState();
 }
 
-class _FhaScreenState extends State<FhaScreen> {
+class _FhaScreenState extends ConsumerState<FhaScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _homePriceCtrl = TextEditingController(text: '350000');
+  final _homePriceCtrl = TextEditingController();
   final _taxCtrl = TextEditingController(text: '300');
   final _insCtrl = TextEditingController(text: '120');
   double _downPct = 3.5;
   int _creditScore = 680;
   bool _logged = false;
 
-  static const double _rate = 7.0;
+  double _rate = 7.0;
   static const int _term = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    final input = ref.read(mortgageInputProvider);
+    _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
+    _rate = input.annualRatePct;
+  }
 
   @override
   void dispose() {

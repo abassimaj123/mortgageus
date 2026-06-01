@@ -1,29 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// Points / Discount Calculator
 /// Each point = 1% of loan, lowers rate by ~0.25%.
 /// Breakeven months = points_cost / monthly_savings.
-class PointsScreen extends StatefulWidget {
+class PointsScreen extends ConsumerStatefulWidget {
   const PointsScreen({super.key});
 
   @override
-  State<PointsScreen> createState() => _PointsScreenState();
+  ConsumerState<PointsScreen> createState() => _PointsScreenState();
 }
 
-class _PointsScreenState extends State<PointsScreen> {
-  final _loanCtrl = TextEditingController(text: '350000');
-  final _rateCtrl = TextEditingController(text: '7.0');
+class _PointsScreenState extends ConsumerState<PointsScreen> {
+  final _loanCtrl = TextEditingController();
+  final _rateCtrl = TextEditingController();
   double _points = 1.0;
   int _term = 30;
   bool _logged = false;
 
   static const double _ratePerPoint = 0.25;
+
+  @override
+  void initState() {
+    super.initState();
+    final input = ref.read(mortgageInputProvider);
+    final loanAmount = input.downPaymentDollar >= input.homePrice
+        ? 0.0
+        : (input.homePrice - input.downPaymentDollar).clamp(0.0, double.infinity);
+    _loanCtrl.text = loanAmount.toStringAsFixed(0);
+    _rateCtrl.text = input.annualRatePct.toStringAsFixed(2);
+    _term = input.termYears;
+  }
 
   @override
   void dispose() {

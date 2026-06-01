@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// VA Loan Calculator
 /// 0% down allowed. No PMI. Funding fee financed into loan.
 /// First-use regular 2.15%, first-use reserves/NG 2.40%, subsequent 3.30%.
-class VaScreen extends StatefulWidget {
+class VaScreen extends ConsumerStatefulWidget {
   const VaScreen({super.key});
 
   @override
-  State<VaScreen> createState() => _VaScreenState();
+  ConsumerState<VaScreen> createState() => _VaScreenState();
 }
 
-class _VaScreenState extends State<VaScreen> {
-  final _homePriceCtrl = TextEditingController(text: '350000');
+class _VaScreenState extends ConsumerState<VaScreen> {
+  final _homePriceCtrl = TextEditingController();
   final _taxCtrl = TextEditingController(text: '300');
   final _insCtrl = TextEditingController(text: '120');
   double _downPct = 0.0;
@@ -25,8 +27,16 @@ class _VaScreenState extends State<VaScreen> {
   bool _subsequent = false;
   bool _logged = false;
 
-  static const double _rate = 7.0;
+  double _rate = 7.0;
   static const int _term = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    final input = ref.read(mortgageInputProvider);
+    _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
+    _rate = input.annualRatePct;
+  }
 
   @override
   void dispose() {

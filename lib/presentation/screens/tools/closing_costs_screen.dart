@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
@@ -9,16 +11,16 @@ import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 ///
 /// Estimates buyer closing costs based on home price, state, and loan type.
 /// All rates are approximations — a disclaimer is shown in the UI.
-class ClosingCostsScreen extends StatefulWidget {
+class ClosingCostsScreen extends ConsumerStatefulWidget {
   const ClosingCostsScreen({super.key});
 
   @override
-  State<ClosingCostsScreen> createState() => _ClosingCostsScreenState();
+  ConsumerState<ClosingCostsScreen> createState() => _ClosingCostsScreenState();
 }
 
-class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
-  final _homePriceCtrl = TextEditingController(text: '400,000');
-  final _rateCtrl = TextEditingController(text: '6.9');
+class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
+  final _homePriceCtrl = TextEditingController();
+  final _rateCtrl = TextEditingController();
 
   String _state = 'CA';
   String _loanType = 'Conventional';
@@ -28,6 +30,9 @@ class _ClosingCostsScreenState extends State<ClosingCostsScreen> {
   @override
   void initState() {
     super.initState();
+    final input = ref.read(mortgageInputProvider);
+    _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
+    _rateCtrl.text = input.annualRatePct.toStringAsFixed(2);
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 

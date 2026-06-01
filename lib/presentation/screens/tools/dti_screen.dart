@@ -535,8 +535,8 @@ class _DtiGauge extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('0%',
-                  style: const TextStyle(
-                      fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
+                  style: TextStyle(
+                      fontSize: AppTextSize.xs, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               Text('${goodThreshold.toInt()}%',
                   style: TextStyle(
                       fontSize: AppTextSize.xs,

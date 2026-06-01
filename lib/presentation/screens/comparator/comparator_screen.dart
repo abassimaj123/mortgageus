@@ -158,7 +158,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
         final AppStrings str = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
-          body: Center(
+          body: CalcwisePageEntrance(child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
               child: SingleChildScrollView(
@@ -286,11 +286,12 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                     ? 'Guardar comparación'
                                     : 'Save comparison',
                                 button: true,
-                                child: GestureDetector(
+                                child: InkWell(
                                   onTap: _isSaving
                                       ? null
                                       : () => _saveComparison(
                                           context, s, r30, r15, isEs),
+                                  borderRadius: BorderRadius.circular(AppRadius.mdPlus),
                                   child: Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.symmetric(
@@ -339,7 +340,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                     ]),
               ),
             ),
-          ),
+          )),
         );
       },
     );

@@ -813,8 +813,8 @@ class _LineItemRow extends StatelessWidget {
                           fontSize: AppTextSize.body,
                           color: Theme.of(context).colorScheme.onSurface)),
                   Text('${pct.toStringAsFixed(1)}% of total',
-                      style: const TextStyle(
-                          fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
+                      style: TextStyle(
+                          fontSize: AppTextSize.xs, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),

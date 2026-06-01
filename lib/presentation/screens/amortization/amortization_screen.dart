@@ -193,8 +193,9 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                         label:
                             isEs ? 'Ir a la calculadora' : 'Go to Calculator',
                         button: true,
-                        child: GestureDetector(
+                        child: InkWell(
                           onTap: () => tabSwitchNotifier.value = 0,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.xxl,
@@ -232,7 +233,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
-          body: CustomScrollView(slivers: [
+          body: CalcwisePageEntrance(child: CustomScrollView(slivers: [
             // ── Summary card ───────────────────────────────────────────────────
             SliverToBoxAdapter(
                 child: _SummaryCard(
@@ -476,8 +477,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                               label: s.yearlyView,
                               button: true,
                               selected: _yearlyView,
-                              child: GestureDetector(
+                              child: InkWell(
                                 onTap: () => _setViewMode(true),
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(AppRadius.md),
+                                  bottomLeft: Radius.circular(AppRadius.md),
+                                ),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: AppSpacing.smPlus),
@@ -519,8 +524,12 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                               label: s.monthlyView,
                               button: true,
                               selected: !_yearlyView,
-                              child: GestureDetector(
+                              child: InkWell(
                                 onTap: () => _setViewMode(false),
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(AppRadius.md),
+                                  bottomRight: Radius.circular(AppRadius.md),
+                                ),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: AppSpacing.smPlus),
@@ -577,7 +586,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
 
             const SliverToBoxAdapter(
                 child: SizedBox(height: AppSpacing.listBottomInset)),
-          ]),
+          ])),
         );
       },
     );
@@ -740,8 +749,9 @@ class _YearTileState extends State<_YearTile> {
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Column(children: [
             // ── Header row (tappable) ──────────────────────────────────────
-            GestureDetector(
+            InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               child: Container(
                 color: Colors.transparent,
                 padding: const EdgeInsets.symmetric(
@@ -1045,8 +1055,9 @@ class _AmortLockBanner extends StatelessWidget {
               fontSize: AppTextSize.md, color: AppTheme.labelGray),
         ),
         const SizedBox(height: AppSpacing.xl),
-        GestureDetector(
+        InkWell(
           onTap: () => IAPService.instance.buy(),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),

@@ -108,7 +108,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
           body: Column(
             children: [
               Expanded(
-                  child: Center(
+                  child: CalcwisePageEntrance(child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
                   child: SingleChildScrollView(
@@ -272,7 +272,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                         ]),
                   ),
                 ),
-              )),
+              ))),
               const CalcwiseAdFooter(),
             ],
           ),

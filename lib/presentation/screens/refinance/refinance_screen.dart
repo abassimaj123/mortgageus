@@ -108,7 +108,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
           body: Column(
             children: [
               Expanded(
-                  child: Center(
+                  child: CalcwisePageEntrance(child: Center(
                       child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 600),
                           child: SingleChildScrollView(
@@ -273,7 +273,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                         height: AppSpacing.listBottomInset),
                                   ]),
                             ), // Form closes
-                          )))),
+                          ))))),
               const CalcwiseAdFooter(),
             ],
           ),

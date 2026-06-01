@@ -135,7 +135,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
         final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
-          body: Center(
+          body: CalcwisePageEntrance(child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
               child: SingleChildScrollView(
@@ -271,7 +271,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                 ), // Form closes
               ),
             ),
-          ),
+          )),
         );
       },
     );

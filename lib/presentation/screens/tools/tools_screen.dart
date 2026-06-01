@@ -358,7 +358,7 @@ class _ToolCard extends StatelessWidget {
                   ),
                 ),
                 Icon(Icons.chevron_right_rounded,
-                    color: const Color(0xFF94A3B8), size: 22),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant, size: 22),
               ],
             ),
           ),

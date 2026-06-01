@@ -347,7 +347,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               Text(_fmtDate.format(createdAt.toLocal()),
                   style: TextStyle(
-                      fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
+                      fontSize: AppTextSize.xs, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               const Divider(height: 24),
 
               // Side-by-side comparison
@@ -1020,7 +1020,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         : Icons.lock_outline,
                     size: 20,
                     color:
-                        isPremium ? AppTheme.primary : const Color(0xFF94A3B8),
+                        isPremium ? AppTheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(AppRadius.sm),

@@ -697,7 +697,7 @@ class _PdfUnlockSheetState extends State<_PdfUnlockSheet> {
                           child: CircularProgressIndicator(strokeWidth: 2))
                     else
                       Icon(Icons.chevron_right_rounded,
-                          color: const Color(0xFF94A3B8)),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ],
                 ),
               ),

@@ -106,6 +106,7 @@ class AmortizationScreen extends ConsumerStatefulWidget {
 
 class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
   bool _yearlyView = true;
+  int _touchedIndex = -1;
 
   void _rebuild() {
     if (mounted) setState(() {});
@@ -307,25 +308,66 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                           centerSpaceRadius: responsiveCenter,
                                           pieTouchData: PieTouchData(
                                             enabled: true,
-                                            touchCallback: (event, response) {},
+                                            touchCallback:
+                                                (event, response) {
+                                              setState(() {
+                                                if (!event
+                                                        .isInterestedForInteractions ||
+                                                    response == null ||
+                                                    response.touchedSection ==
+                                                        null) {
+                                                  _touchedIndex = -1;
+                                                  return;
+                                                }
+                                                _touchedIndex = response
+                                                    .touchedSection!
+                                                    .touchedSectionIndex;
+                                              });
+                                            },
                                           ),
                                           sections: [
                                             PieChartSectionData(
                                               value: result.loanAmount,
                                               color: AppTheme.primary,
-                                              radius: responsiveSection,
-                                              showTitle: false,
+                                              radius: _touchedIndex == 0
+                                                  ? responsiveSection * 1.18
+                                                  : responsiveSection,
+                                              showTitle: _touchedIndex == 0,
+                                              title:
+                                                  '${AmountFormatter.ui(result.loanAmount, 'USD')}\n$_principalPct%',
+                                              titleStyle: const TextStyle(
+                                                fontSize:
+                                                    CalcwiseChartTokens
+                                                        .axisFontSize,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                              titlePositionPercentageOffset:
+                                                  2.4,
                                             ),
                                             PieChartSectionData(
                                               value: result.totalInterest,
                                               color: AppTheme.secondary,
-                                              radius: responsiveSection,
-                                              showTitle: false,
+                                              radius: _touchedIndex == 1
+                                                  ? responsiveSection * 1.18
+                                                  : responsiveSection,
+                                              showTitle: _touchedIndex == 1,
+                                              title:
+                                                  '${AmountFormatter.ui(result.totalInterest, 'USD')}\n$_interestPct%',
+                                              titleStyle: const TextStyle(
+                                                fontSize:
+                                                    CalcwiseChartTokens
+                                                        .axisFontSize,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                              titlePositionPercentageOffset:
+                                                  2.4,
                                             ),
                                           ],
                                         ),
                                         swapAnimationDuration:
-                                            const Duration(milliseconds: 500),
+                                            CalcwiseChartTokens.swapDuration,
                                       ),
                                       // Center overlay — interest %
                                       Column(

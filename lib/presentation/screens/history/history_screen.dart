@@ -1383,8 +1383,9 @@ class _CompareBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ct = CalcwiseTheme.of(context);
+    final cs = Theme.of(context).colorScheme;
     const colorA = AppTheme.primary;
-    const colorB = Color(0xFF475569); // secondary/slate
+    final colorB = cs.secondary; // secondary/slate
 
     final groups = [
       (isEs ? 'Mensual' : 'Monthly', monthly1, monthly2),
@@ -1447,7 +1448,8 @@ class _CompareBarChart extends StatelessWidget {
                           child: Text(
                             groups[idx].$1,
                             style: TextStyle(
-                                fontSize: AppTextSize.xs, color: ct.textSecondary),
+                                fontSize: CalcwiseChartTokens.axisFontSize,
+                                color: ct.textSecondary),
                             textAlign: TextAlign.center,
                           ),
                         );
@@ -1461,7 +1463,8 @@ class _CompareBarChart extends StatelessWidget {
                       getTitlesWidget: (v, _) => Text(
                         _kFormat(v),
                         style: TextStyle(
-                            fontSize: AppTextSize.xxs, color: ct.textSecondary),
+                            fontSize: CalcwiseChartTokens.axisFontSize,
+                            color: ct.textSecondary),
                       ),
                     ),
                   ),
@@ -1473,7 +1476,7 @@ class _CompareBarChart extends StatelessWidget {
                 gridData: FlGridData(
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (_) =>
-                      const FlLine(color: Color(0xFFE2E8F0), strokeWidth: 1),
+                      FlLine(color: cs.outlineVariant, strokeWidth: 1),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: List.generate(groups.length, (i) {
@@ -1484,7 +1487,7 @@ class _CompareBarChart extends StatelessWidget {
                       BarChartRodData(
                         toY: g.$2,
                         color: colorA,
-                        width: 16,
+                        width: CalcwiseChartTokens.barWidth,
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(4)),
                         rodStackItems: [],
@@ -1492,7 +1495,7 @@ class _CompareBarChart extends StatelessWidget {
                       BarChartRodData(
                         toY: g.$3,
                         color: colorB,
-                        width: 16,
+                        width: CalcwiseChartTokens.barWidth,
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(4)),
                         rodStackItems: [],
@@ -1502,6 +1505,7 @@ class _CompareBarChart extends StatelessWidget {
                   );
                 }),
               ),
+              swapAnimationDuration: CalcwiseChartTokens.swapDuration,
             ),
           ),
           const SizedBox(height: AppSpacing.md),

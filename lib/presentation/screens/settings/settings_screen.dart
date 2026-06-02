@@ -182,27 +182,31 @@ class _LangButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const color = AppTheme.primary;
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: AppDuration.fast,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        decoration: BoxDecoration(
-          color: selected ? color : Colors.transparent,
-          border: Border.all(
-              color: selected
-                  ? color
-                  : Theme.of(context).colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+      borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: AnimatedContainer(
+          duration: AppDuration.fast,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          decoration: BoxDecoration(
+            color: selected ? color : Colors.transparent,
+            border: Border.all(
+                color: selected
+                    ? color
+                    : Theme.of(context).colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+          ),
+          alignment: Alignment.center,
+          child: Text(label,
+              style: TextStyle(
+                color: selected
+                    ? Colors.white
+                    : CalcwiseTheme.of(context).textSecondary,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+              )),
         ),
-        alignment: Alignment.center,
-        child: Text(label,
-            style: TextStyle(
-              color: selected
-                  ? Colors.white
-                  : CalcwiseTheme.of(context).textSecondary,
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-            )),
       ),
     );
   }

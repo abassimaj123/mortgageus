@@ -583,29 +583,33 @@ class _ToggleOption extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => InkWell(
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppTheme.primary.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: AppTextSize.body,
-                color: selected
-                    ? AppTheme.primary
-                    : Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
+            decoration: BoxDecoration(
+              color: selected
+                  ? AppTheme.primary.withValues(alpha: 0.12)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppTextSize.body,
+                  color: selected
+                      ? AppTheme.primary
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.65),
+                ),
               ),
             ),
           ),

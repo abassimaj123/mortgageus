@@ -698,22 +698,26 @@ class _ToggleChip extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => InkWell(
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: AppDuration.fast,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
-          decoration: BoxDecoration(
-            color: selected ? AppTheme.primary : const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(AppRadius.mdPlus),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: selected ? Colors.white : const Color(0xFF334155),
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-              fontSize: AppTextSize.md,
+        borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: AnimatedContainer(
+            duration: AppDuration.fast,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
+            decoration: BoxDecoration(
+              color: selected ? AppTheme.primary : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected ? Colors.white : const Color(0xFF334155),
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                fontSize: AppTextSize.md,
+              ),
             ),
           ),
         ),

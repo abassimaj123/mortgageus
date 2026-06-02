@@ -330,29 +330,34 @@ class _TermChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md, vertical: AppSpacing.xs + 2),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppTheme.primary
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppRadius.full),
-          border: Border.all(
-            color: selected ? AppTheme.primary : Theme.of(context).dividerColor,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: AppTextSize.sm,
-            fontWeight: FontWeight.w500,
+      borderRadius: BorderRadius.circular(AppRadius.full),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md, vertical: AppSpacing.xs + 2),
+          decoration: BoxDecoration(
             color: selected
-                ? Colors.white
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+                ? AppTheme.primary
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            border: Border.all(
+              color:
+                  selected ? AppTheme.primary : Theme.of(context).dividerColor,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: AppTextSize.sm,
+              fontWeight: FontWeight.w500,
+              color: selected
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),

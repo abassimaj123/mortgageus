@@ -18,7 +18,6 @@ import 'presentation/screens/amortization/amortization_screen.dart';
 import 'presentation/screens/comparator/comparator_screen.dart';
 import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/tools/tools_screen.dart';
-import 'presentation/screens/affordability/affordability_screen.dart';
 import 'presentation/screens/history/history_screen.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'l10n/strings_en.dart';
@@ -207,10 +206,8 @@ class _MainShellState extends State<_MainShell> {
         case 2:
           return s.comparatorTitle;
         case 3:
-          return s.affordTitle;
-        case 4:
           return s.toolsTitle;
-        case 5:
+        case 4:
           return s.navHistory;
         default:
           return s.appTitle;
@@ -223,10 +220,8 @@ class _MainShellState extends State<_MainShell> {
         case 2:
           return s.comparatorTitle;
         case 3:
-          return s.affordTitle;
-        case 4:
           return s.toolsTitle;
-        case 5:
+        case 4:
           return s.navHistory;
         default:
           return s.appTitle;
@@ -238,7 +233,6 @@ class _MainShellState extends State<_MainShell> {
     CalculatorScreen(),
     AmortizationScreen(),
     ComparatorScreen(),
-    AffordabilityScreen(),
     ToolsScreen(),
     HistoryScreen(),
   ];
@@ -298,7 +292,6 @@ class _MainShellState extends State<_MainShell> {
                   'calculator',
                   'schedule',
                   'comparator',
-                  'affordability',
                   'tools',
                   'history'
                 ];
@@ -331,10 +324,6 @@ class _MainShellState extends State<_MainShell> {
                     icon: const Icon(Icons.compare_rounded),
                     selectedIcon: const Icon(Icons.compare),
                     label: s.navCompare),
-                NavigationDestination(
-                    icon: const Icon(Icons.home_work_rounded),
-                    selectedIcon: const Icon(Icons.home_work),
-                    label: s.navAfford),
                 NavigationDestination(
                     icon: const Icon(Icons.build_rounded),
                     selectedIcon: const Icon(Icons.build_rounded),

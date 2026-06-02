@@ -17,6 +17,7 @@ import 'points_screen.dart';
 import 'dti_screen.dart';
 import 'heloc_calc_screen.dart';
 import 'closing_costs_screen.dart';
+import '../affordability/affordability_screen.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 
 class ToolsScreen extends StatelessWidget {
@@ -29,6 +30,23 @@ class ToolsScreen extends StatelessWidget {
       builder: (context, isEs, _) {
         final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         final tools = [
+          _ToolItem(
+            icon: Icons.home_work_rounded,
+            iconSelected: Icons.home_work,
+            color: AppTheme.primary,
+            title: s.affordTitle,
+            subtitle: isEs
+                ? 'Presupuesto máximo según tus ingresos'
+                : 'Max budget based on your income',
+            onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder<void>(
+                  pageBuilder: (_, __, ___) => const AffordabilityScreen(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: AppDuration.base,
+                )),
+          ),
           _ToolItem(
             icon: Icons.add_circle_outline,
             iconSelected: Icons.add_circle,

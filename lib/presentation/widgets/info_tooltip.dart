@@ -24,7 +24,7 @@ class InfoTooltip extends StatelessWidget {
       button: true,
       label: isEs ? 'Información sobre $title' : 'Information about $title',
       hint: isEs ? 'Toca para ver detalles' : 'Double tap for details',
-      child: GestureDetector(
+      child: InkWell(
         onTap: () => showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -42,10 +42,15 @@ class InfoTooltip extends StatelessWidget {
             ],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs),
-          child: Icon(Icons.info_outline,
-              size: iconSize, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+          child: Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.xs),
+            child: Icon(Icons.info_outline,
+                size: iconSize,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
         ),
       ),
     );

@@ -210,10 +210,97 @@ class PdfExportService {
           ],
         ),
 
+        pw.SizedBox(height: 12),
+        // ── Monthly payment donut chart ──
+        _buildBreakdownChart(input, result, isEs: isEs),
+
         pw.Spacer(),
         _footerNote(isEs: isEs),
       ],
     );
+  }
+
+  // ── Monthly payment breakdown donut chart ─────────────────────────────────
+
+  static pw.Widget _buildBreakdownChart(
+      MortgageInputState input, MortgageResult result,
+      {bool isEs = false}) {
+    final m = result.monthly;
+    // Slice color palette (theme-coherent).
+    const cPrincipal = _navy;
+    const cInterest = _gold;
+    const cTax = PdfColor(0.20, 0.55, 0.42); // green
+    const cInsurance = PdfColor(0.40, 0.50, 0.78); // soft blue
+    const cHoa = PdfColor(0.55, 0.40, 0.70); // purple
+    const cPmi = PdfColor(0.78, 0.35, 0.35); // muted red
+
+    // Real values from the calculated monthly breakdown.
+    final slices = <_Slice>[
+      _Slice(isEs ? 'Capital' : 'Principal', m.principal, cPrincipal),
+      _Slice(isEs ? 'Interés' : 'Interest', m.interest, cInterest),
+      _Slice(isEs ? 'Impuesto' : 'Property Tax', m.propertyTax, cTax),
+      _Slice(isEs ? 'Seguro' : 'Insurance', m.homeInsurance, cInsurance),
+      if (input.hoaMonthly > 0) _Slice('HOA', m.hoa, cHoa),
+      if (result.hasPmi) _Slice('PMI', m.pmi, cPmi),
+    ].where((s) => s.value > 0).toList();
+
+    final total = slices.fold(0.0, (s, e) => s + e.value);
+    final tTitle =
+        isEs ? 'DESGLOSE DEL PAGO MENSUAL' : 'MONTHLY PAYMENT BREAKDOWN';
+
+    return _sectionBox(tTitle, [
+      pw.SizedBox(height: 6),
+      pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          // Donut
+          pw.SizedBox(
+            width: 150,
+            height: 150,
+            child: pw.Chart(
+              grid: pw.PieGrid(),
+              datasets: [
+                for (final s in slices)
+                  pw.PieDataSet(
+                    value: s.value,
+                    color: s.color,
+                    legend: '',
+                    innerRadius: 38,
+                    surfaceOpacity: 1,
+                  ),
+              ],
+            ),
+          ),
+          pw.SizedBox(width: 16),
+          // Legend with real $ values + percentages
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                for (final s in slices)
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.symmetric(vertical: 2),
+                    child: pw.Row(children: [
+                      pw.Container(width: 9, height: 9, color: s.color),
+                      pw.SizedBox(width: 6),
+                      pw.Expanded(
+                        child: pw.Text(s.label,
+                            style: const pw.TextStyle(fontSize: 8)),
+                      ),
+                      pw.Text(
+                        '${_usd2.format(s.value)}'
+                        '  (${total > 0 ? (s.value / total * 100).toStringAsFixed(0) : '0'}%)',
+                        style: pw.TextStyle(
+                            fontSize: 8, fontWeight: pw.FontWeight.bold),
+                      ),
+                    ]),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ]);
   }
 
   // ── Cost breakdown visual bar ─────────────────────────────────────────────
@@ -558,6 +645,15 @@ class PdfExportService {
       builder: (ctx) => _PdfUnlockSheet(isEs: isEs, onExport: onExport),
     );
   }
+}
+
+// ── Donut chart slice model ───────────────────────────────────────────────────
+
+class _Slice {
+  final String label;
+  final double value;
+  final PdfColor color;
+  const _Slice(this.label, this.value, this.color);
 }
 
 // ── PDF unlock bottom sheet ───────────────────────────────────────────────────

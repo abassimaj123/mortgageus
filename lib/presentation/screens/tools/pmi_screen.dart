@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
@@ -21,6 +22,13 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
   bool _analyticsLogged = false;
 
   static const double _pmiAnnualRate = 0.80; // 0.80% — matches app-wide default
+
+  @override
+  void initState() {
+    super.initState();
+    final input = ref.read(mortgageInputProvider);
+    _homePriceCtrl.text = input.homePrice > 0 ? input.homePrice.toStringAsFixed(0) : '400000';
+  }
 
   Future<void> _onInteraction() async {
     if (!_analyticsLogged) {
@@ -90,13 +98,14 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
               )
             : 0.0;
 
-        // Months until PMI auto-cancel (use current market rate as proxy)
+        // Months until PMI auto-cancel — use rate/term from main calculator input
+        final _input = ref.watch(mortgageInputProvider);
         final int? dropMonth = hasPmi
             ? _monthsUntilPmiDrop(
                 loanAmount: loan,
                 homePrice: rawPrice,
-                annualRatePct: MortgageConstants.defaultInterestRate,
-                termYears: MortgageConstants.defaultTermYears,
+                annualRatePct: _input.annualRatePct,
+                termYears: _input.termYears,
               )
             : null;
 

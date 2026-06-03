@@ -10,7 +10,7 @@ import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// FHA Loan Calculator
 /// Min 3.5% down. Upfront MIP = 1.75% of loan (financed).
-/// Annual MIP: LTV > 95% → 0.55%/yr ; LTV ≤ 95% → 0.50%/yr.
+/// Annual MIP: LTV > 90% → 0.55%/yr ; LTV ≤ 90% → 0.50%/yr.
 class FhaScreen extends ConsumerStatefulWidget {
   const FhaScreen({super.key});
 
@@ -27,15 +27,11 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
   int _creditScore = 680;
   bool _logged = false;
 
-  double _rate = 7.0;
-  static const int _term = 30;
-
   @override
   void initState() {
     super.initState();
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
-    _rate = input.annualRatePct;
   }
 
   @override
@@ -59,8 +55,26 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
   double _parse(String s) =>
       double.tryParse(s.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
 
+  /// Approximate rate adjustment based on credit score (FHA lender pricing).
+  /// Credit score affects the interest rate offered, not the MIP rate.
+  double _creditAdj(int score) {
+    if (score >= 760) return -0.625;
+    if (score >= 740) return -0.375;
+    if (score >= 720) return -0.250;
+    if (score >= 700) return -0.125;
+    if (score >= 680) return 0.000;
+    if (score >= 660) return 0.125;
+    if (score >= 640) return 0.375;
+    if (score >= 620) return 0.625;
+    return 1.125; // 580–619
+  }
+
   @override
   Widget build(BuildContext context) {
+    final input = ref.watch(mortgageInputProvider);
+    final effectiveRate = ((input.annualRatePct > 0 ? input.annualRatePct : 7.0) +
+            _creditAdj(_creditScore))
+        .clamp(0.0, 30.0);
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
@@ -70,11 +84,13 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         final upfrontMip = baseLoan * 0.0175;
         final loan = baseLoan + upfrontMip; // financed
         final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-        final annualMipRate = ltv > 95 ? 0.0055 : 0.0050;
+        final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
         final monthlyMip = loan * annualMipRate / 12.0;
+        // Reactive term — stays in sync with the main calculator tab
+        final term = input.termYears > 0 ? input.termYears : 30;
         final pAndI = loan > 0
             ? MortgageCalculator.calcMonthlyPayment(
-                loanAmount: loan, annualRatePct: _rate, termYears: _term)
+                loanAmount: loan, annualRatePct: effectiveRate, termYears: term)
             : 0.0;
         final tax = _parse(_taxCtrl.text);
         final ins = _parse(_insCtrl.text);
@@ -316,8 +332,8 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
                               Expanded(
                                 child: Text(
                                   isEs
-                                      ? 'FHA requiere 3.5% mínimo. El MIP inicial se financia. El MIP anual es 0.55% si LTV > 95%, 0.50% si LTV ≤ 95%.'
-                                      : 'FHA requires 3.5% minimum down. Upfront MIP is financed into the loan. Annual MIP is 0.55% if LTV > 95%, 0.50% if LTV ≤ 95%.',
+                                      ? 'FHA requiere 3.5% mínimo. El MIP inicial se financia. El MIP anual es 0.55% si LTV > 90%, 0.50% si LTV ≤ 90%.'
+                                      : 'FHA requires 3.5% minimum down. Upfront MIP is financed into the loan. Annual MIP is 0.55% if LTV > 90%, 0.50% if LTV ≤ 90%.',
                                   style: const TextStyle(
                                       color: AppTheme.infoText,
                                       fontSize: AppTextSize.md,

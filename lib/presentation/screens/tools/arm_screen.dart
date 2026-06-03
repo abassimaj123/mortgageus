@@ -39,6 +39,10 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
       if (loan > 0) {
         _loanCtrl.text = loan.toStringAsFixed(0);
       }
+      // Sync initial rate from main calculator
+      if (input.annualRatePct > 0) {
+        _initRateCtrl.text = input.annualRatePct.toStringAsFixed(2);
+      }
       if (mounted) _calculate();
     });
   }
@@ -214,6 +218,19 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
                           isEs: isEs,
                           fixedYears: _fixedYears,
                           termYears: _termYears),
+                    ] else ...[
+                      const SizedBox(height: AppSpacing.xxl),
+                      Center(
+                        child: Text(
+                          isEs
+                              ? 'Ingresa un monto de préstamo para ver los resultados'
+                              : 'Enter a loan amount to see results',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: AppTheme.labelGray,
+                              fontSize: AppTextSize.md),
+                        ),
+                      ),
                     ],
                     const SizedBox(height: AppSpacing.listBottomInset),
                   ]),

@@ -261,7 +261,7 @@ class _InvestmentReturnScreenState
                   const SizedBox(height: AppSpacing.xxl),
 
                   // ── Assumptions note ───────────────────────────────────────
-                  _AssumptionsBox(isEs: isEs),
+                  _AssumptionsBox(isEs: isEs, rate: _defaultRate),
                   const SizedBox(height: AppSpacing.xl),
 
                   // ── Results (premium-gated) ───────────────────────────────
@@ -359,48 +359,30 @@ class _ResultsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final verdict = _verdict(result.irr);
+    // When locked, show a placeholder result so real values are never rendered.
+    final displayResult = unlocked
+        ? result
+        : const _InvestmentResult(
+            price: 0,
+            downAmt: 0,
+            initialInv: 0,
+            loanAmt: 0,
+            mortgageMo: 0,
+            monthlyCF: 0,
+            cashOnCash: 0,
+            irr: 0,
+            npv: 0,
+            equityMult: 0,
+          );
+
+    final verdict = _verdict(displayResult.irr);
     final verdictColor =
         _verdictColor(verdict, Theme.of(context).brightness);
     final verdictLabel = _verdictLabel(verdict, isEs);
 
-    Widget blurred(Widget child) {
-      if (unlocked) return child;
-      return Stack(
-        children: [
-          child,
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              child: Container(
-                color: Colors.white.withValues(alpha: 0.82),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.lock_outline,
-                          color: AppTheme.primary, size: 32),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        isEs ? 'Resultados — Premium' : 'Results — Premium',
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: AppTextSize.bodyMd,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    return blurred(
-      Card(
+    return Column(
+      children: [
+        Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.xl)),
@@ -435,7 +417,9 @@ class _ResultsCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${result.irr.toStringAsFixed(1)}% IRR',
+                      unlocked
+                          ? '${displayResult.irr.toStringAsFixed(1)}% IRR'
+                          : '—',
                       style: TextStyle(
                         color: verdictColor,
                         fontWeight: FontWeight.w600,
@@ -450,24 +434,33 @@ class _ResultsCard extends StatelessWidget {
               // ── Cash flow row ──────────────────────────────────────────
               _Row(
                 label: isEs ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
-                value: '${result.monthlyCF >= 0 ? '+' : ''}'
-                    '${AmountFormatter.ui(result.monthlyCF, 'USD')}',
-                color: result.monthlyCF >= 0
-                    ? AppTheme.accentGood
-                    : CalcwiseSemanticColors.error(Theme.of(context).brightness),
+                value: unlocked
+                    ? '${displayResult.monthlyCF >= 0 ? '+' : ''}'
+                        '${AmountFormatter.ui(displayResult.monthlyCF, 'USD')}'
+                    : '—',
+                color: unlocked
+                    ? (displayResult.monthlyCF >= 0
+                        ? AppTheme.accentGood
+                        : CalcwiseSemanticColors.error(
+                            Theme.of(context).brightness))
+                    : null,
                 bold: true,
               ),
               _Row(
                 label: isEs
                     ? 'Inversión inicial (enganche + cierre)'
                     : 'Initial Investment (down + closing)',
-                value: AmountFormatter.ui(result.initialInv, 'USD'),
+                value: unlocked
+                    ? AmountFormatter.ui(displayResult.initialInv, 'USD')
+                    : '—',
               ),
               _Row(
                 label: isEs
-                    ? 'Pago hipotecario mensual (7%, 30 años)'
-                    : 'Monthly Mortgage Payment (7%, 30yr)',
-                value: AmountFormatter.ui(result.mortgageMo, 'USD'),
+                    ? 'Pago hipotecario mensual'
+                    : 'Monthly Mortgage Payment',
+                value: unlocked
+                    ? AmountFormatter.ui(displayResult.mortgageMo, 'USD')
+                    : '—',
               ),
               const Divider(height: 24),
 
@@ -476,19 +469,26 @@ class _ResultsCard extends StatelessWidget {
                 label: isEs
                     ? 'TIR (tasa interna de retorno)'
                     : 'IRR (Internal Rate of Return)',
-                value: '${result.irr.toStringAsFixed(1)}%',
-                color: verdictColor,
+                value: unlocked
+                    ? '${displayResult.irr.toStringAsFixed(1)}%'
+                    : '—',
+                color: unlocked ? verdictColor : null,
                 bold: true,
               ),
               _Row(
                 label: isEs
                     ? 'VPN (valor presente neto)'
                     : 'NPV (Net Present Value)',
-                value: '${result.npv >= 0 ? '+' : ''}'
-                    '${AmountFormatter.ui(result.npv, 'USD')}',
-                color: result.npv >= 0
-                    ? AppTheme.accentGood
-                    : CalcwiseSemanticColors.error(Theme.of(context).brightness),
+                value: unlocked
+                    ? '${displayResult.npv >= 0 ? '+' : ''}'
+                        '${AmountFormatter.ui(displayResult.npv, 'USD')}'
+                    : '—',
+                color: unlocked
+                    ? (displayResult.npv >= 0
+                        ? AppTheme.accentGood
+                        : CalcwiseSemanticColors.error(
+                            Theme.of(context).brightness))
+                    : null,
                 bold: true,
               ),
               const Divider(height: 24),
@@ -498,14 +498,20 @@ class _ResultsCard extends StatelessWidget {
                 label: isEs
                     ? 'ROI efectivo anual (cash-on-cash)'
                     : 'Cash-on-Cash ROI',
-                value: '${result.cashOnCash.toStringAsFixed(1)}%',
-                color: result.cashOnCash >= 6
-                    ? AppTheme.accentGood
-                    : AppTheme.accentWarn,
+                value: unlocked
+                    ? '${displayResult.cashOnCash.toStringAsFixed(1)}%'
+                    : '—',
+                color: unlocked
+                    ? (displayResult.cashOnCash >= 6
+                        ? AppTheme.accentGood
+                        : AppTheme.accentWarn)
+                    : null,
               ),
               _Row(
                 label: isEs ? 'Múltiplo de capital' : 'Equity Multiple',
-                value: '${result.equityMult.toStringAsFixed(2)}x',
+                value: unlocked
+                    ? '${displayResult.equityMult.toStringAsFixed(2)}x'
+                    : '—',
               ),
 
               const SizedBox(height: AppSpacing.sm),
@@ -515,6 +521,7 @@ class _ResultsCard extends StatelessWidget {
           ),
         ),
       ),
+      ],
     );
   }
 }
@@ -567,37 +574,41 @@ class _PremiumGateBanner extends StatelessWidget {
 
 class _AssumptionsBox extends StatelessWidget {
   final bool isEs;
-  const _AssumptionsBox({required this.isEs});
+  final double rate;
+  const _AssumptionsBox({required this.isEs, required this.rate});
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.mdPlus),
-        decoration: BoxDecoration(
-          color: AppTheme.infoSurface,
-          border: Border.all(color: AppTheme.infoBorder),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.info_outline, color: AppTheme.infoIcon, size: 18),
-            const SizedBox(width: AppSpacing.smPlus),
-            Expanded(
-              child: Text(
-                isEs
-                    ? 'Supuestos: tasa hipotecaria 7% a 30 años · gastos operativos 30% de la renta · costos de cierre 2% · venta con 6% de gastos.'
-                    : 'Assumptions: 7% mortgage rate, 30yr · 30% operating expenses · 2% closing costs · 6% selling costs at exit.',
-                style: const TextStyle(
-                  color: AppTheme.infoText,
-                  fontSize: AppTextSize.sm,
-                  height: 1.4,
-                ),
+  Widget build(BuildContext context) {
+    final rateStr = rate.toStringAsFixed(1);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.mdPlus),
+      decoration: BoxDecoration(
+        color: AppTheme.infoSurface,
+        border: Border.all(color: AppTheme.infoBorder),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, color: AppTheme.infoIcon, size: 18),
+          const SizedBox(width: AppSpacing.smPlus),
+          Expanded(
+            child: Text(
+              isEs
+                  ? 'Supuestos: tasa hipotecaria $rateStr% a 30 años · gastos operativos 30% de la renta · costos de cierre 2% · venta con 6% de gastos.'
+                  : 'Assumptions: $rateStr% mortgage rate, 30yr · 30% operating expenses · 2% closing costs · 6% selling costs at exit.',
+              style: const TextStyle(
+                color: AppTheme.infoText,
+                fontSize: AppTextSize.sm,
+                height: 1.4,
               ),
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ── Verdict legend ────────────────────────────────────────────────────────────

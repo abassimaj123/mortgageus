@@ -32,7 +32,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
     super.initState();
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
-    _rateCtrl.text = input.annualRatePct.toStringAsFixed(2);
+    _rateCtrl.text = (input.annualRatePct > 0 ? input.annualRatePct : 6.9).toStringAsFixed(2);
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
@@ -172,16 +172,51 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
     'USDA',
   ];
 
-  /// Returns list of (label, amount) cost line items
+  /// Returns list of (label, amount) cost line items.
+  /// When [isBuyer] is false, returns seller-side costs instead.
   List<_CostLine> _calcCosts({
     required double homePrice,
     required double rate,
     required String state,
     required String loanType,
+    required bool isBuyer,
   }) {
     if (homePrice <= 0) return [];
 
-    final loanAmount = homePrice * 0.8; // assume 20% down as baseline
+    // ── Seller perspective ────────────────────────────────────────────────────
+    if (!isBuyer) {
+      // Seller bears: agent commission (~5.5%), transfer tax, recording fees
+      final agentCommission = homePrice * 0.055;
+      final transferTaxRate = _transferTaxRates[state] ?? 0.001;
+      final transferTax = homePrice * transferTaxRate;
+      const recordingFees = 200.0;
+      final titleInsurance = homePrice * 0.004; // seller's title policy
+      const escrowFee = 400.0;
+
+      return [
+        _CostLine('Agent Commission (5.5%)', 'Comisión del Agente (5.5%)',
+            agentCommission),
+        _CostLine('Transfer Tax ($state)', 'Impuesto de Transferencia ($state)',
+            transferTax),
+        _CostLine('Owner\'s Title Policy', 'Póliza de Título del Vendedor',
+            titleInsurance),
+        _CostLine('Recording Fees', 'Tarifas de Registro', recordingFees),
+        _CostLine('Escrow / Settlement Fee', 'Tarifa de Plica / Cierre',
+            escrowFee),
+      ];
+    }
+
+    // ── Buyer perspective ─────────────────────────────────────────────────────
+    // Loan amount varies by loan type (affects origination fee & pre-paid interest)
+    final double loanAmount;
+    if (loanType == 'FHA') {
+      loanAmount = homePrice * 0.965; // 3.5% down
+    } else if (loanType == 'VA' || loanType == 'USDA') {
+      loanAmount = homePrice; // 0% down
+    } else {
+      loanAmount = homePrice * 0.8; // Conventional: 20% down baseline
+    }
+
     final transferTaxRate = _transferTaxRates[state] ?? 0.001;
 
     final originationFee = loanAmount * 0.0075;
@@ -234,6 +269,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
           rate: rate,
           state: _state,
           loanType: _loanType,
+          isBuyer: _isBuyer,
         );
         final total = lines.fold<double>(0.0, (s, l) => s + l.amount);
         final pct = homePrice > 0 ? total / homePrice * 100.0 : 0.0;

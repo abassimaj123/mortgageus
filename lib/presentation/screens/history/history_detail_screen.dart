@@ -160,6 +160,15 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
         final hoa = (row['hoa'] as num?)?.toDouble() ?? 0.0;
         final totalCost = totalInterest + loanAmount;
         final downAmount = homePrice * downPercent / 100;
+
+        // Recompute P&I from stored inputs (not persisted directly in DB)
+        final piPayment = loanAmount > 0 && annualRate > 0 && termYears > 0
+            ? MortgageCalculator.calcMonthlyPayment(
+                loanAmount: loanAmount,
+                annualRatePct: annualRate,
+                termYears: termYears,
+              )
+            : 0.0;
         final createdAt =
             DateTime.tryParse(row['created_at'] as String? ?? '') ??
                 DateTime.now();
@@ -226,6 +235,11 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         title: isEs ? 'Resultados' : 'Results',
                         icon: Icons.bar_chart_rounded,
                         children: [
+                          if (piPayment > 0)
+                            _Row(
+                              isEs ? 'Capital + Interés (P&I)' : 'P&I (Principal + Interest)',
+                              AmountFormatter.ui(piPayment, 'USD'),
+                            ),
                           _Row(
                             isEs
                                 ? 'Pago mensual (PITI)'

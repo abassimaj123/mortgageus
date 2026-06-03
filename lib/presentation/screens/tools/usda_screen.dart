@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 
 /// USDA Loan Calculator
 /// 0% down. Upfront guarantee fee = 1% (financed). Annual fee 0.35%.
 /// Income limit = 115% of area median income (default $90k AMI).
-class UsdaScreen extends StatefulWidget {
+class UsdaScreen extends ConsumerStatefulWidget {
   const UsdaScreen({super.key});
 
   @override
-  State<UsdaScreen> createState() => _UsdaScreenState();
+  ConsumerState<UsdaScreen> createState() => _UsdaScreenState();
 }
 
-class _UsdaScreenState extends State<UsdaScreen> {
+class _UsdaScreenState extends ConsumerState<UsdaScreen> {
   final _homePriceCtrl = TextEditingController(text: '280000');
   final _incomeCtrl = TextEditingController(text: '75000');
   final _taxCtrl = TextEditingController(text: '220');
@@ -24,10 +26,18 @@ class _UsdaScreenState extends State<UsdaScreen> {
   bool _rural = true; // rural = eligible, suburban = warning
   bool _logged = false;
 
-  static const double _rate = 7.0;
-  static const int _term = 30;
+  late double _rate;
+  late int _term;
   static const double _defaultAmi = 90000.0;
   static const double _incomeLimit = 1.15; // 115%
+
+  @override
+  void initState() {
+    super.initState();
+    final input = ref.read(mortgageInputProvider);
+    _rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+    _term = input.termYears > 0 ? input.termYears : 30;
+  }
 
   @override
   void dispose() {

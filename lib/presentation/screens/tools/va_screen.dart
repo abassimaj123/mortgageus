@@ -27,15 +27,11 @@ class _VaScreenState extends ConsumerState<VaScreen> {
   bool _subsequent = false;
   bool _logged = false;
 
-  double _rate = 7.0;
-  static const int _term = 30;
-
   @override
   void initState() {
     super.initState();
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
-    _rate = input.annualRatePct;
   }
 
   @override
@@ -66,6 +62,9 @@ class _VaScreenState extends ConsumerState<VaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mortgageInput = ref.watch(mortgageInputProvider);
+    final rate = mortgageInput.annualRatePct > 0 ? mortgageInput.annualRatePct : 7.0;
+    final term = mortgageInput.termYears > 0 ? mortgageInput.termYears : 30;
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
@@ -77,7 +76,7 @@ class _VaScreenState extends ConsumerState<VaScreen> {
         final loan = baseLoan + fundingFee; // financed
         final pAndI = loan > 0
             ? MortgageCalculator.calcMonthlyPayment(
-                loanAmount: loan, annualRatePct: _rate, termYears: _term)
+                loanAmount: loan, annualRatePct: rate, termYears: term)
             : 0.0;
         final tax = _parse(_taxCtrl.text);
         final ins = _parse(_insCtrl.text);

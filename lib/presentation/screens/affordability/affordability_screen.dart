@@ -77,7 +77,9 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
     final hoa = double.tryParse(_hoaCtrl.text.replaceAll(',', '')) ?? 0;
 
     if (income <= 0) {
-      setState(() => _incomeError = 'Enter a valid annual income');
+      setState(() => _incomeError = isSpanishNotifier.value
+          ? 'Ingresa un ingreso anual válido'
+          : 'Enter a valid annual income');
       return;
     }
     setState(() => _incomeError = null);
@@ -299,12 +301,13 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
       ),
       validator: (v) {
         final raw = (v ?? '').trim();
-        if (raw.isEmpty) return required ? 'Required' : null;
+        final es = isSpanishNotifier.value;
+        if (raw.isEmpty) return required ? (es ? 'Requerido' : 'Required') : null;
         final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-        if (cleaned.isEmpty) return 'Invalid';
+        if (cleaned.isEmpty) return es ? 'Inválido' : 'Invalid';
         final n = double.tryParse(cleaned);
-        if (n == null) return 'Invalid';
-        if (n < 0) return 'Must be ≥ 0';
+        if (n == null) return es ? 'Inválido' : 'Invalid';
+        if (n < 0) return es ? 'Debe ser ≥ 0' : 'Must be ≥ 0';
         return null;
       },
     );

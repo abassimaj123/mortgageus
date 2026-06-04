@@ -26,17 +26,12 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
   bool _rural = true; // rural = eligible, suburban = warning
   bool _logged = false;
 
-  late double _rate;
-  late int _term;
   static const double _defaultAmi = 90000.0;
   static const double _incomeLimit = 1.15; // 115%
 
   @override
   void initState() {
     super.initState();
-    final input = ref.read(mortgageInputProvider);
-    _rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
-    _term = input.termYears > 0 ? input.termYears : 30;
   }
 
   @override
@@ -66,6 +61,9 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
+        final input = ref.watch(mortgageInputProvider);
+        final rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+        final term = input.termYears > 0 ? input.termYears : 30;
         final price = _parse(_homePriceCtrl.text);
         final income = _parse(_incomeCtrl.text);
         final maxIncome = _defaultAmi * _incomeLimit;
@@ -78,7 +76,7 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
         final monthlyFee = annualFee / 12.0;
         final pAndI = loan > 0
             ? MortgageCalculator.calcMonthlyPayment(
-                loanAmount: loan, annualRatePct: _rate, termYears: _term)
+                loanAmount: loan, annualRatePct: rate, termYears: term)
             : 0.0;
         final tax = _parse(_taxCtrl.text);
         final ins = _parse(_insCtrl.text);

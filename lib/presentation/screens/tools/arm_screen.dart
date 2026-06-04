@@ -5,7 +5,7 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../domain/models/arm_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show isSpanishNotifier;
+import '../../../../main.dart' show isSpanishNotifier, paywallSession;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
@@ -24,7 +24,16 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
   int _termYears = 30;
   ARMResult? _result;
   String? _loanError;
+  bool _logged = false;
 
+  Future<void> _onInteraction() async {
+    if (_logged) return;
+    _logged = true;
+    final t = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (t == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
 
   static const _fixedOptions = [5, 7, 10];
   static const _termOptions = [15, 20, 30];
@@ -77,6 +86,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
         totalTermYears: _termYears,
       );
       setState(() => _result = r);
+      _onInteraction();
     } catch (_) {
       setState(() => _result = null);
     }

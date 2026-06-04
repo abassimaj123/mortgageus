@@ -59,7 +59,9 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
         double.tryParse(_closingCtrl.text.replaceAll(',', '')) ?? 4000;
     if (balance <= 0 || curYears <= 0 || newYears <= 0) {
       setState(() =>
-          _balanceError = balance <= 0 ? 'Enter a valid loan balance' : null);
+          _balanceError = balance <= 0
+              ? (isSpanishNotifier.value ? 'Ingresa un saldo válido' : 'Enter a valid loan balance')
+              : null);
       return;
     }
     setState(() {
@@ -308,12 +310,13 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
         ),
         validator: (v) {
           final raw = (v ?? '').trim();
-          if (raw.isEmpty) return required ? 'Required' : null;
+          final es = isSpanishNotifier.value;
+          if (raw.isEmpty) return required ? (es ? 'Requerido' : 'Required') : null;
           final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-          if (cleaned.isEmpty) return 'Invalid';
+          if (cleaned.isEmpty) return es ? 'Inválido' : 'Invalid';
           final n = double.tryParse(cleaned);
-          if (n == null) return 'Invalid';
-          if (n < 0) return 'Must be ≥ 0';
+          if (n == null) return es ? 'Inválido' : 'Invalid';
+          if (n < 0) return es ? 'Debe ser ≥ 0' : 'Must be ≥ 0';
           return null;
         },
       ),

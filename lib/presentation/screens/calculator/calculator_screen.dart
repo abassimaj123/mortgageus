@@ -1029,13 +1029,14 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
               horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
         ),
         validator: (v) {
+          final es = isSpanishNotifier.value;
           final raw = (v ?? '').trim();
-          if (raw.isEmpty) return required ? 'Required' : null;
+          if (raw.isEmpty) return required ? (es ? 'Requerido' : 'Required') : null;
           final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-          if (cleaned.isEmpty) return 'Invalid';
+          if (cleaned.isEmpty) return es ? 'Inválido' : 'Invalid';
           final n = double.tryParse(cleaned);
-          if (n == null) return 'Invalid';
-          if (n < 0) return 'Must be ≥ 0';
+          if (n == null) return es ? 'Inválido' : 'Invalid';
+          if (n < 0) return es ? 'Debe ser ≥ 0' : 'Must be ≥ 0';
           return null;
         },
         onChanged: onChanged,
@@ -1220,13 +1221,14 @@ class _DownPaymentRow extends ConsumerWidget {
                 horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
           ),
           validator: (v) {
+            final es = isSpanishNotifier.value;
             final raw = (v ?? '').trim();
             if (raw.isEmpty) return null;
             final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-            if (cleaned.isEmpty) return 'Invalid';
+            if (cleaned.isEmpty) return es ? 'Inválido' : 'Invalid';
             final n = double.tryParse(cleaned);
-            if (n == null) return 'Invalid';
-            if (n < 0) return 'Must be ≥ 0';
+            if (n == null) return es ? 'Inválido' : 'Invalid';
+            if (n < 0) return es ? 'Debe ser ≥ 0' : 'Must be ≥ 0';
             return null;
           },
           onChanged: (v) {

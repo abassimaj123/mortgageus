@@ -1525,33 +1525,30 @@ class _ChipRow<T> extends StatelessWidget {
               HapticFeedback.selectionClick();
               onTap(v);
             },
-            borderRadius: BorderRadius.circular(AppRadius.full),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
-              child: AnimatedContainer(
-                duration: AppDuration.fast,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md, vertical: AppSpacing.xs + 2),
-                decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            child: AnimatedContainer(
+              duration: AppDuration.fast,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppTheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(
                   color: isSelected
                       ? AppTheme.primary
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppTheme.primary
-                        : CalcwiseTheme.of(context).cardBorder,
-                  ),
+                      : CalcwiseTheme.of(context).cardBorder,
                 ),
-                child: Text(
-                  label(v),
-                  style: TextStyle(
-                    fontSize: AppTextSize.sm,
-                    fontWeight: FontWeight.w500,
-                    color: isSelected
-                        ? Colors.white
-                        : CalcwiseTheme.of(context).textSecondary,
-                  ),
+              ),
+              child: Text(
+                label(v),
+                style: TextStyle(
+                  fontSize: AppTextSize.body,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : CalcwiseTheme.of(context).textSecondary,
                 ),
               ),
             ),
@@ -1561,3 +1558,4 @@ class _ChipRow<T> extends StatelessWidget {
     );
   }
 }
+

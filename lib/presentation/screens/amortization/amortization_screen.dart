@@ -734,10 +734,22 @@ class _YearlyList extends StatelessWidget {
             return _YearTile(group: visibleYears[i], s: s);
           }
           // Lock banner (only appended when locked)
-          return _AmortLockBanner(
-            isEs: isEs,
-            lockedYears: totalYears - freeYearLimit,
-            lockedMonths: (totalYears - freeYearLimit) * 12,
+          final _lockedYears = totalYears - freeYearLimit;
+          final _lockedMonths = _lockedYears * 12;
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md, AppSpacing.sm, AppSpacing.md, 80),
+            child: CalcwisePremiumGate(
+              title: isEs ? 'Tabla completa bloqueada' : 'Full schedule locked',
+              description: isEs
+                  ? '+$_lockedYears años · +$_lockedMonths meses restantes'
+                  : '+$_lockedYears years · +$_lockedMonths months remaining',
+              onUnlock: () => IAPService.instance.buy(),
+              buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
+              subtitle: isEs
+                  ? 'Acceso único · Sin suscripción'
+                  : 'One-time purchase · No subscription',
+            ),
           );
         },
         childCount: visibleYears.length + (locked ? 1 : 0),
@@ -1037,99 +1049,26 @@ class _MonthlyList extends StatelessWidget {
               ]),
             );
           }
-          return _AmortLockBanner(
-            isEs: isEs,
-            lockedYears: ((schedule.length - _kFreeMonthLimit) / 12).ceil(),
-            lockedMonths: schedule.length - _kFreeMonthLimit,
+          final _lockedYears = ((schedule.length - _kFreeMonthLimit) / 12).ceil();
+          final _lockedMonths = schedule.length - _kFreeMonthLimit;
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md, AppSpacing.sm, AppSpacing.md, 80),
+            child: CalcwisePremiumGate(
+              title: isEs ? 'Tabla completa bloqueada' : 'Full schedule locked',
+              description: isEs
+                  ? '+$_lockedYears años · +$_lockedMonths meses restantes'
+                  : '+$_lockedYears years · +$_lockedMonths months remaining',
+              onUnlock: () => IAPService.instance.buy(),
+              buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
+              subtitle: isEs
+                  ? 'Acceso único · Sin suscripción'
+                  : 'One-time purchase · No subscription',
+            ),
           );
         },
         childCount: visible.length + (locked ? 1 : 0),
       ),
-    );
-  }
-}
-
-// ── Premium lock banner ───────────────────────────────────────────────────────
-class _AmortLockBanner extends StatelessWidget {
-  final bool isEs;
-  final int lockedYears;
-  final int lockedMonths;
-  const _AmortLockBanner(
-      {required this.isEs,
-      required this.lockedYears,
-      required this.lockedMonths});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
-          AppSpacing.md, AppSpacing.sm, AppSpacing.md, 80),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.primary.withValues(alpha: 0.08),
-            AppTheme.primary.withValues(alpha: 0.02)
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
-      ),
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xxl, vertical: AppSpacing.xxlPlus),
-      child: Column(children: [
-        const Icon(Icons.lock_outline, color: AppTheme.secondary, size: 36),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          isEs ? 'Tabla completa bloqueada' : 'Full schedule locked',
-          style: const TextStyle(
-              fontSize: AppTextSize.bodyLg,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primary),
-        ),
-        const SizedBox(height: AppRadius.sm),
-        Text(
-          isEs
-              ? '+$lockedYears años · +$lockedMonths meses restantes'
-              : '+$lockedYears years · +$lockedMonths months remaining',
-          style: const TextStyle(
-              fontSize: AppTextSize.md, color: AppTheme.labelGray),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        InkWell(
-          onTap: () => IAPService.instance.buy(),
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
-            decoration: BoxDecoration(
-              color: AppTheme.primary,
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-            ),
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Icon(Icons.workspace_premium,
-                  size: 18, color: Colors.white),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                isEs
-                    ? 'Desbloquear Premium — \$4.99'
-                    : 'Unlock Premium — \$4.99',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-            ]),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          isEs
-              ? 'Acceso único · Sin suscripción'
-              : 'One-time purchase · No subscription',
-          style: const TextStyle(
-              fontSize: AppTextSize.xs, color: AppTheme.labelGray),
-        ),
-      ]),
     );
   }
 }

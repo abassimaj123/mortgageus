@@ -333,7 +333,19 @@ class _ResultsSection extends StatelessWidget {
                 _ResultsCard(result: result, isEs: isEs, unlocked: unlocked),
                 if (!unlocked) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  _PremiumGateBanner(isEs: isEs),
+                  CalcwisePremiumGate(
+                    title: isEs
+                        ? 'IRR, NPV y análisis completo'
+                        : 'IRR, NPV & full analysis',
+                    description: isEs
+                        ? 'Desbloquea IRR, NPV y análisis completo'
+                        : 'Unlock IRR, NPV & full analysis',
+                    onUnlock: () => PaywallHard.show(context),
+                    buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
+                    subtitle: isEs
+                        ? 'Acceso único · Sin suscripción'
+                        : 'One-time purchase · No subscription',
+                  ),
                 ],
               ],
             );
@@ -524,50 +536,6 @@ class _ResultsCard extends StatelessWidget {
       ],
     );
   }
-}
-
-// ── Premium gate banner ───────────────────────────────────────────────────────
-
-class _PremiumGateBanner extends StatelessWidget {
-  final bool isEs;
-  const _PremiumGateBanner({required this.isEs});
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: () => PaywallHard.show(context),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.mdPlus),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppTheme.primary, AppTheme.primaryDark],
-            ),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.lock_open_rounded,
-                  color: Colors.white, size: 22),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  isEs
-                      ? 'Desbloquea IRR, NPV y análisis completo — Premium'
-                      : 'Unlock IRR, NPV & full analysis — Premium',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: AppTextSize.body,
-                  ),
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded,
-                  color: Colors.white70, size: 22),
-            ],
-          ),
-        ),
-      );
 }
 
 // ── Assumptions box ───────────────────────────────────────────────────────────

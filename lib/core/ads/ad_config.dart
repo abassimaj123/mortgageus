@@ -11,7 +11,10 @@
 class AdConfig {
   AdConfig._();
 
-  static const bool adsEnabled = true; // set false to disable all ads globally
+  // ⚠️ SCREENSHOT MODE — set to true for store captures, revert to false before release
+  static const bool screenshotMode = false;
+
+  static const bool adsEnabled = !screenshotMode; // set false to disable all ads globally
 
   // ── App IDs (replace with real IDs) ──────────────────────────────────────
   // TODO: android app ID from AdMob → android/app/src/main/AndroidManifest.xml

@@ -70,6 +70,11 @@ Future<void> main() async {
 
   await themeModeService.initialize();
   await freemiumService.initialize();
+  // ⚠️ SCREENSHOT MODE — force premium for store captures, revert before release
+  if (AdConfig.screenshotMode) {
+    freemiumService.isPremiumNotifier.value = true;
+    freemiumService.hasFullAccessNotifier.value = true;
+  }
   await IAPService.instance.initialize();
   await requestCalcwiseConsent();
   if (AdConfig.adsEnabled) await adService.initialize();

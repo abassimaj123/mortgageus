@@ -278,7 +278,7 @@ class AppStringsES implements AppStrings {
   @override
   final adFreeMinFree = '60 min sin anuncios';
   @override
-  final getPremiumBtn = r'Obtener Premium — $4.99';
+  final getPremiumBtn = 'Obtener Premium';
 
   // ARM calculator
   @override
@@ -336,9 +336,9 @@ class AppStringsES implements AppStrings {
   @override
   final premiumSubtitle = 'Historial ilimitado · Sin anuncios · Exportar PDF';
   @override
-  final getPremium = 'Desbloquear Premium — \$4.99';
+  final getPremium = 'Desbloquear Premium';
   @override
-  final getPremiumShort = 'Premium — \$4.99';
+  final getPremiumShort = 'Premium';
   @override
   final restorePurchase = 'Restaurar Compra';
 

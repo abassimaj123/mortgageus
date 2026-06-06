@@ -5,6 +5,7 @@ import '../../../core/irr_engine.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
+import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
@@ -340,6 +341,7 @@ class _ResultsSection extends StatelessWidget {
                     description: isEs
                         ? 'Desbloquea IRR, NPV y análisis completo'
                         : 'Unlock IRR, NPV & full analysis',
+                    price: IAPService.instance.localizedPrice,
                     onUnlock: () => PaywallHard.show(context),
                     buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
                     subtitle: isEs

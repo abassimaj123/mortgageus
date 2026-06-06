@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:calcwise_core/calcwise_core.dart'
     hide CrashlyticsService, iapErrorNotifier, PaywallHard;
 import 'core/ads/ad_config.dart';
+import 'core/db/mortgage_us_database_adapter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,6 +41,12 @@ final ValueNotifier<Map<String, double>?> preFillNotifier =
 final paywallSession = PaywallSessionService(
   appKey: 'mortgageus',
   hasFullAccess: () => freemiumService.hasFullAccess,
+);
+
+// SmartHistory ring buffer + pinned scenarios service
+final smartHistoryService = SmartHistoryService(
+  db: MortgageUSDatabaseAdapter(),
+  freemium: freemiumService,
 );
 
 // Ad service — backed by calcwise_core

@@ -12,10 +12,13 @@ import '../../../domain/models/mortgage_input.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier;
+import '../../../main.dart'
+    show isSpanishNotifier, tabSwitchNotifier, smartHistoryService;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'history_detail_screen.dart';
+
+enum _PinAction { unpin, rename, delete }
 
 // ── Item model for grouped display ───────────────────────────────────────────
 
@@ -98,7 +101,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (mounted) {
       setState(() {
         _history = rows;
-        _items = _groupRows(rows);
+        // Recent list groups only non-pinned (auto-saved) entries — pinned
+        // scenarios get their own section at the top.
+        _items = _groupRows(_visibleAutoSaves);
         _firstLoad = false;
       });
     }
@@ -109,9 +114,63 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (mounted) {
       setState(() {
         _history = rows;
-        _items = _groupRows(rows);
+        _items = _groupRows(_visibleAutoSaves);
       });
     }
+  }
+
+  // ── Pinned / auto-save partitions ──────────────────────────────────────────
+
+  List<Map<String, dynamic>> get _pinned =>
+      _history.where((r) => (r['is_pinned'] as int? ?? 0) == 1).toList();
+
+  List<Map<String, dynamic>> get _autoSaves =>
+      _history.where((r) => (r['is_pinned'] as int? ?? 0) == 0).toList();
+
+  List<Map<String, dynamic>> get _visibleAutoSaves {
+    if (freemiumService.hasFullAccess || freemiumService.isRewarded) {
+      return _autoSaves;
+    }
+    return _autoSaves.take(MonetizationConfig.freeRingBufferSize).toList();
+  }
+
+  // ── Pin management ─────────────────────────────────────────────────────────
+
+  Future<void> _unpin(int id) async {
+    await smartHistoryService.unpin(id);
+    _load();
+  }
+
+  Future<void> _rename(Map<String, dynamic> row, bool isEs) async {
+    final ctrl = TextEditingController(
+      text: (row['pin_label'] as String?) ?? '',
+    );
+    final label = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(isEs ? 'Renombrar escenario' : 'Rename scenario'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: InputDecoration(
+              hintText: isEs ? 'Nombre del escenario' : 'Scenario name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(isEs ? 'Cancelar' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, ctrl.text),
+            child: Text(isEs ? 'Guardar' : 'Save'),
+          ),
+        ],
+      ),
+    );
+    if (label == null) return;
+    await smartHistoryService.rename(row['id'] as int, label.trim());
+    _load();
   }
 
   // ── Delete helpers ────────────────────────────────────────────────────────
@@ -633,8 +692,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             Expanded(
                                               child: Text(
                                                 isPremium
-                                                    ? '${_items.length} ${isEs ? 'entradas guardadas' : 'entries saved'}'
-                                                    : '${_items.length} / ${MonetizationConfig.freeCalculationLimit} ${isEs ? 'guardados' : 'saved'}',
+                                                    ? '${_history.length} ${isEs ? 'entradas guardadas' : 'entries saved'}'
+                                                    : '${_autoSaves.length} / ${MonetizationConfig.freeRingBufferSize} ${isEs ? 'guardados' : 'saved'}',
                                                 style: TextStyle(
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -760,8 +819,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               Expanded(
                                                 child: Text(
                                                   isEs
-                                                      ? 'Máximo ${MonetizationConfig.freeCalculationLimit} entradas para usuarios gratuitos'
-                                                      : 'Max ${MonetizationConfig.freeCalculationLimit} entries for free users',
+                                                      ? 'Máximo ${MonetizationConfig.freeRingBufferSize} entradas recientes para usuarios gratuitos'
+                                                      : 'Max ${MonetizationConfig.freeRingBufferSize} recent entries for free users',
                                                   style: TextStyle(
                                                       fontSize: AppTextSize.sm,
                                                       color: Theme.of(context)
@@ -795,7 +854,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   ),
                                 ),
                               ),
-                              if (_items.isEmpty)
+                              if (_pinned.isEmpty && _items.isEmpty)
                                 SliverFillRemaining(
                                   hasScrollBody: false,
                                   child: CalcwiseEmptyState(
@@ -812,7 +871,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     onAction: () => tabSwitchNotifier.value = 0,
                                   ),
                                 )
-                              else
+                              else ...[
+                                // ── Saved Scenarios (pinned) ────────────────
+                                if (_pinned.isNotEmpty) ...[
+                                  SliverToBoxAdapter(
+                                    child: _sectionHeader(
+                                        context,
+                                        isEs
+                                            ? 'ESCENARIOS GUARDADOS'
+                                            : 'SAVED SCENARIOS',
+                                        Icons.bookmark_rounded),
+                                  ),
+                                  SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, i) => Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            16, 0, 16, 8),
+                                        child: _buildPinnedCard(
+                                            context, _pinned[i], isEs),
+                                      ),
+                                      childCount: _pinned.length,
+                                    ),
+                                  ),
+                                ],
+                                // ── Recent Calculations (auto-saves) ────────
+                                if (_items.isNotEmpty)
+                                  SliverToBoxAdapter(
+                                    child: _sectionHeader(
+                                        context,
+                                        isEs
+                                            ? 'CÁLCULOS RECIENTES'
+                                            : 'RECENT CALCULATIONS',
+                                        Icons.history_rounded),
+                                  ),
                                 SliverList(
                                   delegate: SliverChildBuilderDelegate(
                                     (context, i) {
@@ -906,6 +997,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     childCount: _items.length,
                                   ),
                                 ),
+                              ],
                               const SliverToBoxAdapter(
                                   child: SizedBox(height: AppSpacing.lg)),
                             ],
@@ -920,6 +1012,169 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   // ── Card builders ─────────────────────────────────────────────────────────
+
+  Widget _sectionHeader(BuildContext context, String label, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.sm),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: AppTheme.primary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: AppTextSize.xs,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.primary,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Card for a pinned scenario — bookmark badge + overflow menu.
+  Widget _buildPinnedCard(
+      BuildContext context, Map<String, dynamic> row, bool isEs) {
+    final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
+    final annualRate = (row['annual_rate'] as num?)?.toDouble() ?? 0.0;
+    final termYears = (row['term_years'] as num?)?.toInt() ?? 30;
+    final loanType = row['loan_type'] as String? ?? 'Conventional';
+    final monthly = (row['monthly_payment'] as num?)?.toDouble() ?? 0.0;
+    final createdAt =
+        DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now();
+    final id = row['id'] as int? ?? 0;
+    final pinLabel = row['pin_label'] as String?;
+    final label = row['label'] as String?;
+    final humanLabel =
+        '${AmountFormatter.ui(homePrice, 'USD')} · ${annualRate.toStringAsFixed(2)}% · $termYears${isEs ? 'a' : 'yr'}';
+    final title = (pinLabel != null && pinLabel.isNotEmpty)
+        ? pinLabel
+        : (label != null && label.isNotEmpty ? label : humanLabel);
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.5), width: 1.5),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        onTap: () => Navigator.push(
+            context,
+            PageRouteBuilder<void>(
+              pageBuilder: (_, __, ___) => HistoryDetailScreen(row: row),
+              transitionsBuilder: (_, anim, __, child) =>
+                  FadeTransition(opacity: anim, child: child),
+              transitionDuration: AppDuration.base,
+            )),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.mdPlus, vertical: AppSpacing.md),
+          child: Row(children: [
+            const Icon(Icons.bookmark_rounded,
+                size: 18, color: AppTheme.primary),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: AppTextSize.bodyMd,
+                        color: AppTheme.primary),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                          color: AppTheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.sm)),
+                      child: Text(loanType,
+                          style: const TextStyle(
+                              fontSize: AppTextSize.xs,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primary)),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(
+                      child: Text(
+                        '${isEs ? 'Mensual' : 'Monthly'}: ${AmountFormatter.ui(monthly, 'USD')}',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: AppTextSize.xs,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.65)),
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(_fmtDate.format(createdAt.toLocal()),
+                      style: const TextStyle(
+                          fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
+                ],
+              ),
+            ),
+            PopupMenuButton<_PinAction>(
+              icon: const Icon(Icons.more_vert_rounded,
+                  size: 18, color: Color(0xFF94A3B8)),
+              onSelected: (action) {
+                switch (action) {
+                  case _PinAction.unpin:
+                    _unpin(id);
+                  case _PinAction.rename:
+                    _rename(row, isEs);
+                  case _PinAction.delete:
+                    _delete(id, context);
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: _PinAction.unpin,
+                  child: Row(children: [
+                    const Icon(Icons.bookmark_remove_outlined, size: 18),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(isEs ? 'Desfijar' : 'Unpin'),
+                  ]),
+                ),
+                PopupMenuItem(
+                  value: _PinAction.rename,
+                  child: Row(children: [
+                    const Icon(Icons.edit_outlined, size: 18),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(isEs ? 'Renombrar' : 'Rename'),
+                  ]),
+                ),
+                PopupMenuItem(
+                  value: _PinAction.delete,
+                  child: Row(children: [
+                    Icon(Icons.delete_outline_rounded,
+                        size: 18,
+                        color: CalcwiseSemanticColors.error(
+                            Theme.of(context).brightness)),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(isEs ? 'Eliminar' : 'Delete',
+                        style: TextStyle(
+                            color: CalcwiseSemanticColors.error(
+                                Theme.of(context).brightness))),
+                  ]),
+                ),
+              ],
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
 
   Widget _buildSingleCard(
       BuildContext context, Map<String, dynamic> row, bool isEs) {

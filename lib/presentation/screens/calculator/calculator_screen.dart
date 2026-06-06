@@ -6,9 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
-import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
-import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/pdf_export_service.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../domain/models/loan_type.dart';
@@ -17,15 +15,21 @@ import '../../../domain/models/mortgage_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
-import '../history/history_screen.dart' show paywallSession, HistoryScreen;
+import '../history/history_screen.dart' show HistoryScreen;
 import '../../../main.dart'
-    show adService, paywallSession, isSpanishNotifier, preFillNotifier;
+    show
+        adService,
+        paywallSession,
+        isSpanishNotifier,
+        preFillNotifier,
+        smartHistoryService;
 import '../../../core/services/analytics_service.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../../widgets/info_tooltip.dart';
 import '../../../core/utils/insight_engine.dart';
 import '../../widgets/insight_card.dart';
+import '../../widgets/save_scenario_button.dart';
 
 class CalculatorScreen extends ConsumerStatefulWidget {
   const CalculatorScreen({super.key});
@@ -98,16 +102,124 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     }
   }
 
+  // ── SmartHistory: hash + payload helpers ──────────────────────────────────
+
+  /// Deterministic input hash for dedup. Uses only key inputs (rounded).
+  String? _currentHash() {
+    final result = ref.read(mortgageResultProvider);
+    if (result == null || result.loanAmount <= 0) return null;
+    final inputState = ref.read(mortgageInputProvider);
+    return ResultHasher.hashMixed({
+      'home': ResultHasher.roundTo(inputState.homePrice, 1000),
+      'down': ResultHasher.roundTo(inputState.downPaymentPct, 0.5),
+      'rate': ResultHasher.roundTo(inputState.annualRatePct, 0.1),
+      'term': inputState.termYears,
+      'type': inputState.loanType.label,
+    });
+  }
+
+  /// L2 payload — the full round-trippable record used to rebuild the row.
+  Map<String, dynamic> _l2Payload(String label) {
+    final result = ref.read(mortgageResultProvider)!;
+    final inputState = ref.read(mortgageInputProvider);
+    return {
+      'home_price': inputState.homePrice,
+      'down_percent': inputState.downPaymentPct,
+      'annual_rate': inputState.annualRatePct,
+      'monthly_payment': result.monthly.pitiPayment,
+      'total_interest': result.totalInterest,
+      'loan_amount': result.loanAmount,
+      'loan_type': inputState.loanType.label,
+      'term_years': inputState.termYears,
+      'tax_rate': inputState.propertyTaxRatePct,
+      'insurance': inputState.homeInsuranceAnnual,
+      'hoa': inputState.hoaMonthly,
+      'label': label,
+    };
+  }
+
+  /// L1 payload — lightweight summary for list display.
+  Map<String, dynamic> _l1Payload(String label) {
+    final result = ref.read(mortgageResultProvider)!;
+    final inputState = ref.read(mortgageInputProvider);
+    return {
+      'label': label,
+      'monthly_payment': result.monthly.pitiPayment,
+      'home_price': inputState.homePrice,
+    };
+  }
+
+  String _autoLabel() {
+    final inputState = ref.read(mortgageInputProvider);
+    return '${inputState.homePrice ~/ 1000}K · ${inputState.annualRatePct.toStringAsFixed(2)}% · ${inputState.termYears}yr';
+  }
+
   void _scheduleAutoSave() {
+    final hash = _currentHash();
+    if (hash == null) return;
+    final label = _autoLabel();
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'mortgageus',
+      screenId: 'calculator',
+      inputHash: hash,
+      l1: _l1Payload(label),
+      l2: _l2Payload(label),
+    );
+    // Refresh history tab + side-effects after the debounce window elapses.
     _autoSaveTimer?.cancel();
     _autoSaveTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) _saveToHistory();
+      if (!mounted) return;
+      HistoryScreen.refreshNotifier.value++;
+      adService.onSave();
+      try {
+        AnalyticsService.instance.logSave();
+        AnalyticsService.instance.logHistorySaved();
+      } catch (_) {}
+      final inputState = ref.read(mortgageInputProvider);
+      final result = ref.read(mortgageResultProvider);
+      unawaited(RateWatchService.instance
+          .checkRate(inputState.annualRatePct, appLabel: 'MortgageUS'));
+      // Emotional trigger: accessible monthly payment → ask for review.
+      if (result != null &&
+          result.monthly.pitiPayment < 3000 &&
+          result.monthly.pitiPayment > 0) {
+        CalcwiseReviewService.instance.requestAfterPremium();
+      }
     });
+  }
+
+  /// Save the current calculation as a pinned scenario.
+  Future<void> _saveScenario(String? label) async {
+    final hash = _currentHash();
+    if (hash == null) return;
+    final effectiveLabel = (label != null && label.isNotEmpty)
+        ? label
+        : _autoLabel();
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'calculator',
+      inputHash: hash,
+      l1: _l1Payload(effectiveLabel),
+      l2: _l2Payload(effectiveLabel),
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
+    try {
+      AnalyticsService.instance.logSave();
+      AnalyticsService.instance.logHistorySaved();
+    } catch (_) {}
+    if (!mounted) return;
+    final trigger = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
   }
 
   @override
   void dispose() {
     _autoSaveTimer?.cancel();
+    smartHistoryService.cancelPendingSave('mortgageus', 'calculator');
     preFillNotifier.removeListener(_onPreFill);
     _homePriceCtrl.dispose();
     _downPayCtrl.dispose();
@@ -117,86 +229,6 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     _hoaCtrl.dispose();
     _incomeCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _saveToHistory({bool showFeedback = false}) async {
-    final result = ref.read(mortgageResultProvider);
-    if (result == null || result.loanAmount <= 0) return;
-
-    final inputState = ref.read(mortgageInputProvider);
-    final label =
-        '${inputState.homePrice ~/ 1000}K · ${inputState.annualRatePct.toStringAsFixed(2)}% · ${inputState.termYears}yr';
-    try {
-      await DatabaseHelper.instance.insertHistory({
-        'home_price': inputState.homePrice,
-        'down_percent': inputState.downPaymentPct,
-        'annual_rate': inputState.annualRatePct,
-        'monthly_payment': result.monthly.pitiPayment,
-        'total_interest': result.totalInterest,
-        'loan_amount': result.loanAmount,
-        'loan_type': inputState.loanType.label,
-        'term_years': inputState.termYears,
-        'tax_rate': inputState.propertyTaxRatePct,
-        'insurance': inputState.homeInsuranceAnnual,
-        'hoa': inputState.hoaMonthly,
-        'created_at': DateTime.now().toIso8601String(),
-        'label': label,
-      });
-    } catch (_) {}
-    try {
-      AnalyticsService.instance.logSave();
-    } catch (_) {}
-
-    // Emotional trigger: accessible monthly payment → ask for review
-    if (result.monthly.pitiPayment < 3000 && result.monthly.pitiPayment > 0) {
-      CalcwiseReviewService.instance.requestAfterPremium();
-    }
-
-    // Refresh history tab immediately
-    HistoryScreen.refreshNotifier.value++;
-    adService.onSave();
-    unawaited(RateWatchService.instance
-        .checkRate(inputState.annualRatePct, appLabel: 'MortgageUS'));
-    AnalyticsService.instance.logHistorySaved();
-    if (mounted) {
-      final trigger = await paywallSession.recordAction();
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-    }
-
-    if (!mounted) return;
-    final isEs = isSpanishNotifier.value;
-
-    // Free users: FIFO cap — remove oldest, show paywallSession, informative snackbar
-    if (!freemiumService.hasFullAccess) {
-      final count = await DatabaseHelper.instance.countHistory();
-      if (count > freemiumService.historyLimit) {
-        await DatabaseHelper.instance.deleteOldestHistory();
-        HistoryScreen.refreshNotifier.value++;
-        if (showFeedback && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(isEs
-                ? 'Guardado · entrada más antigua reemplazada · ${freemiumService.historyLimit}/${freemiumService.historyLimit} slots'
-                : 'Saved · oldest entry replaced · ${freemiumService.historyLimit}/${freemiumService.historyLimit} free slots'),
-            action: SnackBarAction(
-              label: isEs ? 'Ilimitado' : 'Unlock unlimited',
-              onPressed: () => IAPService.instance.buy(),
-            ),
-            duration: const Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-          ));
-        }
-        return;
-      }
-    }
-
-    if (showFeedback && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(isEs ? 'Cálculo guardado' : 'Calculation saved'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ));
-    }
   }
 
   @override
@@ -601,27 +633,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               ],
                                               const SizedBox(
                                                   height: AppSpacing.md),
-                                              // Save button — primary CTA
-                                              FilledButton.icon(
-                                                onPressed: () {
-                                                  HapticFeedback.mediumImpact();
-                                                  _saveToHistory(
-                                                      showFeedback: true);
-                                                },
-                                                icon: const Icon(
-                                                    Icons.bookmark_add_rounded),
-                                                label: Text(s.saveCalc),
-                                                style: FilledButton.styleFrom(
-                                                  backgroundColor:
-                                                      AppTheme.primary,
-                                                  minimumSize: const Size(
-                                                      double.infinity, 52),
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              AppRadius.lg)),
-                                                ),
-                                              ),
+                                              // Save Scenario button — primary CTA
+                                              SaveScenarioButton(
+                                                  onSave: _saveScenario),
                                               const SizedBox(
                                                   height: AppSpacing.sm),
                                               // PDF + Share — secondary actions

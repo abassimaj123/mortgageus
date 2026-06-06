@@ -16,10 +16,12 @@ class IAPService {
 
   static const productId = 'premium_upgrade';
 
-  late final CalcwiseIAP _iap;
+  CalcwiseIAP? _iap;
+  final _fallbackPrice = ValueNotifier<String?>(null);
 
   /// Localized price notifier — exposed for UI to listen.
-  ValueNotifier<String?> get localizedPrice => _iap.localizedPrice;
+  ValueNotifier<String?> get localizedPrice =>
+      _iap?.localizedPrice ?? _fallbackPrice;
 
   Future<void> initialize() async {
     _iap = CalcwiseIAP(
@@ -28,13 +30,13 @@ class IAPService {
       analytics: CalcwiseAnalytics(appName: 'mortgageus'),
       onPurchaseCompleted: () => ReviewService.instance.requestAfterPremium(),
     );
-    await _iap.initialize();
-    PaywallHard.registerPrice(_iap.localizedPrice);
+    await _iap!.initialize();
+    PaywallHard.registerPrice(_iap!.localizedPrice);
   }
 
-  Future<void> buy() => _iap.buy();
+  Future<void> buy() async => _iap?.buy();
 
-  Future<void> restore() => _iap.restore();
+  Future<void> restore() async => _iap?.restore();
 
-  void dispose() => _iap.dispose();
+  void dispose() => _iap?.dispose();
 }

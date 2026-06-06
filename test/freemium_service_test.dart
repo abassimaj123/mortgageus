@@ -170,8 +170,8 @@ void main() {
       expect(MonetizationConfig.rewardedDurationMinutes, 60);
     });
 
-    test('freeHistoryLimit is 5', () {
-      expect(MonetizationConfig.freeHistoryLimit, 5);
+    test('freeRingBufferSize is 5', () {
+      expect(MonetizationConfig.freeRingBufferSize, 5);
     });
   });
 }

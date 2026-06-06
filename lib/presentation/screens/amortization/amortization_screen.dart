@@ -744,6 +744,7 @@ class _YearlyList extends StatelessWidget {
               description: isEs
                   ? '+$_lockedYears años · +$_lockedMonths meses restantes'
                   : '+$_lockedYears years · +$_lockedMonths months remaining',
+              price: IAPService.instance.localizedPrice,
               onUnlock: () => IAPService.instance.buy(),
               buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
               subtitle: isEs
@@ -1059,6 +1060,7 @@ class _MonthlyList extends StatelessWidget {
               description: isEs
                   ? '+$_lockedYears años · +$_lockedMonths meses restantes'
                   : '+$_lockedYears years · +$_lockedMonths months remaining',
+              price: IAPService.instance.localizedPrice,
               onUnlock: () => IAPService.instance.buy(),
               buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
               subtitle: isEs

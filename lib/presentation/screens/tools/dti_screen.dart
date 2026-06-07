@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 /// DTI (Debt-to-Income) Ratio Calculator
 ///
@@ -35,9 +37,12 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
 
   bool _logged = false;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('dti');
     // Pre-fill PITI from main calculator if home price is set
     final input = ref.read(mortgageInputProvider);
     final loanAmt = input.homePrice * (1 - input.downPaymentPct / 100);
@@ -69,6 +74,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'dti');
     _annualIncomeCtrl.dispose();
     _pitiCtrl.dispose();
     _carPaymentCtrl.dispose();
@@ -78,7 +84,115 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
     super.dispose();
   }
 
+  void _scheduleAutoSave({
+    required double annualIncome,
+    required double piti,
+    required double totalDebts,
+    required double frontEndDti,
+    required double backEndDti,
+  }) {
+    if (annualIncome <= 0) return;
+    final hash = ResultHasher.hashMixed({
+      'income': _roundTo(annualIncome, 5000),
+      'debts': _roundTo(totalDebts, 100),
+      'piti': _roundTo(piti, 100),
+    });
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'mortgageus',
+      screenId: 'dti',
+      inputHash: hash,
+      l1: {
+        'gross_income': annualIncome,
+        'total_debts': totalDebts + piti,
+        'front_dti': frontEndDti,
+        'back_dti': backEndDti,
+        'qualifies': backEndDti <= 43.0,
+      },
+      l2: {
+        'inputs': {
+          'annual_income': annualIncome,
+          'piti': piti,
+          'car': _parse(_carPaymentCtrl.text),
+          'student': _parse(_studentLoansCtrl.text),
+          'credit_cards': _parse(_creditCardsCtrl.text),
+          'other': _parse(_otherDebtsCtrl.text),
+        },
+        'results': {
+          'front_dti': frontEndDti,
+          'back_dti': backEndDti,
+          'qualifies': backEndDti <= 43.0,
+        },
+      },
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final annualIncome = _parse(_annualIncomeCtrl.text);
+    final piti = _parse(_pitiCtrl.text);
+    final car = _parse(_carPaymentCtrl.text);
+    final student = _parse(_studentLoansCtrl.text);
+    final cards = _parse(_creditCardsCtrl.text);
+    final other = _parse(_otherDebtsCtrl.text);
+    final totalDebts = car + student + cards + other;
+    final monthlyIncome = annualIncome / 12;
+    final frontEndDti = monthlyIncome > 0 ? (piti / monthlyIncome) * 100 : 0.0;
+    final backEndDti = monthlyIncome > 0 ? ((piti + totalDebts) / monthlyIncome) * 100 : 0.0;
+    if (annualIncome <= 0) return;
+    final hash = ResultHasher.hashMixed({
+      'income': _roundTo(annualIncome, 5000),
+      'debts': _roundTo(totalDebts, 100),
+      'piti': _roundTo(piti, 100),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'dti',
+      inputHash: hash,
+      l1: {
+        'gross_income': annualIncome,
+        'total_debts': totalDebts + piti,
+        'front_dti': frontEndDti,
+        'back_dti': backEndDti,
+        'qualifies': backEndDti <= 43.0,
+      },
+      l2: {
+        'inputs': {
+          'annual_income': annualIncome,
+          'piti': piti,
+          'car': car,
+          'student': student,
+          'credit_cards': cards,
+          'other': other,
+        },
+        'results': {
+          'front_dti': frontEndDti,
+          'back_dti': backEndDti,
+          'qualifies': backEndDti <= 43.0,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
+  }
+
   Future<void> _onInteraction() async {
+    // Always schedule auto-save on interaction
+    final annualIncome = _parse(_annualIncomeCtrl.text);
+    final piti = _parse(_pitiCtrl.text);
+    final car = _parse(_carPaymentCtrl.text);
+    final student = _parse(_studentLoansCtrl.text);
+    final cards = _parse(_creditCardsCtrl.text);
+    final other = _parse(_otherDebtsCtrl.text);
+    final totalDebts = car + student + cards + other;
+    final monthlyIncome = annualIncome / 12;
+    final frontEndDti = monthlyIncome > 0 ? (piti / monthlyIncome) * 100 : 0.0;
+    final backEndDti = monthlyIncome > 0 ? ((piti + totalDebts) / monthlyIncome) * 100 : 0.0;
+    _scheduleAutoSave(
+      annualIncome: annualIncome,
+      piti: piti,
+      totalDebts: totalDebts,
+      frontEndDti: frontEndDti,
+      backEndDti: backEndDti,
+    );
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logDtiCalculated();
@@ -381,6 +495,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                               ),
                       ),
 
+                      const SizedBox(height: AppSpacing.md),
+                      if (monthlyIncome > 0) SaveScenarioButton(onSave: _saveScenario),
                       const SizedBox(height: AppSpacing.lg),
 
                       // Info box

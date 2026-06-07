@@ -9,8 +9,9 @@ import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 // ── Color for Investment Return tool icon (emerald-teal) ──────────────────────
 const Color _kToolColor = Color(0xFF0D9488); // teal-600
@@ -38,6 +39,8 @@ class _InvestmentReturnScreenState
 
   static const List<int> _holdOptions = [5, 10, 15, 20];
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   // ── Interest rate used for mortgage calculation ───────────────────────────
   late double _defaultRate;
   static const int _defaultTerm = 30;
@@ -46,6 +49,7 @@ class _InvestmentReturnScreenState
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('investment_return');
     // Pre-fill from current calculator values
     final input = ref.read(mortgageInputProvider);
     final price = input.homePrice > 0 ? input.homePrice : 400000;
@@ -57,6 +61,7 @@ class _InvestmentReturnScreenState
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'investment_return');
     _priceCtrl.dispose();
     _rentCtrl.dispose();
     _discountCtrl.dispose();
@@ -64,6 +69,44 @@ class _InvestmentReturnScreenState
   }
 
   Future<void> _onInteraction() async {
+    // Schedule auto-save
+    final result = _calculate();
+    if (result != null) {
+      final price = result.price;
+      final hash = ResultHasher.hashMixed({
+        'home_price': _roundTo(price, 5000),
+        'down_pct': _roundTo(_downPct, 5.0),
+        'appreciation': _roundTo(_appreciation, 1.0),
+        'hold_years': _holdYears.toDouble(),
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'investment_return',
+        inputHash: hash,
+        l1: {
+          'home_price': price,
+          'down_pct': _downPct,
+          'appreciation_rate': _appreciation,
+          'hold_years': _holdYears,
+          'total_return_pct': result.cashOnCash,
+        },
+        l2: {
+          'inputs': {
+            'home_price': price,
+            'down_pct': _downPct,
+            'appreciation_rate': _appreciation,
+            'hold_years': _holdYears,
+          },
+          'results': {
+            'future_value': price * (1 + _appreciation / 100) * _holdYears,
+            'equity': result.downAmt,
+            'total_return': result.equityMult,
+            'annualized_return': result.irr ?? 0.0,
+            'coc': result.cashOnCash,
+          },
+        },
+      );
+    }
     if (!_analyticsLogged) {
       _analyticsLogged = true;
       AnalyticsService.instance.logInvestmentReturnCalculated();
@@ -73,6 +116,47 @@ class _InvestmentReturnScreenState
         if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
       }
     }
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final result = _calculate();
+    if (result == null) return;
+    final price = result.price;
+    final hash = ResultHasher.hashMixed({
+      'home_price': _roundTo(price, 5000),
+      'down_pct': _roundTo(_downPct, 5.0),
+      'appreciation': _roundTo(_appreciation, 1.0),
+      'hold_years': _holdYears.toDouble(),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'investment_return',
+      inputHash: hash,
+      l1: {
+        'home_price': price,
+        'down_pct': _downPct,
+        'appreciation_rate': _appreciation,
+        'hold_years': _holdYears,
+        'total_return_pct': result.cashOnCash,
+      },
+      l2: {
+        'inputs': {
+          'home_price': price,
+          'down_pct': _downPct,
+          'appreciation_rate': _appreciation,
+          'hold_years': _holdYears,
+        },
+        'results': {
+          'future_value': price * (1 + _appreciation / 100) * _holdYears,
+          'equity': result.downAmt,
+          'total_return': result.equityMult,
+          'annualized_return': result.irr ?? 0.0,
+          'coc': result.cashOnCash,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   // ── Core calculation ──────────────────────────────────────────────────────
@@ -279,8 +363,11 @@ class _InvestmentReturnScreenState
                                 .withValues(alpha: 0.65)),
                       ),
                     )
-                  else
+                  else ...[
                     _ResultsSection(result: result, isEs: isEs),
+                    const SizedBox(height: AppSpacing.md),
+                    SaveScenarioButton(onSave: _saveScenario),
+                  ],
                 ],
               ),
             )),

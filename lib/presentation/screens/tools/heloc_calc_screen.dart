@@ -1,11 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../providers/mortgage_providers.dart';
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 /// HELOC Calculator
 ///
@@ -14,14 +18,14 @@ import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 /// Repayment Pmt     = amortization(Draw, Rate, repaymentYears)
 /// Total Cost        = interestOnly × drawPeriodMonths + repaymentPmt × repaymentMonths
 /// LTV after draw    = (MortgageBalance + Draw) / HomeValue
-class HelocCalcScreen extends StatefulWidget {
+class HelocCalcScreen extends ConsumerStatefulWidget {
   const HelocCalcScreen({super.key});
 
   @override
-  State<HelocCalcScreen> createState() => _HelocCalcScreenState();
+  ConsumerState<HelocCalcScreen> createState() => _HelocCalcScreenState();
 }
 
-class _HelocCalcScreenState extends State<HelocCalcScreen> {
+class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
   final _homeValueCtrl = TextEditingController(text: '450,000');
   final _mortgageBalCtrl = TextEditingController(text: '280,000');
   final _drawAmountCtrl = TextEditingController(text: '50,000');
@@ -33,14 +37,34 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
 
   bool _logged = false;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
+    AnalyticsService.instance.logScreenView('heloc_calc');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Pre-fill from main calculator provider
+      final input = ref.read(mortgageInputProvider);
+      if (input.homePrice > 0) {
+        _homeValueCtrl.text = NumberFormat('#,##0').format(input.homePrice.round());
+      }
+      final loanBalance = input.homePrice > 0
+          ? (input.homePrice * (1 - input.downPaymentPct / 100)).clamp(0.0, double.infinity)
+          : 0.0;
+      if (loanBalance > 0) {
+        _mortgageBalCtrl.text = NumberFormat('#,##0').format(loanBalance.round());
+      }
+      if (input.annualRatePct > 0) {
+        _rateCtrl.text = input.annualRatePct.toStringAsFixed(2);
+      }
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'heloc_calc');
     _homeValueCtrl.dispose();
     _mortgageBalCtrl.dispose();
     _drawAmountCtrl.dispose();
@@ -48,7 +72,30 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
     super.dispose();
   }
 
+  void _triggerAutoSave() {
+    final homeValue = _parse(_homeValueCtrl.text);
+    final mortgageBal = _parse(_mortgageBalCtrl.text);
+    final drawAmount = _parse(_drawAmountCtrl.text);
+    final rate = double.tryParse(_rateCtrl.text) ?? 8.5;
+    if (homeValue <= 0 || drawAmount <= 0) return;
+    final availableEquity = (homeValue * _maxLtv / 100.0 - mortgageBal).clamp(0.0, double.infinity);
+    final monthlyInterestOnly = drawAmount * rate / 100.0 / 12.0;
+    final monthlyRepayment = _amortPmt(drawAmount, rate, _repaymentPeriod);
+    final totalCost = monthlyInterestOnly * _drawPeriod * 12 + monthlyRepayment * _repaymentPeriod * 12;
+    _scheduleAutoSave(
+      homeValue: homeValue,
+      mortgageBal: mortgageBal,
+      drawAmount: drawAmount,
+      rate: rate,
+      availableEquity: availableEquity,
+      monthlyInterestOnly: monthlyInterestOnly,
+      monthlyRepayment: monthlyRepayment,
+      totalCost: totalCost,
+    );
+  }
+
   Future<void> _onInteraction() async {
+    _triggerAutoSave();
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logHelocCalculated();
@@ -56,6 +103,101 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
     if (!mounted) return;
     if (t == PaywallTrigger.soft) PaywallSoft.show(context);
     if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
+
+  void _scheduleAutoSave({
+    required double homeValue,
+    required double mortgageBal,
+    required double drawAmount,
+    required double rate,
+    required double availableEquity,
+    required double monthlyInterestOnly,
+    required double monthlyRepayment,
+    required double totalCost,
+  }) {
+    if (homeValue <= 0 || drawAmount <= 0) return;
+    final hash = ResultHasher.hashMixed({
+      'home_value': _roundTo(homeValue, 5000),
+      'mortgage_bal': _roundTo(mortgageBal, 5000),
+      'draw_amount': _roundTo(drawAmount, 1000),
+      'rate': _roundTo(rate, 0.25),
+    });
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'mortgageus',
+      screenId: 'heloc_calc',
+      inputHash: hash,
+      l1: {
+        'home_value': homeValue,
+        'available_equity': availableEquity,
+        'draw_amount': drawAmount,
+        'monthly_interest': monthlyInterestOnly,
+      },
+      l2: {
+        'inputs': {
+          'home_value': homeValue,
+          'mortgage_balance': mortgageBal,
+          'draw_amount': drawAmount,
+          'rate': rate,
+          'max_ltv': _maxLtv,
+          'draw_period': _drawPeriod,
+          'repayment_period': _repaymentPeriod,
+        },
+        'results': {
+          'available_equity': availableEquity,
+          'draw_phase_payment': monthlyInterestOnly,
+          'repayment_payment': monthlyRepayment,
+          'total_interest': totalCost,
+        },
+      },
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final homeValue = _parse(_homeValueCtrl.text);
+    final mortgageBal = _parse(_mortgageBalCtrl.text);
+    final drawAmount = _parse(_drawAmountCtrl.text);
+    final rate = double.tryParse(_rateCtrl.text) ?? 8.5;
+    if (homeValue <= 0 || drawAmount <= 0) return;
+    final availableEquity = (homeValue * _maxLtv / 100.0 - mortgageBal).clamp(0.0, double.infinity);
+    final monthlyInterestOnly = drawAmount > 0 && rate > 0 ? drawAmount * rate / 100.0 / 12.0 : 0.0;
+    final monthlyRepayment = _amortPmt(drawAmount, rate, _repaymentPeriod);
+    final totalCost = monthlyInterestOnly * _drawPeriod * 12 + monthlyRepayment * _repaymentPeriod * 12;
+    final hash = ResultHasher.hashMixed({
+      'home_value': _roundTo(homeValue, 5000),
+      'mortgage_bal': _roundTo(mortgageBal, 5000),
+      'draw_amount': _roundTo(drawAmount, 1000),
+      'rate': _roundTo(rate, 0.25),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'heloc_calc',
+      inputHash: hash,
+      l1: {
+        'home_value': homeValue,
+        'available_equity': availableEquity,
+        'draw_amount': drawAmount,
+        'monthly_interest': monthlyInterestOnly,
+      },
+      l2: {
+        'inputs': {
+          'home_value': homeValue,
+          'mortgage_balance': mortgageBal,
+          'draw_amount': drawAmount,
+          'rate': rate,
+          'max_ltv': _maxLtv,
+          'draw_period': _drawPeriod,
+          'repayment_period': _repaymentPeriod,
+        },
+        'results': {
+          'available_equity': availableEquity,
+          'draw_phase_payment': monthlyInterestOnly,
+          'repayment_payment': monthlyRepayment,
+          'total_interest': totalCost,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   double _parse(String s) =>
@@ -100,8 +242,6 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
 
         final drawExceedsEquity = drawAmount > availableEquity;
         final ltvTooHigh = ltvAfterDraw > 90.0;
-
-
 
         // ─────────────────────────────────────────────────────────────────────
         return Scaffold(
@@ -448,6 +588,8 @@ class _HelocCalcScreenState extends State<HelocCalcScreen> {
                               : 'Draw exceeds available equity',
                         ),
 
+                        const SizedBox(height: AppSpacing.md),
+                        SaveScenarioButton(onSave: _saveScenario),
                         const SizedBox(height: AppSpacing.lg),
                       ],
 

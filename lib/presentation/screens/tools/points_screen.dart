@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 /// Points / Discount Calculator
 /// Each point = 1% of loan, lowers rate by ~0.25%.
@@ -27,9 +29,12 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
 
   static const double _ratePerPoint = 0.25;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('points');
     final input = ref.read(mortgageInputProvider);
     final loanAmount = input.downPaymentDollar >= input.homePrice
         ? 0.0
@@ -41,12 +46,55 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'points');
     _loanCtrl.dispose();
     _rateCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _onInteraction() async {
+    // Schedule auto-save
+    final loan = _parse(_loanCtrl.text);
+    final origRate = double.tryParse(_rateCtrl.text) ?? 7.0;
+    if (loan > 0) {
+      final newRate = (origRate - _points * _ratePerPoint).clamp(0.0, double.infinity);
+      final pointsCost = loan * _points / 100.0;
+      final origPay = MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: origRate, termYears: _term);
+      final newPay = MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: newRate, termYears: _term);
+      final monthlySav = origPay - newPay;
+      final breakeven = monthlySav > 0 ? pointsCost / monthlySav : null;
+      final hash = ResultHasher.hashMixed({
+        'loan_amount': _roundTo(loan, 5000),
+        'base_rate': _roundTo(origRate, 0.25),
+        'points': _roundTo(_points, 0.5),
+        'term_years': (_term / 60).round() * 60.0,
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'points',
+        inputHash: hash,
+        l1: {
+          'loan_amount': loan,
+          'base_rate': origRate,
+          'points_cost': pointsCost,
+          'break_even_months': breakeven?.round() ?? 0,
+        },
+        l2: {
+          'inputs': {
+            'loan_amount': loan,
+            'base_rate': origRate,
+            'points': _points,
+            'term_years': _term,
+          },
+          'results': {
+            'points_cost': pointsCost,
+            'rate_with_points': newRate,
+            'monthly_savings': monthlySav,
+            'break_even_months': breakeven?.round() ?? 0,
+          },
+        },
+      );
+    }
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logPointsCalculated();
@@ -54,6 +102,51 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
     if (!mounted) return;
     if (t == PaywallTrigger.soft) PaywallSoft.show(context);
     if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final loan = _parse(_loanCtrl.text);
+    if (loan <= 0) return;
+    final origRate = double.tryParse(_rateCtrl.text) ?? 7.0;
+    final newRate = (origRate - _points * _ratePerPoint).clamp(0.0, double.infinity);
+    final pointsCost = loan * _points / 100.0;
+    final origPay = MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: origRate, termYears: _term);
+    final newPay = MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: newRate, termYears: _term);
+    final monthlySav = origPay - newPay;
+    final breakeven = monthlySav > 0 ? pointsCost / monthlySav : null;
+    final hash = ResultHasher.hashMixed({
+      'loan_amount': _roundTo(loan, 5000),
+      'base_rate': _roundTo(origRate, 0.25),
+      'points': _roundTo(_points, 0.5),
+      'term_years': (_term / 60).round() * 60.0,
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'points',
+      inputHash: hash,
+      l1: {
+        'loan_amount': loan,
+        'base_rate': origRate,
+        'points_cost': pointsCost,
+        'break_even_months': breakeven?.round() ?? 0,
+      },
+      l2: {
+        'inputs': {
+          'loan_amount': loan,
+          'base_rate': origRate,
+          'points': _points,
+          'term_years': _term,
+        },
+        'results': {
+          'points_cost': pointsCost,
+          'rate_with_points': newRate,
+          'monthly_savings': monthlySav,
+          'break_even_months': breakeven?.round() ?? 0,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   double _parse(String s) =>
@@ -242,6 +335,8 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
                                 ),
                               ),
                       ),
+                      const SizedBox(height: AppSpacing.md),
+                      if (loan > 0) SaveScenarioButton(onSave: _saveScenario),
                       const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,

@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../domain/models/arm_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show isSpanishNotifier, paywallSession;
+import '../../../../main.dart' show isSpanishNotifier, paywallSession, smartHistoryService;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 class ArmScreen extends ConsumerStatefulWidget {
   const ArmScreen({super.key});
@@ -26,6 +29,8 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
   String? _loanError;
   bool _logged = false;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   Future<void> _onInteraction() async {
     if (_logged) return;
     _logged = true;
@@ -41,6 +46,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('arm');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final input = ref.read(mortgageInputProvider);
       final loan =
@@ -58,6 +64,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'arm');
     _loanCtrl.dispose();
     _initRateCtrl.dispose();
     _adjRateCtrl.dispose();
@@ -87,9 +94,86 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
       );
       setState(() => _result = r);
       _onInteraction();
+      // SmartHistory auto-save
+      final hash = ResultHasher.hashMixed({
+        'loan': _roundTo(loan, 5000),
+        'init_rate': _roundTo(initRate, 0.25),
+        'adj_rate': _roundTo(adjRate, 0.25),
+        'fixed_years': _fixedYears.toDouble(),
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'arm',
+        inputHash: hash,
+        l1: {
+          'loan_amount': loan,
+          'initial_rate': initRate,
+          'adjusted_rate': adjRate,
+          'payment_increase': r.payment2 - r.payment1,
+          'worst_case': r.payment2,
+        },
+        l2: {
+          'inputs': {
+            'loan_amount': loan,
+            'initial_rate': initRate,
+            'adjusted_rate': adjRate,
+            'fixed_years': _fixedYears,
+            'term_years': _termYears,
+          },
+          'results': {
+            'initial_payment': r.payment1,
+            'adjusted_payment': r.payment2,
+            'payment_jump': r.payment2 - r.payment1,
+            'worst_case_payment': r.payment2,
+          },
+        },
+      );
     } catch (_) {
       setState(() => _result = null);
     }
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final r = _result;
+    if (r == null) return;
+    final loan = double.tryParse(_loanCtrl.text.replaceAll(',', '')) ?? 0;
+    final initRate = double.tryParse(_initRateCtrl.text) ?? 0;
+    final adjRate = double.tryParse(_adjRateCtrl.text) ?? 0;
+    final hash = ResultHasher.hashMixed({
+      'loan': _roundTo(loan, 5000),
+      'init_rate': _roundTo(initRate, 0.25),
+      'adj_rate': _roundTo(adjRate, 0.25),
+      'fixed_years': _fixedYears.toDouble(),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'arm',
+      inputHash: hash,
+      l1: {
+        'loan_amount': loan,
+        'initial_rate': initRate,
+        'adjusted_rate': adjRate,
+        'payment_increase': r.payment2 - r.payment1,
+        'worst_case': r.payment2,
+      },
+      l2: {
+        'inputs': {
+          'loan_amount': loan,
+          'initial_rate': initRate,
+          'adjusted_rate': adjRate,
+          'fixed_years': _fixedYears,
+          'term_years': _termYears,
+        },
+        'results': {
+          'initial_payment': r.payment1,
+          'adjusted_payment': r.payment2,
+          'payment_jump': r.payment2 - r.payment1,
+          'worst_case_payment': r.payment2,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   @override
@@ -228,6 +312,8 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
                           isEs: isEs,
                           fixedYears: _fixedYears,
                           termYears: _termYears),
+                      const SizedBox(height: AppSpacing.md),
+                      SaveScenarioButton(onSave: _saveScenario),
                     ] else ...[
                       const SizedBox(height: AppSpacing.xxl),
                       Center(

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 /// VA Loan Calculator
 /// 0% down allowed. No PMI. Funding fee financed into loan.
@@ -27,15 +29,19 @@ class _VaScreenState extends ConsumerState<VaScreen> {
   bool _subsequent = false;
   bool _logged = false;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('va');
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
   }
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'va');
     _homePriceCtrl.dispose();
     _taxCtrl.dispose();
     _insCtrl.dispose();
@@ -43,6 +49,54 @@ class _VaScreenState extends ConsumerState<VaScreen> {
   }
 
   Future<void> _onInteraction() async {
+    // Schedule auto-save
+    final price = _parse(_homePriceCtrl.text);
+    if (price > 0) {
+      final input = ref.read(mortgageInputProvider);
+      final rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+      final down = price * _downPct / 100.0;
+      final baseLoan = (price - down).clamp(0.0, double.infinity);
+      final ffRate = _fundingFeeRate();
+      final fundingFee = baseLoan * ffRate;
+      final loan = baseLoan + fundingFee;
+      final term = input.termYears > 0 ? input.termYears : 30;
+      final pAndI = loan > 0 ? MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: rate, termYears: term) : 0.0;
+      final tax = _parse(_taxCtrl.text);
+      final ins = _parse(_insCtrl.text);
+      final total = pAndI + tax + ins;
+      final serviceType = _subsequent ? 'subsequent' : _reserves ? 'reserves' : 'regular';
+      final hash = ResultHasher.hashMixed({
+        'home_price': _roundTo(price, 5000),
+        'down_pct': _roundTo(_downPct, 5.0),
+        'rate': _roundTo(rate, 0.25),
+        'service_type': serviceType,
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'va',
+        inputHash: hash,
+        l1: {
+          'home_price': price,
+          'down_pct': _downPct,
+          'rate': rate,
+          'monthly_payment': total,
+          'funding_fee': fundingFee,
+        },
+        l2: {
+          'inputs': {
+            'home_price': price,
+            'down_pct': _downPct,
+            'rate': rate,
+            'service_type': serviceType,
+          },
+          'results': {
+            'funding_fee': fundingFee,
+            'loan_amount': loan,
+            'monthly_payment': total,
+          },
+        },
+      );
+    }
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logVaCalculated();
@@ -50,6 +104,57 @@ class _VaScreenState extends ConsumerState<VaScreen> {
     if (!mounted) return;
     if (t == PaywallTrigger.soft) PaywallSoft.show(context);
     if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final price = _parse(_homePriceCtrl.text);
+    if (price <= 0) return;
+    final input = ref.read(mortgageInputProvider);
+    final rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+    final down = price * _downPct / 100.0;
+    final baseLoan = (price - down).clamp(0.0, double.infinity);
+    final ffRate = _fundingFeeRate();
+    final fundingFee = baseLoan * ffRate;
+    final loan = baseLoan + fundingFee;
+    final term = input.termYears > 0 ? input.termYears : 30;
+    final pAndI = loan > 0 ? MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: rate, termYears: term) : 0.0;
+    final tax = _parse(_taxCtrl.text);
+    final ins = _parse(_insCtrl.text);
+    final total = pAndI + tax + ins;
+    final serviceType = _subsequent ? 'subsequent' : _reserves ? 'reserves' : 'regular';
+    final hash = ResultHasher.hashMixed({
+      'home_price': _roundTo(price, 5000),
+      'down_pct': _roundTo(_downPct, 5.0),
+      'rate': _roundTo(rate, 0.25),
+      'service_type': serviceType,
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'va',
+      inputHash: hash,
+      l1: {
+        'home_price': price,
+        'down_pct': _downPct,
+        'rate': rate,
+        'monthly_payment': total,
+        'funding_fee': fundingFee,
+      },
+      l2: {
+        'inputs': {
+          'home_price': price,
+          'down_pct': _downPct,
+          'rate': rate,
+          'service_type': serviceType,
+        },
+        'results': {
+          'funding_fee': fundingFee,
+          'loan_amount': loan,
+          'monthly_payment': total,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   double _parse(String s) =>
@@ -296,6 +401,8 @@ class _VaScreenState extends ConsumerState<VaScreen> {
                                 ),
                               ),
                       ),
+                      const SizedBox(height: AppSpacing.md),
+                      if (price > 0) SaveScenarioButton(onSave: _saveScenario),
                       const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,

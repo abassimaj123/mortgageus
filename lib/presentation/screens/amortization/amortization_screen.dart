@@ -10,7 +10,9 @@ import '../../../core/freemium/iap_service.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../domain/models/mortgage_result.dart';
-import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier;
+import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier, smartHistoryService;
+import '../../../core/services/analytics_service.dart';
+import '../../widgets/save_scenario_button.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart';
@@ -115,9 +117,48 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('amortization');
     _loadPref();
     freemiumService.isRewardedNotifier.addListener(_rebuild);
     freemiumService.isPremiumNotifier.addListener(_rebuild);
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final result = ref.read(mortgageResultProvider);
+    if (result == null) return;
+    final inputState = ref.read(mortgageInputProvider);
+    final hash = ResultHasher.hashMixed({
+      'home': ResultHasher.roundTo(inputState.homePrice, 1000),
+      'down': ResultHasher.roundTo(inputState.downPaymentPct, 0.5),
+      'rate': ResultHasher.roundTo(inputState.annualRatePct, 0.1),
+      'term': inputState.termYears,
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'amortization',
+      inputHash: hash,
+      l1: {
+        'monthly_payment': result.monthly.pitiPayment,
+        'home_price': inputState.homePrice,
+        'label': label ?? '',
+      },
+      l2: {
+        'inputs': {
+          'home_price': inputState.homePrice,
+          'down_percent': inputState.downPaymentPct,
+          'annual_rate': inputState.annualRatePct,
+          'term_years': inputState.termYears,
+        },
+        'results': {
+          'monthly_payment': result.monthly.pitiPayment,
+          'total_interest': result.totalInterest,
+          'total_paid': result.totalCost,
+          'payoff_date': result.payoffDate.toIso8601String(),
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   @override
@@ -242,6 +283,15 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                     inputState: inputState,
                     fmtDate: fmtDate,
                     s: s)),
+
+            // ── Save scenario ──────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                child: SaveScenarioButton(onSave: _saveScenario),
+              ),
+            ),
 
             // ── Donut chart ────────────────────────────────────────────────────
             SliverToBoxAdapter(

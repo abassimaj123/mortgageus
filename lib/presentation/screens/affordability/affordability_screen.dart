@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../domain/models/affordability_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
@@ -13,10 +14,12 @@ import '../../../main.dart'
         paywallSession,
         isSpanishNotifier,
         preFillNotifier,
-        tabSwitchNotifier;
+        tabSwitchNotifier,
+        smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
+import '../../widgets/save_scenario_button.dart';
 
 class AffordabilityScreen extends ConsumerStatefulWidget {
   const AffordabilityScreen({super.key});
@@ -40,10 +43,12 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
   String? _incomeError;
   AffordabilityResult? _result;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
 
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('affordability');
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Sync rate from main calculator provider, then auto-calculate
       final rate = ref.read(mortgageInputProvider).annualRatePct;
@@ -54,6 +59,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'affordability');
     _incomeCtrl.dispose();
     _debtsCtrl.dispose();
     _downCtrl.dispose();
@@ -102,11 +108,94 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
     });
     adService.onAction();
     AnalyticsService.instance.logAffordabilityCalculated();
+    // SmartHistory auto-save
+    final r2 = _result;
+    if (r2 != null) {
+      final maxHomePrice = r2.maxHomePriceStandard > 0 ? r2.maxHomePriceStandard : r2.maxHomePriceConservative;
+      final hash = ResultHasher.hashMixed({
+        'income': _roundTo(income, 5000),
+        'debts': _roundTo(debts, 100),
+        'rate': _roundTo(rate, 0.25),
+        'term': _termYears,
+      });
+      final downPct = maxHomePrice > 0 ? (down / maxHomePrice * 100) : 0.0;
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'affordability',
+        inputHash: hash,
+        l1: {
+          'income': income,
+          'max_home_price': maxHomePrice,
+          'max_monthly': r2.totalMonthly,
+          'down_pct': downPct,
+        },
+        l2: {
+          'inputs': {
+            'annual_income': income,
+            'monthly_debts': debts,
+            'down_payment': down,
+            'rate': rate,
+            'term_years': _termYears,
+          },
+          'results': {
+            'max_loan': maxHomePrice - down,
+            'max_home_price': maxHomePrice,
+            'max_monthly': r2.totalMonthly,
+            'dti': r2.monthlyPI,
+          },
+        },
+      );
+    }
     if (mounted) {
       final trigger = await paywallSession.recordAction();
       if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
       if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
     }
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final r = _result;
+    if (r == null) return;
+    final income = double.tryParse(_incomeCtrl.text.replaceAll(',', '')) ?? 0;
+    final debts = double.tryParse(_debtsCtrl.text.replaceAll(',', '')) ?? 0;
+    final down = double.tryParse(_downCtrl.text.replaceAll(',', '')) ?? 0;
+    final rate = double.tryParse(_rateCtrl.text) ?? MortgageConstants.defaultInterestRate;
+    final maxHomePrice = r.maxHomePriceStandard > 0 ? r.maxHomePriceStandard : r.maxHomePriceConservative;
+    final hash = ResultHasher.hashMixed({
+      'income': _roundTo(income, 5000),
+      'debts': _roundTo(debts, 100),
+      'rate': _roundTo(rate, 0.25),
+      'term': _termYears,
+    });
+    final downPct = maxHomePrice > 0 ? (down / maxHomePrice * 100) : 0.0;
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'affordability',
+      inputHash: hash,
+      l1: {
+        'income': income,
+        'max_home_price': maxHomePrice,
+        'max_monthly': r.totalMonthly,
+        'down_pct': downPct,
+      },
+      l2: {
+        'inputs': {
+          'annual_income': income,
+          'monthly_debts': debts,
+          'down_payment': down,
+          'rate': rate,
+          'term_years': _termYears,
+        },
+        'results': {
+          'max_loan': maxHomePrice - down,
+          'max_home_price': maxHomePrice,
+          'max_monthly': r.totalMonthly,
+          'dti': r.monthlyPI,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   void _useInCalculator() {
@@ -230,6 +319,8 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                           _ResultCard(
                               r: r, s: s, isEs: isEs),
                           const SizedBox(height: AppSpacing.md),
+                          SaveScenarioButton(onSave: _saveScenario),
+                          const SizedBox(height: AppSpacing.sm),
                           SizedBox(
                             width: double.infinity,
                             child: InkWell(

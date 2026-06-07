@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/constants/mortgage_constants.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 class PmiScreen extends ConsumerStatefulWidget {
   const PmiScreen({super.key});
@@ -23,14 +25,59 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
 
   static const double _pmiAnnualRate = 0.80; // 0.80% — matches app-wide default
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('pmi');
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice > 0 ? input.homePrice.toStringAsFixed(0) : '400000';
   }
 
   Future<void> _onInteraction() async {
+    // Schedule auto-save
+    final rawPrice = double.tryParse(_homePriceCtrl.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0.0;
+    final downAmt = rawPrice * _downPct / 100.0;
+    final loan = (rawPrice - downAmt).clamp(0.0, double.infinity);
+    final ltv = rawPrice > 0 ? (loan / rawPrice) * 100.0 : 0.0;
+    final hasPmi = ltv > 80.0;
+    if (rawPrice > 0 && hasPmi) {
+      final input = ref.read(mortgageInputProvider);
+      final monthlyPmi = MortgageCalculator.calcPmiMonthly(loanAmount: loan, homePrice: rawPrice, pmiAnnualRatePct: _pmiAnnualRate);
+      final dropMonth = _monthsUntilPmiDrop(loanAmount: loan, homePrice: rawPrice, annualRatePct: input.annualRatePct, termYears: input.termYears);
+      final totalPmiCost = dropMonth != null ? monthlyPmi * dropMonth : 0.0;
+      final hash = ResultHasher.hashMixed({
+        'loan_amount': _roundTo(loan, 5000),
+        'home_value': _roundTo(rawPrice, 5000),
+        'rate': _roundTo(input.annualRatePct, 0.25),
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'pmi',
+        inputHash: hash,
+        l1: {
+          'loan_amount': loan,
+          'ltv': ltv,
+          'monthly_pmi': monthlyPmi,
+          'pmi_removal_date': dropMonth ?? 0,
+        },
+        l2: {
+          'inputs': {
+            'loan_amount': loan,
+            'home_value': rawPrice,
+            'rate': input.annualRatePct,
+          },
+          'results': {
+            'ltv': ltv,
+            'monthly_pmi': monthlyPmi,
+            'annual_pmi': monthlyPmi * 12,
+            'payoff_months': dropMonth ?? 0,
+            'total_pmi_paid': totalPmiCost,
+          },
+        },
+      );
+    }
     if (!_analyticsLogged) {
       _analyticsLogged = true;
       AnalyticsService.instance.logPmiCalculated();
@@ -42,8 +89,53 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
     }
   }
 
+  Future<void> _saveScenario(String? label) async {
+    final rawPrice = double.tryParse(_homePriceCtrl.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0.0;
+    if (rawPrice <= 0) return;
+    final downAmt = rawPrice * _downPct / 100.0;
+    final loan = (rawPrice - downAmt).clamp(0.0, double.infinity);
+    final ltv = rawPrice > 0 ? (loan / rawPrice) * 100.0 : 0.0;
+    final input = ref.read(mortgageInputProvider);
+    final monthlyPmi = MortgageCalculator.calcPmiMonthly(loanAmount: loan, homePrice: rawPrice, pmiAnnualRatePct: _pmiAnnualRate);
+    final dropMonth = _monthsUntilPmiDrop(loanAmount: loan, homePrice: rawPrice, annualRatePct: input.annualRatePct, termYears: input.termYears);
+    final totalPmiCost = dropMonth != null ? monthlyPmi * dropMonth : 0.0;
+    final hash = ResultHasher.hashMixed({
+      'loan_amount': _roundTo(loan, 5000),
+      'home_value': _roundTo(rawPrice, 5000),
+      'rate': _roundTo(input.annualRatePct, 0.25),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'pmi',
+      inputHash: hash,
+      l1: {
+        'loan_amount': loan,
+        'ltv': ltv,
+        'monthly_pmi': monthlyPmi,
+        'pmi_removal_date': dropMonth ?? 0,
+      },
+      l2: {
+        'inputs': {
+          'loan_amount': loan,
+          'home_value': rawPrice,
+          'rate': input.annualRatePct,
+        },
+        'results': {
+          'ltv': ltv,
+          'monthly_pmi': monthlyPmi,
+          'annual_pmi': monthlyPmi * 12,
+          'payoff_months': dropMonth ?? 0,
+          'total_pmi_paid': totalPmiCost,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
+  }
+
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'pmi');
     _homePriceCtrl.dispose();
     super.dispose();
   }
@@ -221,6 +313,8 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                       totalPmiCost: totalPmiCost,
                     ),
 
+                  const SizedBox(height: AppSpacing.md),
+                  if (rawPrice > 0) SaveScenarioButton(onSave: _saveScenario),
                   const SizedBox(height: AppSpacing.xl),
 
                   // ── Info box ───────────────────────────────────────────────

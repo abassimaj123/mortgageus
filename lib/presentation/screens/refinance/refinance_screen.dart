@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../domain/models/refinance_result.dart';
 import '../../../core/services/analytics_service.dart';
-import '../../../main.dart' show adService, paywallSession, isSpanishNotifier;
+import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
+import '../../widgets/save_scenario_button.dart';
 
 class RefinanceScreen extends StatefulWidget {
   const RefinanceScreen({super.key});
@@ -30,9 +32,12 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
 
   bool _interacted = false;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('refinance');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _recalculate();
     });
@@ -40,6 +45,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'refinance');
     _balanceCtrl.dispose();
     _curRateCtrl.dispose();
     _curYearsCtrl.dispose();
@@ -79,6 +85,93 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
         _result = null;
       }
     });
+    // SmartHistory auto-save
+    final r = _result;
+    if (r != null && balance > 0) {
+      final hash = ResultHasher.hashMixed({
+        'balance': _roundTo(balance, 5000),
+        'cur_rate': _roundTo(curRate, 0.25),
+        'new_rate': _roundTo(newRate, 0.25),
+        'closing': _roundTo(closing, 500),
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'refinance',
+        inputHash: hash,
+        l1: {
+          'balance': balance,
+          'current_rate': curRate,
+          'new_rate': newRate,
+          'monthly_savings': r.monthlySavings,
+          'break_even_months': r.breakEvenMonths,
+        },
+        l2: {
+          'inputs': {
+            'current_balance': balance,
+            'current_rate': curRate,
+            'current_years': curYears,
+            'new_rate': newRate,
+            'new_years': newYears,
+            'closing_costs': closing,
+          },
+          'results': {
+            'current_payment': r.oldMonthlyPayment,
+            'new_payment': r.newMonthlyPayment,
+            'monthly_savings': r.monthlySavings,
+            'break_even_months': r.breakEvenMonths,
+            'total_savings': r.totalSavingsOverLife,
+          },
+        },
+      );
+    }
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final r = _result;
+    if (r == null) return;
+    final balance = double.tryParse(_balanceCtrl.text.replaceAll(',', '')) ?? 0;
+    final curRate = double.tryParse(_curRateCtrl.text) ?? 0;
+    final newRate = double.tryParse(_newRateCtrl.text) ?? 0;
+    final closing = double.tryParse(_closingCtrl.text.replaceAll(',', '')) ?? 4000;
+    final curYears = int.tryParse(_curYearsCtrl.text) ?? 25;
+    final newYears = int.tryParse(_newYearsCtrl.text) ?? 30;
+    final hash = ResultHasher.hashMixed({
+      'balance': _roundTo(balance, 5000),
+      'cur_rate': _roundTo(curRate, 0.25),
+      'new_rate': _roundTo(newRate, 0.25),
+      'closing': _roundTo(closing, 500),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'refinance',
+      inputHash: hash,
+      l1: {
+        'balance': balance,
+        'current_rate': curRate,
+        'new_rate': newRate,
+        'monthly_savings': r.monthlySavings,
+        'break_even_months': r.breakEvenMonths,
+      },
+      l2: {
+        'inputs': {
+          'current_balance': balance,
+          'current_rate': curRate,
+          'current_years': curYears,
+          'new_rate': newRate,
+          'new_years': newYears,
+          'closing_costs': closing,
+        },
+        'results': {
+          'current_payment': r.oldMonthlyPayment,
+          'new_payment': r.newMonthlyPayment,
+          'monthly_savings': r.monthlySavings,
+          'break_even_months': r.breakEvenMonths,
+          'total_savings': r.totalSavingsOverLife,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   void _onChanged() {
@@ -245,7 +338,9 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                           ]),
                                         ),
                                       ),
-                                      const SizedBox(height: AppSpacing.lg),
+                                      const SizedBox(height: AppSpacing.md),
+                                      SaveScenarioButton(onSave: _saveScenario),
+                                      const SizedBox(height: AppSpacing.md),
                                       Row(children: [
                                         Expanded(
                                           child: OutlinedButton.icon(

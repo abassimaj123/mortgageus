@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 /// USDA Loan Calculator
 /// 0% down. Upfront guarantee fee = 1% (financed). Annual fee 0.35%.
@@ -29,13 +31,17 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
   static const double _defaultAmi = 90000.0;
   static const double _incomeLimit = 1.15; // 115%
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('usda');
   }
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'usda');
     _homePriceCtrl.dispose();
     _incomeCtrl.dispose();
     _taxCtrl.dispose();
@@ -44,6 +50,54 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
   }
 
   Future<void> _onInteraction() async {
+    // Schedule auto-save
+    final price = _parse(_homePriceCtrl.text);
+    final income = _parse(_incomeCtrl.text);
+    if (price > 0) {
+      final input = ref.read(mortgageInputProvider);
+      final rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+      final term = input.termYears > 0 ? input.termYears : 30;
+      final baseLoan = price;
+      final upfrontFee = baseLoan * 0.01;
+      final loan = baseLoan + upfrontFee;
+      final annualFee = loan * 0.0035;
+      final monthlyFee = annualFee / 12.0;
+      final pAndI = loan > 0 ? MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: rate, termYears: term) : 0.0;
+      final tax = _parse(_taxCtrl.text);
+      final ins = _parse(_insCtrl.text);
+      final total = pAndI + monthlyFee + tax + ins;
+      final monthlyIncome = income / 12;
+      final dti = monthlyIncome > 0 ? (total / monthlyIncome) * 100 : 0.0;
+      final hash = ResultHasher.hashMixed({
+        'home_price': _roundTo(price, 5000),
+        'income': _roundTo(income, 5000),
+        'rate': _roundTo(rate, 0.25),
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'usda',
+        inputHash: hash,
+        l1: {
+          'home_price': price,
+          'income': income,
+          'monthly_payment': total,
+          'guarantee_fee': upfrontFee,
+        },
+        l2: {
+          'inputs': {
+            'home_price': price,
+            'income': income,
+            'rate': rate,
+          },
+          'results': {
+            'guarantee_fee': upfrontFee,
+            'monthly_payment': total,
+            'total_loan': loan,
+            'dti': dti,
+          },
+        },
+      );
+    }
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logUsdaCalculated();
@@ -51,6 +105,57 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
     if (!mounted) return;
     if (t == PaywallTrigger.soft) PaywallSoft.show(context);
     if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final price = _parse(_homePriceCtrl.text);
+    if (price <= 0) return;
+    final income = _parse(_incomeCtrl.text);
+    final input = ref.read(mortgageInputProvider);
+    final rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+    final term = input.termYears > 0 ? input.termYears : 30;
+    final baseLoan = price;
+    final upfrontFee = baseLoan * 0.01;
+    final loan = baseLoan + upfrontFee;
+    final annualFee = loan * 0.0035;
+    final monthlyFee = annualFee / 12.0;
+    final pAndI = loan > 0 ? MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: rate, termYears: term) : 0.0;
+    final tax = _parse(_taxCtrl.text);
+    final ins = _parse(_insCtrl.text);
+    final total = pAndI + monthlyFee + tax + ins;
+    final monthlyIncome = income / 12;
+    final dti = monthlyIncome > 0 ? (total / monthlyIncome) * 100 : 0.0;
+    final hash = ResultHasher.hashMixed({
+      'home_price': _roundTo(price, 5000),
+      'income': _roundTo(income, 5000),
+      'rate': _roundTo(rate, 0.25),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'usda',
+      inputHash: hash,
+      l1: {
+        'home_price': price,
+        'income': income,
+        'monthly_payment': total,
+        'guarantee_fee': upfrontFee,
+      },
+      l2: {
+        'inputs': {
+          'home_price': price,
+          'income': income,
+          'rate': rate,
+        },
+        'results': {
+          'guarantee_fee': upfrontFee,
+          'monthly_payment': total,
+          'total_loan': loan,
+          'dti': dti,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   double _parse(String s) =>
@@ -301,6 +406,8 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
                                 ),
                               ),
                       ),
+                      const SizedBox(height: AppSpacing.md),
+                      if (price > 0) SaveScenarioButton(onSave: _saveScenario),
                       const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,

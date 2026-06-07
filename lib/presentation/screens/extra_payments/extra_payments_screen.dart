@@ -7,7 +7,9 @@ import '../../../domain/models/extra_payment_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../core/services/analytics_service.dart';
-import '../../../main.dart' show adService, paywallSession, isSpanishNotifier;
+import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../../core/freemium/freemium_service.dart' show freemiumService;
+import '../../widgets/save_scenario_button.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
@@ -31,6 +33,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('extra_payments');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _recalculate(ref.read(mortgageInputProvider));
     });
@@ -76,6 +79,54 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
     if (_interacted) return;
     _interacted = true;
     _trackInteraction();
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final r = _result;
+    if (r == null) return;
+    final inputState = ref.read(mortgageInputProvider);
+    final loan = inputState.homePrice - inputState.downPaymentDollar;
+    if (loan <= 0) return;
+    final extraMonthly =
+        double.tryParse(_extraMonthlyCtrl.text.replaceAll(',', '')) ?? 0;
+    final extraAnnual =
+        double.tryParse(_extraAnnualCtrl.text.replaceAll(',', '')) ?? 0;
+    final lumpSum =
+        double.tryParse(_lumpSumCtrl.text.replaceAll(',', '')) ?? 0;
+    final hash = ResultHasher.hashMixed({
+      'loan': ResultHasher.roundTo(loan, 1000),
+      'rate': ResultHasher.roundTo(inputState.annualRatePct, 0.1),
+      'term': inputState.termYears,
+      'extra_monthly': ResultHasher.roundTo(extraMonthly, 50),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'extra_payments',
+      inputHash: hash,
+      l1: {
+        'loan': loan,
+        'extra_monthly': extraMonthly,
+        'interest_saved': r.interestSaved,
+        'label': label ?? '',
+      },
+      l2: {
+        'inputs': {
+          'loan_amount': loan,
+          'annual_rate': inputState.annualRatePct,
+          'term_years': inputState.termYears,
+          'extra_monthly': extraMonthly,
+          'extra_annual': extraAnnual,
+          'lump_sum': lumpSum,
+        },
+        'results': {
+          'months_saved': r.originalPayoffMonths - r.newPayoffMonths,
+          'interest_saved': r.interestSaved,
+          'new_payoff_months': r.newPayoffMonths,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   Future<void> _trackInteraction() async {
@@ -267,6 +318,10 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                 ),
                               ),
                             ],
+                          ],
+                          if (_result != null) ...[
+                            const SizedBox(height: AppSpacing.sm),
+                            SaveScenarioButton(onSave: _saveScenario),
                           ],
                           const SizedBox(height: AppSpacing.listBottomInset),
                         ]),

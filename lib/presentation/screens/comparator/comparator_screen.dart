@@ -14,7 +14,8 @@ import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../history/history_screen.dart';
 import '../../../core/services/analytics_service.dart';
-import '../../../main.dart' show adService, paywallSession, isSpanishNotifier;
+import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../widgets/save_scenario_button.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 
@@ -34,6 +35,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('comparator');
     AnalyticsService.instance.logComparatorUsed();
     // ARM adjusted-rate field is reactive (calcArm runs in build) —
     // trigger a rebuild whenever the user types a new rate.
@@ -98,6 +100,66 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
       behavior: SnackBarBehavior.floating,
       duration: const Duration(seconds: 3),
     ));
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final inputState = ref.read(mortgageInputProvider);
+    final loan = inputState.homePrice - inputState.downPaymentDollar;
+    if (loan <= 0 || inputState.homePrice <= 0) return;
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month + 1);
+    MortgageResult? calcResult(int termYears) {
+      try {
+        return MortgageCalculator.calculate(MortgageInput(
+          homePrice: inputState.homePrice,
+          downPayment: inputState.downPaymentDollar,
+          annualRatePct: inputState.annualRatePct,
+          termYears: termYears,
+          loanType: inputState.loanType,
+          propertyTaxRatePct: inputState.propertyTaxRatePct,
+          homeInsuranceAnnual: inputState.homeInsuranceAnnual,
+          hoaMonthly: inputState.hoaMonthly,
+          pmiAnnualRatePct: 0.0,
+          startDate: startDate,
+        ));
+      } catch (_) {
+        return null;
+      }
+    }
+    final r30 = calcResult(30);
+    final r15 = calcResult(15);
+    final hash = ResultHasher.hashMixed({
+      'home': ResultHasher.roundTo(inputState.homePrice, 1000),
+      'down': ResultHasher.roundTo(inputState.downPaymentPct, 0.5),
+      'rate': ResultHasher.roundTo(inputState.annualRatePct, 0.1),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'comparator',
+      inputHash: hash,
+      l1: {
+        'home_price': inputState.homePrice,
+        'annual_rate': inputState.annualRatePct,
+        'label': label ?? '',
+      },
+      l2: {
+        'inputs': {
+          'home_price': inputState.homePrice,
+          'down_percent': inputState.downPaymentPct,
+          'annual_rate': inputState.annualRatePct,
+          'loan_amount': loan,
+        },
+        'results': {
+          'payments_15': r15?.monthly.pitiPayment,
+          'payments_30': r30?.monthly.pitiPayment,
+          'interest_diff_vs_30': (r30 != null && r15 != null)
+              ? r30.totalInterest - r15.totalInterest
+              : null,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   @override
@@ -338,6 +400,10 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                             },
                           ),
                         ),
+                      ],
+                      if (!_armMode && r30 != null && r15 != null) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        SaveScenarioButton(onSave: _saveScenario),
                       ],
                       const SizedBox(height: AppSpacing.lg),
                     ]),

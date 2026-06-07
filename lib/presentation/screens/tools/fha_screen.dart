@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 /// FHA Loan Calculator
 /// Min 3.5% down. Upfront MIP = 1.75% of loan (financed).
@@ -27,22 +29,100 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
   int _creditScore = 680;
   bool _logged = false;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('fha');
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
   }
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'fha');
     _homePriceCtrl.dispose();
     _taxCtrl.dispose();
     _insCtrl.dispose();
     super.dispose();
   }
 
+  void _scheduleAutoSave({
+    required double price,
+    required double effectiveRate,
+    required double loan,
+    required double upfrontMip,
+    required double monthlyMip,
+    required double total,
+    required double annualMipRate,
+  }) {
+    if (price <= 0) return;
+    final hash = ResultHasher.hashMixed({
+      'home_price': _roundTo(price, 5000),
+      'down_pct': _roundTo(_downPct, 1.0),
+      'rate': _roundTo(effectiveRate, 0.25),
+      'credit_score': (_creditScore / 50).round() * 50.0,
+    });
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'mortgageus',
+      screenId: 'fha',
+      inputHash: hash,
+      l1: {
+        'home_price': price,
+        'down_pct': _downPct,
+        'rate': effectiveRate,
+        'monthly_with_mip': total,
+        'mip_monthly': monthlyMip,
+      },
+      l2: {
+        'inputs': {
+          'home_price': price,
+          'down_pct': _downPct,
+          'rate': effectiveRate,
+          'credit_score': _creditScore,
+        },
+        'results': {
+          'loan_amount': loan,
+          'upfront_mip': upfrontMip,
+          'annual_mip': annualMipRate,
+          'monthly_payment': total,
+          'monthly_mip': monthlyMip,
+        },
+      },
+    );
+  }
+
   Future<void> _onInteraction() async {
+    // Compute current state for auto-save
+    final input = ref.read(mortgageInputProvider);
+    final effectiveRate = ((input.annualRatePct > 0 ? input.annualRatePct : 7.0) + _creditAdj(_creditScore)).clamp(0.0, 30.0);
+    final price = _parse(_homePriceCtrl.text);
+    if (price > 0) {
+      final down = price * _downPct / 100.0;
+      final baseLoan = (price - down).clamp(0.0, double.infinity);
+      final upfrontMip = baseLoan * 0.0175;
+      final loan = baseLoan + upfrontMip;
+      final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
+      final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
+      final monthlyMip = loan * annualMipRate / 12.0;
+      final term = input.termYears > 0 ? input.termYears : 30;
+      final pAndI = loan > 0
+          ? MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: effectiveRate, termYears: term)
+          : 0.0;
+      final tax = _parse(_taxCtrl.text);
+      final ins = _parse(_insCtrl.text);
+      final total = pAndI + monthlyMip + tax + ins;
+      _scheduleAutoSave(
+        price: price,
+        effectiveRate: effectiveRate,
+        loan: loan,
+        upfrontMip: upfrontMip,
+        monthlyMip: monthlyMip,
+        total: total,
+        annualMipRate: annualMipRate,
+      );
+    }
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logFhaCalculated();
@@ -50,6 +130,62 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
     if (!mounted) return;
     if (t == PaywallTrigger.soft) PaywallSoft.show(context);
     if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final input = ref.read(mortgageInputProvider);
+    final effectiveRate = ((input.annualRatePct > 0 ? input.annualRatePct : 7.0) + _creditAdj(_creditScore)).clamp(0.0, 30.0);
+    final price = _parse(_homePriceCtrl.text);
+    if (price <= 0) return;
+    final down = price * _downPct / 100.0;
+    final baseLoan = (price - down).clamp(0.0, double.infinity);
+    final upfrontMip = baseLoan * 0.0175;
+    final loan = baseLoan + upfrontMip;
+    final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
+    final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
+    final monthlyMip = loan * annualMipRate / 12.0;
+    final term = input.termYears > 0 ? input.termYears : 30;
+    final pAndI = loan > 0
+        ? MortgageCalculator.calcMonthlyPayment(loanAmount: loan, annualRatePct: effectiveRate, termYears: term)
+        : 0.0;
+    final tax = _parse(_taxCtrl.text);
+    final ins = _parse(_insCtrl.text);
+    final total = pAndI + monthlyMip + tax + ins;
+    final hash = ResultHasher.hashMixed({
+      'home_price': _roundTo(price, 5000),
+      'down_pct': _roundTo(_downPct, 1.0),
+      'rate': _roundTo(effectiveRate, 0.25),
+      'credit_score': (_creditScore / 50).round() * 50.0,
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'fha',
+      inputHash: hash,
+      l1: {
+        'home_price': price,
+        'down_pct': _downPct,
+        'rate': effectiveRate,
+        'monthly_with_mip': total,
+        'mip_monthly': monthlyMip,
+      },
+      l2: {
+        'inputs': {
+          'home_price': price,
+          'down_pct': _downPct,
+          'rate': effectiveRate,
+          'credit_score': _creditScore,
+        },
+        'results': {
+          'loan_amount': loan,
+          'upfront_mip': upfrontMip,
+          'annual_mip': annualMipRate,
+          'monthly_payment': total,
+          'monthly_mip': monthlyMip,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   double _parse(String s) =>
@@ -95,7 +231,6 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         final tax = _parse(_taxCtrl.text);
         final ins = _parse(_insCtrl.text);
         final total = pAndI + monthlyMip + tax + ins;
-
 
         return Scaffold(
           appBar: AppBar(
@@ -314,6 +449,8 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
                                   ),
                                 ),
                         ),
+                        const SizedBox(height: AppSpacing.md),
+                        if (price > 0) SaveScenarioButton(onSave: _saveScenario),
                         const SizedBox(height: AppSpacing.lg),
                         Container(
                           width: double.infinity,

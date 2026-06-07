@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
+import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier;
+import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 
 /// Closing Costs by State Calculator
 ///
@@ -27,9 +29,12 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
   bool _isBuyer = true;
   bool _logged = false;
 
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('closing_costs');
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
     _rateCtrl.text = (input.annualRatePct > 0 ? input.annualRatePct : 6.9).toStringAsFixed(2);
@@ -38,12 +43,54 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'closing_costs');
     _homePriceCtrl.dispose();
     _rateCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _onInteraction() async {
+    // Schedule auto-save on interaction
+    final homePrice = _parse(_homePriceCtrl.text);
+    final rate = double.tryParse(_rateCtrl.text) ?? 6.9;
+    if (homePrice > 0) {
+      final lines = _calcCosts(homePrice: homePrice, rate: rate, state: _state, loanType: _loanType, isBuyer: _isBuyer);
+      final total = lines.fold<double>(0.0, (s, l) => s + l.amount);
+      final loanAmount = _isBuyer
+          ? (_loanType == 'FHA' ? homePrice * 0.965 : _loanType == 'VA' || _loanType == 'USDA' ? homePrice : homePrice * 0.8)
+          : 0.0;
+      final hash = ResultHasher.hashMixed({
+        'home_price': _roundTo(homePrice, 5000),
+        'loan_amount': _roundTo(loanAmount, 5000),
+        'state': _state.substring(0, 2),
+      });
+      smartHistoryService.scheduleAutoSave(
+        appKey: 'mortgageus',
+        screenId: 'closing_costs',
+        inputHash: hash,
+        l1: {
+          'home_price': homePrice,
+          'loan_amount': loanAmount,
+          'state': _state,
+          'total_closing_costs': total,
+        },
+        l2: {
+          'inputs': {
+            'home_price': homePrice,
+            'rate': rate,
+            'state': _state,
+            'loan_type': _loanType,
+            'is_buyer': _isBuyer,
+          },
+          'results': {
+            'lender_fees': lines.isNotEmpty ? lines.first.amount : 0.0,
+            'third_party_fees': 0.0,
+            'prepaid_items': 0.0,
+            'total_closing_costs': total,
+          },
+        },
+      );
+    }
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logClosingCostsCalculated();
@@ -51,6 +98,50 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
     if (!mounted) return;
     if (t == PaywallTrigger.soft) PaywallSoft.show(context);
     if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final homePrice = _parse(_homePriceCtrl.text);
+    final rate = double.tryParse(_rateCtrl.text) ?? 6.9;
+    if (homePrice <= 0) return;
+    final lines = _calcCosts(homePrice: homePrice, rate: rate, state: _state, loanType: _loanType, isBuyer: _isBuyer);
+    final total = lines.fold<double>(0.0, (s, l) => s + l.amount);
+    final loanAmount = _isBuyer
+        ? (_loanType == 'FHA' ? homePrice * 0.965 : _loanType == 'VA' || _loanType == 'USDA' ? homePrice : homePrice * 0.8)
+        : 0.0;
+    final hash = ResultHasher.hashMixed({
+      'home_price': _roundTo(homePrice, 5000),
+      'loan_amount': _roundTo(loanAmount, 5000),
+      'state': _state.substring(0, 2),
+    });
+    await smartHistoryService.saveScenario(
+      appKey: 'mortgageus',
+      screenId: 'closing_costs',
+      inputHash: hash,
+      l1: {
+        'home_price': homePrice,
+        'loan_amount': loanAmount,
+        'state': _state,
+        'total_closing_costs': total,
+      },
+      l2: {
+        'inputs': {
+          'home_price': homePrice,
+          'rate': rate,
+          'state': _state,
+          'loan_type': _loanType,
+          'is_buyer': _isBuyer,
+        },
+        'results': {
+          'lender_fees': lines.isNotEmpty ? lines.first.amount : 0.0,
+          'third_party_fees': 0.0,
+          'prepaid_items': 0.0,
+          'total_closing_costs': total,
+        },
+      },
+      label: freemiumService.hasFullAccess ? label : null,
+    );
+    AnalyticsService.instance.logHistorySaved();
   }
 
   double _parse(String s) =>
@@ -535,6 +626,8 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
                             ),
                           ]),
                         ),
+                        const SizedBox(height: AppSpacing.md),
+                        SaveScenarioButton(onSave: _saveScenario),
                         const SizedBox(height: AppSpacing.lg),
                       ],
 

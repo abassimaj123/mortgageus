@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../presentation/providers/mortgage_providers.dart';
 import '../../domain/models/mortgage_result.dart';
 import '../../domain/models/loan_type.dart';
+import '../../domain/models/extra_payment_result.dart';
 import '../freemium/iap_service.dart';
 import '../theme/app_theme.dart';
 import '../../main.dart' show adService, isSpanishNotifier;
@@ -629,6 +630,377 @@ class PdfExportService {
           ],
         ),
       );
+
+  // ── Amortization PDF export ───────────────────────────────────────────────
+
+  static Future<void> exportAmortization(
+    BuildContext context,
+    MortgageInputState input,
+    MortgageResult result, {
+    bool isEs = false,
+  }) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+      build: (_) => _buildAmortSummaryPage(input, result, isEs: isEs),
+    ));
+
+    pdf.addPage(pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.fromLTRB(36, 28, 36, 28),
+      header: (ctx) => _amortHeader(input, result, ctx.pageNumber, isEs: isEs),
+      footer: (ctx) => _footer(ctx, isEs: isEs),
+      build: (_) => [
+        ..._buildYearlySection(result, isEs: isEs),
+        pw.SizedBox(height: 18),
+        ..._buildMonthlySection(result, isEs: isEs),
+      ],
+    ));
+
+    final pdfBytes = await pdf.save();
+    final tmpDir = await getTemporaryDirectory();
+    final pdfFile = File(
+        '${tmpDir.path}/MortgageUS_Amortization_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
+    await pdfFile.writeAsBytes(pdfBytes);
+    await Share.shareXFiles(
+        [XFile(pdfFile.path, mimeType: 'application/pdf')]);
+  }
+
+  static pw.Widget _buildAmortSummaryPage(
+      MortgageInputState input, MortgageResult result,
+      {bool isEs = false}) {
+    final now = DateTime.now();
+    final tReport = isEs ? 'Tabla de Amortización' : 'Amortization Schedule';
+    final tLoanDetails = isEs ? 'DETALLES DEL PRÉSTAMO' : 'LOAN DETAILS';
+    final tHomePrice = isEs ? 'Precio de la casa' : 'Home Price';
+    final tLoanAmount = isEs ? 'Monto del préstamo' : 'Loan Amount';
+    final tInterestRate = isEs ? 'Tasa de interés' : 'Interest Rate';
+    final tLoanTerm = isEs ? 'Plazo' : 'Loan Term';
+    final tYears = isEs ? 'años' : 'years';
+    final tTotalInterest = isEs ? 'Interés total' : 'Total Interest';
+    final tTotalCost = isEs ? 'Costo total' : 'Total Cost';
+    final tPayoffDate = isEs ? 'Fecha de liquidación' : 'Payoff Date';
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+              pw.Text('MortgageUS',
+                  style: pw.TextStyle(
+                      fontSize: AppTextSize.title,
+                      fontWeight: pw.FontWeight.bold,
+                      color: _navy)),
+              pw.Text(tReport,
+                  style: const pw.TextStyle(
+                      fontSize: AppTextSize.xs, color: PdfColors.grey700)),
+            ]),
+            pw.Text(_dateLong.format(now),
+                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+          ],
+        ),
+        pw.Container(
+            height: 2,
+            color: _navy,
+            margin: const pw.EdgeInsets.only(top: 6, bottom: 14)),
+        _sectionBox(tLoanDetails, [
+          _row2(tHomePrice, _usd0.format(input.homePrice)),
+          _row2(tLoanAmount, _usd0.format(result.loanAmount)),
+          _row2(tInterestRate, '${input.annualRatePct.toStringAsFixed(2)}%'),
+          _row2(tLoanTerm, '${input.termYears} $tYears'),
+          _row2(tTotalInterest, _usd0.format(result.totalInterest)),
+          _row2(tTotalCost, _usd0.format(result.totalCost), bold: true),
+          _row2(tPayoffDate, DateFormat('MMM yyyy').format(result.payoffDate)),
+        ]),
+        pw.Spacer(),
+        _footerNote(isEs: isEs),
+      ],
+    );
+  }
+
+  // ── Comparator PDF export ─────────────────────────────────────────────────
+
+  static Future<void> exportComparator(
+    BuildContext context,
+    MortgageInputState input,
+    MortgageResult r30,
+    MortgageResult r15, {
+    bool isEs = false,
+  }) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+      build: (_) => _buildComparatorPage(input, r30, r15, isEs: isEs),
+    ));
+
+    final pdfBytes = await pdf.save();
+    final tmpDir = await getTemporaryDirectory();
+    final pdfFile = File(
+        '${tmpDir.path}/MortgageUS_Comparator_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
+    await pdfFile.writeAsBytes(pdfBytes);
+    await Share.shareXFiles(
+        [XFile(pdfFile.path, mimeType: 'application/pdf')]);
+  }
+
+  static pw.Widget _buildComparatorPage(
+      MortgageInputState input, MortgageResult r30, MortgageResult r15,
+      {bool isEs = false}) {
+    final now = DateTime.now();
+    final tReport = isEs ? 'Comparación 15 vs 30 años' : '15 vs 30 Year Comparison';
+    final tLoanInfo = isEs ? 'INFORMACIÓN DEL PRÉSTAMO' : 'LOAN INFORMATION';
+    final tHomePrice = isEs ? 'Precio de la casa' : 'Home Price';
+    final tLoanAmount = isEs ? 'Monto del préstamo' : 'Loan Amount';
+    final tInterestRate = isEs ? 'Tasa de interés' : 'Interest Rate';
+    final tComparison = isEs ? 'COMPARACIÓN 15 vs 30 AÑOS' : '15 VS 30 YEAR COMPARISON';
+    final tMetric = isEs ? 'Métrica' : 'Metric';
+    final t30yr = isEs ? '30 años' : '30 Year';
+    final t15yr = isEs ? '15 años' : '15 Year';
+    final tMonthlyPI = isEs ? 'Pago mensual (P&I)' : 'Monthly P&I';
+    final tTotalInterest = isEs ? 'Interés total' : 'Total Interest';
+    final tTotalCost = isEs ? 'Costo total' : 'Total Cost';
+    final tPayoff = isEs ? 'Fecha pago final' : 'Payoff Date';
+    final tAdvantage = isEs ? 'VENTAJA 15 AÑOS' : '15-YEAR ADVANTAGE';
+    final tInterestSaved = isEs ? 'Interés ahorrado' : 'Interest saved';
+    final tPaidOffEarlier = isEs ? 'Pagado antes' : 'Paid off earlier';
+    final tYears = isEs ? 'años' : 'years';
+
+    final yearsDiff = r30.payoffDate.year - r15.payoffDate.year;
+    final interestSaved = r30.totalInterest - r15.totalInterest;
+    final extraMonthly = r15.monthly.piPayment - r30.monthly.piPayment;
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+              pw.Text('MortgageUS',
+                  style: pw.TextStyle(
+                      fontSize: AppTextSize.title,
+                      fontWeight: pw.FontWeight.bold,
+                      color: _navy)),
+              pw.Text(tReport,
+                  style: const pw.TextStyle(
+                      fontSize: AppTextSize.xs, color: PdfColors.grey700)),
+            ]),
+            pw.Text(_dateLong.format(now),
+                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+          ],
+        ),
+        pw.Container(
+            height: 2,
+            color: _navy,
+            margin: const pw.EdgeInsets.only(top: 6, bottom: 14)),
+        _sectionBox(tLoanInfo, [
+          _row2(tHomePrice, _usd0.format(input.homePrice)),
+          _row2(tLoanAmount, _usd0.format(r30.loanAmount)),
+          _row2(tInterestRate, '${input.annualRatePct.toStringAsFixed(2)}%'),
+        ]),
+        pw.SizedBox(height: 12),
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Container(
+              width: double.infinity,
+              padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              color: _navy,
+              child: pw.Text(tComparison,
+                  style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.white)),
+            ),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(AppSpacing.sm),
+              decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey300, width: 0.5)),
+              child: pw.TableHelper.fromTextArray(
+                headers: [tMetric, t30yr, t15yr],
+                data: [
+                  [tMonthlyPI, _usd2.format(r30.monthly.piPayment), _usd2.format(r15.monthly.piPayment)],
+                  [tTotalInterest, _usd0.format(r30.totalInterest), _usd0.format(r15.totalInterest)],
+                  [tTotalCost, _usd0.format(r30.totalCost), _usd0.format(r15.totalCost)],
+                  [tPayoff,
+                    '${r30.payoffDate.month}/${r30.payoffDate.year}',
+                    '${r15.payoffDate.month}/${r15.payoffDate.year}'],
+                ],
+                headerStyle: pw.TextStyle(
+                    fontSize: 8,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.white),
+                headerDecoration: const pw.BoxDecoration(color: _navy),
+                cellStyle: const pw.TextStyle(fontSize: 9),
+                cellHeight: 16,
+                cellAlignments: {
+                  0: pw.Alignment.centerLeft,
+                  1: pw.Alignment.centerRight,
+                  2: pw.Alignment.centerRight,
+                },
+                border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+              ),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 12),
+        _sectionBox(tAdvantage, [
+          _row2(tInterestSaved, _usd0.format(interestSaved),
+              bold: true, color: PdfColor(0.13, 0.55, 0.33)),
+          _row2(tPaidOffEarlier, '$yearsDiff $tYears',
+              bold: true, color: PdfColor(0.13, 0.55, 0.33)),
+          _row2(
+            isEs ? 'Pago mensual adicional (15 años)' : 'Extra monthly payment (15yr)',
+            _usd2.format(extraMonthly),
+          ),
+        ]),
+        pw.Spacer(),
+        _footerNote(isEs: isEs),
+      ],
+    );
+  }
+
+  // ── Extra Payments PDF export ─────────────────────────────────────────────
+
+  static Future<void> exportExtraPayments(
+    BuildContext context,
+    MortgageInputState input,
+    ExtraPaymentResult result, {
+    required double extraMonthly,
+    required double extraAnnual,
+    required double lumpSum,
+    bool isEs = false,
+  }) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+      build: (_) => _buildExtraPaymentsPage(
+          input, result,
+          extraMonthly: extraMonthly,
+          extraAnnual: extraAnnual,
+          lumpSum: lumpSum,
+          isEs: isEs),
+    ));
+
+    final pdfBytes = await pdf.save();
+    final tmpDir = await getTemporaryDirectory();
+    final loan = input.homePrice - input.downPaymentDollar;
+    final pdfFile = File(
+        '${tmpDir.path}/MortgageUS_ExtraPayments_${loan.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
+    await pdfFile.writeAsBytes(pdfBytes);
+    await Share.shareXFiles(
+        [XFile(pdfFile.path, mimeType: 'application/pdf')]);
+  }
+
+  static pw.Widget _buildExtraPaymentsPage(
+      MortgageInputState input, ExtraPaymentResult result, {
+      required double extraMonthly,
+      required double extraAnnual,
+      required double lumpSum,
+      bool isEs = false}) {
+    final now = DateTime.now();
+    final loan = input.homePrice - input.downPaymentDollar;
+    final tReport = isEs ? 'Simulación de Pagos Extra' : 'Extra Payments Simulation';
+    final tLoanInfo = isEs ? 'PRÉSTAMO BASE' : 'BASE LOAN';
+    final tLoanAmount = isEs ? 'Monto del préstamo' : 'Loan Amount';
+    final tInterestRate = isEs ? 'Tasa de interés' : 'Interest Rate';
+    final tLoanTerm = isEs ? 'Plazo' : 'Loan Term';
+    final tYears = isEs ? 'años' : 'years';
+    final tExtraPayments = isEs ? 'PAGOS ADICIONALES' : 'EXTRA PAYMENTS';
+    final tExtraMonthly = isEs ? 'Extra mensual' : 'Monthly extra';
+    final tExtraAnnual = isEs ? 'Extra anual' : 'Annual extra';
+    final tLumpSum = isEs ? 'Pago único' : 'Lump sum';
+    final tResults = isEs ? 'RESULTADOS' : 'RESULTS';
+    final tOrigPayoff = isEs ? 'Pago original (meses)' : 'Original payoff (months)';
+    final tNewPayoff = isEs ? 'Nuevo pago (meses)' : 'New payoff (months)';
+    final tTimeSaved = isEs ? 'Tiempo ahorrado' : 'Time saved';
+    final tOrigInterest = isEs ? 'Interés total original' : 'Original total interest';
+    final tNewInterest = isEs ? 'Nuevo interés total' : 'New total interest';
+    final tInterestSaved = isEs ? 'Interés ahorrado' : 'Interest saved';
+    final months = isEs ? 'meses' : 'months';
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+              pw.Text('MortgageUS',
+                  style: pw.TextStyle(
+                      fontSize: AppTextSize.title,
+                      fontWeight: pw.FontWeight.bold,
+                      color: _navy)),
+              pw.Text(tReport,
+                  style: const pw.TextStyle(
+                      fontSize: AppTextSize.xs, color: PdfColors.grey700)),
+            ]),
+            pw.Text(_dateLong.format(now),
+                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+          ],
+        ),
+        pw.Container(
+            height: 2,
+            color: _navy,
+            margin: const pw.EdgeInsets.only(top: 6, bottom: 14)),
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Expanded(
+              child: pw.Column(children: [
+                _sectionBox(tLoanInfo, [
+                  _row2(tLoanAmount, _usd0.format(loan)),
+                  _row2(tInterestRate, '${input.annualRatePct.toStringAsFixed(2)}%'),
+                  _row2(tLoanTerm, '${input.termYears} $tYears'),
+                ]),
+                pw.SizedBox(height: 10),
+                _sectionBox(tExtraPayments, [
+                  if (extraMonthly > 0)
+                    _row2(tExtraMonthly, _usd2.format(extraMonthly)),
+                  if (extraAnnual > 0)
+                    _row2(tExtraAnnual, _usd2.format(extraAnnual)),
+                  if (lumpSum > 0)
+                    _row2(tLumpSum, _usd2.format(lumpSum)),
+                  if (extraMonthly == 0 && extraAnnual == 0 && lumpSum == 0)
+                    _row2(isEs ? 'Ninguno' : 'None', '—'),
+                ]),
+              ]),
+            ),
+            pw.SizedBox(width: 14),
+            pw.Expanded(
+              child: _sectionBox(tResults, [
+                _row2(tOrigPayoff, '${result.originalPayoffMonths} $months'),
+                _row2(tNewPayoff, '${result.newPayoffMonths} $months'),
+                _row2(tTimeSaved,
+                    '${result.yearsSaved} $tYears ${result.remMonthsSaved} $months',
+                    bold: true, color: PdfColor(0.13, 0.55, 0.33)),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                  child: pw.Divider(color: PdfColors.grey300, height: 6),
+                ),
+                _row2(tOrigInterest, _usd0.format(result.originalTotalInterest)),
+                _row2(tNewInterest, _usd0.format(result.newTotalInterest)),
+                _row2(tInterestSaved, _usd0.format(result.interestSaved),
+                    bold: true, color: PdfColor(0.13, 0.55, 0.33)),
+              ]),
+            ),
+          ],
+        ),
+        pw.Spacer(),
+        _footerNote(isEs: isEs),
+      ],
+    );
+  }
 
   // ── Unlock sheet entry point (unchanged) ─────────────────────────────────
 

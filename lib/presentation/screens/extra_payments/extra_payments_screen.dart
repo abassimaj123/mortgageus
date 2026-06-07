@@ -9,6 +9,8 @@ import '../../providers/mortgage_providers.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, smartHistoryService;
 import '../../../core/freemium/freemium_service.dart' show freemiumService;
+import '../../../core/freemium/iap_service.dart';
+import '../../../core/services/pdf_export_service.dart';
 import '../../widgets/save_scenario_button.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
@@ -322,6 +324,84 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                           if (_result != null) ...[
                             const SizedBox(height: AppSpacing.sm),
                             SaveScenarioButton(onSave: _saveScenario),
+                            const SizedBox(height: AppSpacing.sm),
+                            ValueListenableBuilder<bool>(
+                              valueListenable:
+                                  freemiumService.hasFullAccessNotifier,
+                              builder: (context, isPremium, _) {
+                                return SizedBox(
+                                  width: double.infinity,
+                                  child: TextButton.icon(
+                                    onPressed: () async {
+                                      if (isPremium) {
+                                        final inputState =
+                                            ref.read(mortgageInputProvider);
+                                        try {
+                                          await PdfExportService
+                                              .exportExtraPayments(
+                                            context,
+                                            inputState,
+                                            _result!,
+                                            extraMonthly: extraMonthly,
+                                            extraAnnual: extraAnnual,
+                                            lumpSum: lumpSum,
+                                            isEs: isEs,
+                                          );
+                                          AnalyticsService.instance
+                                              .logPdfExported();
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                              content: Text(isEs
+                                                  ? 'PDF exportado con éxito'
+                                                  : 'PDF exported successfully'),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              duration:
+                                                  const Duration(seconds: 2),
+                                            ));
+                                          }
+                                        } catch (_) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                              content: Text(isEs
+                                                  ? 'Error al exportar PDF'
+                                                  : 'Export failed'),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                            ));
+                                          }
+                                        }
+                                      } else {
+                                        IAPService.instance.buy();
+                                      }
+                                    },
+                                    icon: Icon(
+                                        isPremium
+                                            ? Icons.picture_as_pdf_rounded
+                                            : Icons.lock_outline,
+                                        size: 18),
+                                    label: Text(
+                                      isPremium
+                                          ? (isEs
+                                              ? 'Exportar PDF'
+                                              : 'Export PDF')
+                                          : (isEs
+                                              ? 'Exportar PDF — Premium'
+                                              : 'Export PDF — Premium'),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    style: TextButton.styleFrom(
+                                      minimumSize: const Size(0, 44),
+                                      foregroundColor: isPremium
+                                          ? AppTheme.primary
+                                          : AppTheme.secondary,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                           const SizedBox(height: AppSpacing.listBottomInset),
                         ]),

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/freemium/iap_service.dart';
+import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../domain/models/mortgage_result.dart';
@@ -284,12 +285,79 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                     fmtDate: fmtDate,
                     s: s)),
 
-            // ── Save scenario ──────────────────────────────────────────────────
+            // ── Save scenario + PDF export ─────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-                child: SaveScenarioButton(onSave: _saveScenario),
+                child: Column(
+                  children: [
+                    SaveScenarioButton(onSave: _saveScenario),
+                    const SizedBox(height: AppSpacing.sm),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: freemiumService.hasFullAccessNotifier,
+                      builder: (context, isPremium, _) {
+                        return SizedBox(
+                          width: double.infinity,
+                          child: TextButton.icon(
+                            onPressed: () async {
+                              if (isPremium) {
+                                try {
+                                  await PdfExportService.exportAmortization(
+                                      context, inputState, result,
+                                      isEs: isEs);
+                                  AnalyticsService.instance.logPdfExported();
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(isEs
+                                            ? 'PDF exportado con éxito'
+                                            : 'PDF exported successfully'),
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                  }
+                                } catch (_) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(isEs
+                                            ? 'Error al exportar PDF'
+                                            : 'Export failed'),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  }
+                                }
+                              } else {
+                                IAPService.instance.buy();
+                              }
+                            },
+                            icon: Icon(
+                                isPremium
+                                    ? Icons.picture_as_pdf_rounded
+                                    : Icons.lock_outline,
+                                size: 18),
+                            label: Text(
+                              isPremium
+                                  ? (isEs ? 'Exportar PDF' : 'Export PDF')
+                                  : (isEs
+                                      ? 'Exportar PDF — Premium'
+                                      : 'Export PDF — Premium'),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(0, 44),
+                              foregroundColor:
+                                  isPremium ? AppTheme.primary : AppTheme.secondary,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
 

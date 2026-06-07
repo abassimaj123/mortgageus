@@ -109,7 +109,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
         'loan': loan,
         'extra_monthly': extraMonthly,
         'interest_saved': r.interestSaved,
-        'label': label ?? '',
+        'months_saved': r.originalPayoffMonths - r.newPayoffMonths,
       },
       l2: {
         'inputs': {

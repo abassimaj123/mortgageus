@@ -141,7 +141,8 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
       l1: {
         'monthly_payment': result.monthly.pitiPayment,
         'home_price': inputState.homePrice,
-        'label': label ?? '',
+        'total_interest': result.totalInterest,
+        'payoff_date': result.payoffDate.toIso8601String(),
       },
       l2: {
         'inputs': {

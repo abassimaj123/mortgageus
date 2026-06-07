@@ -141,8 +141,12 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
       inputHash: hash,
       l1: {
         'home_price': inputState.homePrice,
-        'annual_rate': inputState.annualRatePct,
-        'label': label ?? '',
+        'rate': inputState.annualRatePct,
+        'monthly_15': r15?.monthly.pitiPayment,
+        'monthly_30': r30?.monthly.pitiPayment,
+        'savings': (r30 != null && r15 != null)
+            ? r30.totalInterest - r15.totalInterest
+            : null,
       },
       l2: {
         'inputs': {

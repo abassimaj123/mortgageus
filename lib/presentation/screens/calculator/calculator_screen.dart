@@ -123,18 +123,22 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     final result = ref.read(mortgageResultProvider)!;
     final inputState = ref.read(mortgageInputProvider);
     return {
-      'home_price': inputState.homePrice,
-      'down_percent': inputState.downPaymentPct,
-      'annual_rate': inputState.annualRatePct,
-      'monthly_payment': result.monthly.pitiPayment,
-      'total_interest': result.totalInterest,
-      'loan_amount': result.loanAmount,
-      'loan_type': inputState.loanType.label,
-      'term_years': inputState.termYears,
-      'tax_rate': inputState.propertyTaxRatePct,
-      'insurance': inputState.homeInsuranceAnnual,
-      'hoa': inputState.hoaMonthly,
-      'label': label,
+      'inputs': {
+        'home_price': inputState.homePrice,
+        'down_percent': inputState.downPaymentPct,
+        'annual_rate': inputState.annualRatePct,
+        'term_years': inputState.termYears,
+        'loan_type': inputState.loanType.label,
+        'tax_rate': inputState.propertyTaxRatePct,
+        'insurance': inputState.homeInsuranceAnnual,
+        'hoa': inputState.hoaMonthly,
+      },
+      'results': {
+        'monthly_payment': result.monthly.pitiPayment,
+        'total_interest': result.totalInterest,
+        'total_cost': result.totalCost,
+        'loan_amount': result.loanAmount,
+      },
     };
   }
 
@@ -143,9 +147,12 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     final result = ref.read(mortgageResultProvider)!;
     final inputState = ref.read(mortgageInputProvider);
     return {
-      'label': label,
-      'monthly_payment': result.monthly.pitiPayment,
       'home_price': inputState.homePrice,
+      'down_payment': inputState.downPaymentDollar,
+      'rate': inputState.annualRatePct,
+      'term': inputState.termYears,
+      'monthly_payment': result.monthly.pitiPayment,
+      'total_interest': result.totalInterest,
     };
   }
 
@@ -160,7 +167,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     final label = _autoLabel();
     smartHistoryService.scheduleAutoSave(
       appKey: 'mortgageus',
-      screenId: 'calculator',
+      screenId: 'mortgage_calculator',
       inputHash: hash,
       l1: _l1Payload(label),
       l2: _l2Payload(label),
@@ -197,7 +204,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
         : _autoLabel();
     await smartHistoryService.saveScenario(
       appKey: 'mortgageus',
-      screenId: 'calculator',
+      screenId: 'mortgage_calculator',
       inputHash: hash,
       l1: _l1Payload(effectiveLabel),
       l2: _l2Payload(effectiveLabel),

@@ -256,7 +256,7 @@ class AppStringsES implements AppStrings {
   @override
   final exportPdf = 'Exportar PDF';
   @override
-  final exportPdfPremium = 'Exportar PDF — Premium';
+  final exportPdfPremium = 'Exportar PDF';
 
   // Ad-free / rewarded
   @override

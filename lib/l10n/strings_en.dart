@@ -439,7 +439,7 @@ class AppStringsEN implements AppStrings {
   @override
   final exportPdf = 'Export PDF';
   @override
-  final exportPdfPremium = 'Export PDF — Premium';
+  final exportPdfPremium = 'Export PDF';
 
   // Ad-free / rewarded
   @override

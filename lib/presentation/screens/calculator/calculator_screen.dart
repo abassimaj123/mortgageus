@@ -783,31 +783,14 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 const SizedBox(
                                                     width: AppSpacing.sm),
                                                 Expanded(
-                                                  child: TextButton.icon(
-                                                    onPressed: () async {
+                                                  child: ValueListenableBuilder<bool>(
+                                                    valueListenable: freemiumService.hasFullAccessNotifier,
+                                                    builder: (context, isPremiumShare, _) => TextButton.icon(
+                                                    onPressed: isPremiumShare
+                                                        ? () async {
                                                       final isEs =
                                                           isSpanishNotifier
                                                               .value;
-                                                      if (!freemiumService
-                                                          .hasFullAccess) {
-                                                        final trigger =
-                                                            await paywallSession
-                                                                .recordAction();
-                                                        if (trigger ==
-                                                            PaywallTrigger
-                                                                .soft) {
-                                                          PaywallSoft.show(
-                                                              context);
-                                                          return;
-                                                        }
-                                                        if (trigger ==
-                                                            PaywallTrigger
-                                                                .hard) {
-                                                          PaywallHard.show(
-                                                              context);
-                                                          return;
-                                                        }
-                                                      }
                                                       final text = isEs
                                                           ? '🏠 Resumen hipotecario\n'
                                                               'Precio: ${AmountFormatter.ui(inputState.homePrice, 'USD')}\n'
@@ -864,9 +847,11 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                           );
                                                         }
                                                       }
-                                                    },
-                                                    icon: const Icon(
-                                                        Icons.share_rounded,
+                                                    }
+                                                        : () => PaywallHard.show(context),
+                                                    icon: Icon(isPremiumShare
+                                                        ? Icons.share_rounded
+                                                        : Icons.lock_outline,
                                                         size: 18),
                                                     label: Text(isEs
                                                         ? 'Compartir'
@@ -874,7 +859,11 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     style: TextButton.styleFrom(
                                                       minimumSize:
                                                           const Size(0, 44),
+                                                      foregroundColor: isPremiumShare
+                                                          ? null
+                                                          : AppTheme.secondary,
                                                     ),
+                                                  ),
                                                   ),
                                                 ),
                                               ]),

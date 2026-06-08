@@ -43,7 +43,11 @@ class _HistoryItem {
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({super.key, this.showAppBar = false});
+
+  /// Set to true when pushed as a standalone route (e.g. from ToolsScreen).
+  /// When false (default), the parent scaffold already provides the AppBar.
+  final bool showAppBar;
 
   static final refreshNotifier = ValueNotifier<int>(0);
 
@@ -635,36 +639,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
         final AppStrings str = isEs ? AppStringsES() : AppStringsEN();
-        return Scaffold(
-            appBar: AppBar(
-              title: Text(str.navHistory),
-              actions: [
-                if (_compareMode && _selectedIds.length == 2)
-                  TextButton(
-                    onPressed: () => _openCompareScreen(context, isEs),
-                    child: Text(
-                      isEs ? 'Comparar' : 'Compare Selected',
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                IconButton(
-                  icon: Icon(_compareMode
-                      ? Icons.close_rounded
-                      : Icons.compare_arrows),
-                  tooltip: _compareMode
-                      ? (isEs ? 'Cancelar' : 'Cancel')
-                      : (isEs ? 'Comparar' : 'Compare'),
-                  onPressed: () {
-                    setState(() {
-                      _compareMode = !_compareMode;
-                      _selectedIds.clear();
-                    });
-                  },
-                ),
-              ],
+        final appBarActions = [
+          if (_compareMode && _selectedIds.length == 2)
+            TextButton(
+              onPressed: () => _openCompareScreen(context, isEs),
+              child: Text(
+                isEs ? 'Comparar' : 'Compare Selected',
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
-            body: Column(
+          IconButton(
+            icon: Icon(_compareMode
+                ? Icons.close_rounded
+                : Icons.compare_arrows),
+            tooltip: _compareMode
+                ? (isEs ? 'Cancelar' : 'Cancel')
+                : (isEs ? 'Comparar' : 'Compare'),
+            onPressed: () {
+              setState(() {
+                _compareMode = !_compareMode;
+                _selectedIds.clear();
+              });
+            },
+          ),
+        ];
+
+        final bodyContent = Column(
               children: [
                 Expanded(
                   child: _firstLoad
@@ -1006,7 +1007,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 const CalcwiseAdFooter(),
               ],
-            ));
+            );
+
+        return widget.showAppBar
+            ? Scaffold(
+                appBar: AppBar(
+                  title: Text(str.navHistory),
+                  actions: appBarActions,
+                ),
+                body: bodyContent,
+              )
+            : bodyContent;
       },
     );
   }

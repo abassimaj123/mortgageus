@@ -192,12 +192,18 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       inputHash: hash,
       l1: _l1Payload(label),
       l2: _l2Payload(label),
+      // Refresh history tab AFTER the DB write — avoids race condition where
+      // the history screen would query before the entry is persisted.
+      onSaved: () {
+        if (!mounted) return;
+        HistoryScreen.refreshNotifier.value++;
+      },
     );
-    // Refresh history tab + side-effects after the debounce window elapses.
+    // Side-effects (ads, analytics, rate watch) fire after a short delay,
+    // independent of the DB write timing.
     _autoSaveTimer?.cancel();
     _autoSaveTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
-      HistoryScreen.refreshNotifier.value++;
       adService.onSave();
       try {
         AnalyticsService.instance.logSave();

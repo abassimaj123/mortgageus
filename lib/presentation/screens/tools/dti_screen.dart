@@ -7,9 +7,10 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../../../main.dart'
+    show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../widgets/save_scenario_button.dart';
+import '../../../core/services/pdf_export_service.dart';
 
 /// DTI (Debt-to-Income) Ratio Calculator
 ///
@@ -172,6 +173,36 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
       label: freemiumService.hasFullAccess ? label : null,
     );
     AnalyticsService.instance.logHistorySaved();
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final annualIncome = _parse(_annualIncomeCtrl.text);
+    if (annualIncome <= 0) return;
+    final piti = _parse(_pitiCtrl.text);
+    final car = _parse(_carPaymentCtrl.text);
+    final student = _parse(_studentLoansCtrl.text);
+    final cards = _parse(_creditCardsCtrl.text);
+    final other = _parse(_otherDebtsCtrl.text);
+    final monthlyIncome = annualIncome / 12;
+    final frontEndDti =
+        monthlyIncome > 0 ? (piti / monthlyIncome) * 100 : 0.0;
+    final backEndDti = monthlyIncome > 0
+        ? ((piti + car + student + cards + other) / monthlyIncome) * 100
+        : 0.0;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportDti(
+        context,
+        annualIncome: annualIncome,
+        piti: piti,
+        carPayment: car,
+        studentLoans: student,
+        creditCards: cards,
+        otherDebts: other,
+        frontEndDti: frontEndDti,
+        backEndDti: backEndDti,
+        isEs: isEs,
+      );
+    });
   }
 
   Future<void> _onInteraction() async {
@@ -496,7 +527,33 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
                       ),
 
                       const SizedBox(height: AppSpacing.md),
-                      if (monthlyIncome > 0) SaveScenarioButton(onSave: _saveScenario),
+                      if (monthlyIncome > 0)
+                        ValueListenableBuilder<bool>(
+                          valueListenable:
+                              freemiumService.hasFullAccessNotifier,
+                          builder: (context, hasFull, _) => SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _exportPdf(isEs),
+                              icon: const Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  size: 18),
+                              label: Text(isEs
+                                  ? 'Exportar PDF'
+                                  : 'Export PDF'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.primary,
+                                side: const BorderSide(
+                                    color: AppTheme.primary),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: AppSpacing.mdPlus),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        AppRadius.mdPlus)),
+                              ),
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: AppSpacing.lg),
 
                       // Info box

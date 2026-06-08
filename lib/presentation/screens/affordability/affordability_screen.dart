@@ -17,9 +17,10 @@ import '../../../main.dart'
         tabSwitchNotifier,
         smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../../widgets/save_scenario_button.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
-import '../../widgets/save_scenario_button.dart';
+import '../../../core/services/pdf_export_service.dart';
 
 class AffordabilityScreen extends ConsumerStatefulWidget {
   const AffordabilityScreen({super.key});
@@ -108,6 +109,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
     });
     adService.onAction();
     AnalyticsService.instance.logAffordabilityCalculated();
+
     // SmartHistory auto-save
     final r2 = _result;
     if (r2 != null) {
@@ -196,6 +198,27 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
       label: freemiumService.hasFullAccess ? label : null,
     );
     AnalyticsService.instance.logHistorySaved();
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final r = _result;
+    if (r == null) return;
+    final income = double.tryParse(_incomeCtrl.text.replaceAll(',', '')) ?? 0;
+    final debts = double.tryParse(_debtsCtrl.text.replaceAll(',', '')) ?? 0;
+    final down = double.tryParse(_downCtrl.text.replaceAll(',', '')) ?? 0;
+    final rate = double.tryParse(_rateCtrl.text) ?? MortgageConstants.defaultInterestRate;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportAffordability(
+        context,
+        annualIncome: income,
+        monthlyDebts: debts,
+        downPayment: down,
+        annualRatePct: rate,
+        termYears: _termYears,
+        result: r,
+        isEs: isEs,
+      );
+    });
   }
 
   void _useInCalculator() {
@@ -319,7 +342,38 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                           _ResultCard(
                               r: r, s: s, isEs: isEs),
                           const SizedBox(height: AppSpacing.md),
-                          SaveScenarioButton(onSave: _saveScenario),
+                          SaveScenarioButton(
+                            onSave: _saveScenario,
+                            labelEn: 'Save Affordability',
+                            labelEs: 'Guardar asequibilidad',
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          ValueListenableBuilder<bool>(
+                            valueListenable:
+                                freemiumService.hasFullAccessNotifier,
+                            builder: (context, hasFull, _) => SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _exportPdf(isEs),
+                                icon: const Icon(
+                                    Icons.picture_as_pdf_rounded,
+                                    size: 18),
+                                label: Text(isEs
+                                    ? 'Exportar PDF'
+                                    : 'Export PDF'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppTheme.primary,
+                                  side: const BorderSide(
+                                      color: AppTheme.primary),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.mdPlus),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppRadius.mdPlus)),
+                                ),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: AppSpacing.sm),
                           SizedBox(
                             width: double.infinity,
@@ -554,12 +608,16 @@ class _Row extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(label,
-              style: TextStyle(
-                  color: color ?? AppTheme.labelGray,
-                  fontSize: AppTextSize.md)),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+          Flexible(
+            child: Text(label,
+                style: TextStyle(
+                    color: color ?? AppTheme.labelGray,
+                    fontSize: AppTextSize.md)),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Text(value,
               style: TextStyle(
                 fontWeight: bold ? FontWeight.bold : FontWeight.w500,

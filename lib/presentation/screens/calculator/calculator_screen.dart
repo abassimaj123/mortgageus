@@ -23,13 +23,14 @@ import '../../../main.dart'
         isSpanishNotifier,
         preFillNotifier,
         smartHistoryService;
+import '../../widgets/save_scenario_button.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../../widgets/info_tooltip.dart';
 import '../../../core/utils/insight_engine.dart';
 import '../../widgets/insight_card.dart';
-import '../../widgets/save_scenario_button.dart';
+import '../../widgets/paywall_hard.dart';
 
 class CalculatorScreen extends ConsumerStatefulWidget {
   const CalculatorScreen({super.key});
@@ -51,7 +52,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   String? _homePriceError;
   Timer? _autoSaveTimer;
   /// True once the user has actually changed at least one input field.
-  /// Auto-save is skipped until then so default values are never saved.
+  /// Auto-save and [Save Scenario] are skipped until then.
   bool _userHasEdited = false;
 
   // Cached 15-yr comparison result — recomputed only when inputs change.
@@ -103,6 +104,21 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     if (data.containsKey('termYears')) {
       n.updateTerm(data['termYears']!.toInt());
     }
+    if (data.containsKey('taxRate')) {
+      final tr = data['taxRate']!;
+      _taxCtrl.text = tr.toStringAsFixed(2);
+      n.updatePropertyTaxRate(tr);
+    }
+    if (data.containsKey('insurance')) {
+      final ins = data['insurance']!;
+      _insuranceCtrl.text = ins.toStringAsFixed(0);
+      n.updateHomeInsurance(ins);
+    }
+    if (data.containsKey('hoa')) {
+      final hoa = data['hoa']!;
+      _hoaCtrl.text = hoa.toStringAsFixed(0);
+      n.updateHoa(hoa);
+    }
   }
 
   // ── SmartHistory: hash + payload helpers ──────────────────────────────────
@@ -122,6 +138,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   }
 
   /// L2 payload — the full round-trippable record used to rebuild the row.
+  /// Includes a 'tools' section when in-scenario tools have been calculated.
   Map<String, dynamic> _l2Payload(String label) {
     final result = ref.read(mortgageResultProvider)!;
     final inputState = ref.read(mortgageInputProvider);
@@ -199,8 +216,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     });
   }
 
-  /// Save the current calculation as a pinned scenario.
+  /// Save the current calculation as a pinned scenario (premium).
   Future<void> _saveScenario(String? label) async {
+    if (!_userHasEdited) return;
     final hash = _currentHash();
     if (hash == null) return;
     final effectiveLabel = (label != null && label.isNotEmpty)
@@ -646,9 +664,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               ],
                                               const SizedBox(
                                                   height: AppSpacing.md),
-                                              // Save Scenario button — primary CTA
                                               SaveScenarioButton(
-                                                  onSave: _saveScenario),
+                                                onSave: _saveScenario,
+                                              ),
                                               const SizedBox(
                                                   height: AppSpacing.sm),
                                               // PDF + Share — secondary actions
@@ -789,11 +807,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 const SizedBox(
                                                     width: AppSpacing.sm),
                                                 Expanded(
-                                                  child: ValueListenableBuilder<bool>(
-                                                    valueListenable: freemiumService.hasFullAccessNotifier,
-                                                    builder: (context, isPremiumShare, _) => TextButton.icon(
-                                                    onPressed: isPremiumShare
-                                                        ? () async {
+                                                  child: TextButton.icon(
+                                                    onPressed: () async {
                                                       final isEs =
                                                           isSpanishNotifier
                                                               .value;
@@ -853,11 +868,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                           );
                                                         }
                                                       }
-                                                    }
-                                                        : () => PaywallHard.show(context),
-                                                    icon: Icon(isPremiumShare
-                                                        ? Icons.share_rounded
-                                                        : Icons.lock_outline,
+                                                    },
+                                                    icon: const Icon(
+                                                        Icons.share_rounded,
                                                         size: 18),
                                                     label: Text(isEs
                                                         ? 'Compartir'
@@ -865,11 +878,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     style: TextButton.styleFrom(
                                                       minimumSize:
                                                           const Size(0, 44),
-                                                      foregroundColor: isPremiumShare
-                                                          ? null
-                                                          : AppTheme.secondary,
                                                     ),
-                                                  ),
                                                   ),
                                                 ),
                                               ]),
@@ -1497,14 +1506,19 @@ class _Row extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(label,
-                      style: TextStyle(color: color ?? AppTheme.labelGray)),
-                  if (tooltip != null) tooltip!,
-                ],
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(label,
+                          style: TextStyle(color: color ?? AppTheme.labelGray)),
+                    ),
+                    if (tooltip != null) tooltip!,
+                  ],
+                ),
               ),
+              const SizedBox(width: AppSpacing.sm),
               Text(value,
                   style: TextStyle(
                     fontWeight: bold ? FontWeight.bold : FontWeight.w500,

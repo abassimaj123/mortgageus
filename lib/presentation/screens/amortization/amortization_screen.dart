@@ -18,6 +18,9 @@ import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 
+// ── Table cell amount formatter — always 0 decimals (no wrapping risk) ─────────
+final _tableAmt = NumberFormat('\$#,##0');
+
 const _kFreeMonthLimit = 24; // 2 years free, full schedule = premium
 
 // ── SharedPreferences key ─────────────────────────────────────────────────────
@@ -293,7 +296,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                     horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
                 child: Column(
                   children: [
-                    SaveScenarioButton(onSave: _saveScenario),
+                    SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save Schedule', labelEs: 'Guardar amortización'),
                     const SizedBox(height: AppSpacing.sm),
                     ValueListenableBuilder<bool>(
                       valueListenable: freemiumService.hasFullAccessNotifier,
@@ -304,7 +307,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                             onPressed: () async {
                               if (isPremium) {
                                 try {
-                                  await PdfExportService.exportAmortization(
+                                  await PdfExportService.exportMortgage(
                                       context, inputState, result,
                                       isEs: isEs);
                                   AnalyticsService.instance.logPdfExported();
@@ -812,11 +815,19 @@ class _SummaryRow extends StatelessWidget {
   Widget build(BuildContext context) => MergeSemantics(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text(label,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7), fontSize: AppTextSize.md)),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+            Flexible(
+              child: Text(label,
+                  style: TextStyle(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withValues(alpha: 0.7),
+                      fontSize: AppTextSize.md)),
+            ),
+            const SizedBox(width: AppSpacing.sm),
             Text(value,
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
@@ -1085,16 +1096,16 @@ class _MonthSubTable extends StatelessWidget {
             child: Row(children: [
               _Cell('${e.month}', flex: 1),
               _Cell('${e.date.month}/${e.date.year}', flex: 2),
-              _Cell(AmountFormatter.ui(e.payment, 'USD'), flex: 2),
-              _Cell(AmountFormatter.ui(e.interest, 'USD'), flex: 2),
-              _Cell(AmountFormatter.ui(e.principal, 'USD'), flex: 2),
-              _Cell(AmountFormatter.ui(e.balance, 'USD'), flex: 2),
+              _Cell(_tableAmt.format(e.payment.round()), flex: 2),
+              _Cell(_tableAmt.format(e.interest.round()), flex: 2),
+              _Cell(_tableAmt.format(e.principal.round()), flex: 2),
+              _Cell(_tableAmt.format(e.balance.round()), flex: 2),
               if (hasPmi)
                 _Cell(
                     e.pmiDropped
                         ? s.off
                         : e.pmiAmount > 0
-                            ? AmountFormatter.ui(e.pmiAmount, 'USD')
+                            ? _tableAmt.format(e.pmiAmount.round())
                             : '-',
                     flex: 2),
             ]),
@@ -1112,7 +1123,7 @@ class _MonthlyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        padding: EdgeInsets.zero,
         child: Container(
           color: AppTheme.primary,
           padding: const EdgeInsets.symmetric(
@@ -1158,14 +1169,14 @@ class _MonthlyList extends StatelessWidget {
             return Container(
               color: bg,
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl, vertical: 7),
+                  horizontal: AppSpacing.sm, vertical: 7),
               child: Row(children: [
                 _Cell('${e.month}', flex: 1),
                 _Cell('${e.date.month}/${e.date.year}', flex: 2),
-                _Cell(AmountFormatter.ui(e.payment, 'USD'), flex: 2),
-                _Cell(AmountFormatter.ui(e.principal, 'USD'), flex: 2),
-                _Cell(AmountFormatter.ui(e.interest, 'USD'), flex: 2),
-                _Cell(AmountFormatter.ui(e.balance, 'USD'), flex: 2),
+                _Cell(_tableAmt.format(e.payment.round()), flex: 2),
+                _Cell(_tableAmt.format(e.principal.round()), flex: 2),
+                _Cell(_tableAmt.format(e.interest.round()), flex: 2),
+                _Cell(_tableAmt.format(e.balance.round()), flex: 2),
               ]),
             );
           }

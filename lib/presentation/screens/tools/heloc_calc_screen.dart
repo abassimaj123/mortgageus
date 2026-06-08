@@ -10,6 +10,7 @@ import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
+import '../../../core/services/pdf_export_service.dart';
 
 /// HELOC Calculator
 ///
@@ -92,6 +93,37 @@ class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
       monthlyRepayment: monthlyRepayment,
       totalCost: totalCost,
     );
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final homeValue = _parse(_homeValueCtrl.text);
+    final drawAmount = _parse(_drawAmountCtrl.text);
+    if (homeValue <= 0 || drawAmount <= 0) return;
+    final mortgageBal = _parse(_mortgageBalCtrl.text);
+    final rate = double.tryParse(_rateCtrl.text) ?? 8.5;
+    final availableEquity =
+        (homeValue * _maxLtv / 100.0 - mortgageBal).clamp(0.0, double.infinity);
+    final monthlyInterestOnly = drawAmount * rate / 100.0 / 12.0;
+    final monthlyRepayment = _amortPmt(drawAmount, rate, _repaymentPeriod);
+    final totalCost = monthlyInterestOnly * _drawPeriod * 12 +
+        monthlyRepayment * _repaymentPeriod * 12;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportHeloc(
+        context,
+        homeValue: homeValue,
+        mortgageBalance: mortgageBal,
+        maxLtv: _maxLtv,
+        drawAmount: drawAmount,
+        rate: rate,
+        drawPeriod: _drawPeriod,
+        repaymentPeriod: _repaymentPeriod,
+        availableEquity: availableEquity,
+        monthlyInterestOnly: monthlyInterestOnly,
+        monthlyRepayment: monthlyRepayment,
+        totalCost: totalCost,
+        isEs: isEs,
+      );
+    });
   }
 
   Future<void> _onInteraction() async {
@@ -589,7 +621,34 @@ class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
                         ),
 
                         const SizedBox(height: AppSpacing.md),
-                        SaveScenarioButton(onSave: _saveScenario),
+                        SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save HELOC Result', labelEs: 'Guardar resultado HELOC'),
+                        const SizedBox(height: AppSpacing.sm),
+                        ValueListenableBuilder<bool>(
+                          valueListenable:
+                              freemiumService.hasFullAccessNotifier,
+                          builder: (context, hasFull, _) => SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _exportPdf(isEs),
+                              icon: const Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  size: 18),
+                              label: Text(isEs
+                                  ? 'Exportar PDF'
+                                  : 'Export PDF'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.primary,
+                                side: const BorderSide(
+                                    color: AppTheme.primary),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: AppSpacing.mdPlus),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        AppRadius.mdPlus)),
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: AppSpacing.lg),
                       ],
 

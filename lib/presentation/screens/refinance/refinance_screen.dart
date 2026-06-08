@@ -3,6 +3,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
+import '../../../core/freemium/iap_service.dart';
+import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../domain/models/refinance_result.dart';
 import '../../../core/services/analytics_service.dart';
@@ -123,6 +125,39 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
           },
         },
       );
+    }
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final r = _result;
+    if (r == null) return;
+    final balance =
+        double.tryParse(_balanceCtrl.text.replaceAll(',', '')) ?? 0;
+    final curRate = double.tryParse(_curRateCtrl.text) ?? 0;
+    final curYears = int.tryParse(_curYearsCtrl.text) ?? 25;
+    final newRate = double.tryParse(_newRateCtrl.text) ?? 0;
+    final newYears = int.tryParse(_newYearsCtrl.text) ?? 30;
+    final closing =
+        double.tryParse(_closingCtrl.text.replaceAll(',', '')) ?? 4000;
+    try {
+      await PdfExportService.exportRefinance(
+        context,
+        balance: balance,
+        curRate: curRate,
+        curYears: curYears,
+        newRate: newRate,
+        newYears: newYears,
+        closing: closing,
+        result: r,
+        isEs: isEs,
+      );
+      AnalyticsService.instance.logPdfExported();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(isEs ? 'Error al exportar PDF' : 'Export failed'),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   }
 
@@ -339,7 +374,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                         ),
                                       ),
                                       const SizedBox(height: AppSpacing.md),
-                                      SaveScenarioButton(onSave: _saveScenario),
+                                      SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save Refinance', labelEs: 'Guardar refinanciamiento'),
                                       const SizedBox(height: AppSpacing.md),
                                       Row(children: [
                                         Expanded(
@@ -365,6 +400,46 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                           ),
                                         ),
                                       ]),
+                                      const SizedBox(height: AppSpacing.sm),
+                                      ValueListenableBuilder<bool>(
+                                        valueListenable:
+                                            freemiumService.hasFullAccessNotifier,
+                                        builder: (context, isPremium, _) =>
+                                            SizedBox(
+                                          width: double.infinity,
+                                          child: TextButton.icon(
+                                            onPressed: () {
+                                              if (isPremium) {
+                                                _exportPdf(isEs);
+                                              } else {
+                                                IAPService.instance.buy();
+                                              }
+                                            },
+                                            icon: Icon(
+                                                isPremium
+                                                    ? Icons.picture_as_pdf_rounded
+                                                    : Icons.lock_outline,
+                                                size: 18),
+                                            label: Text(
+                                              isPremium
+                                                  ? (isEs
+                                                      ? 'Exportar PDF'
+                                                      : 'Export PDF')
+                                                  : (isEs
+                                                      ? 'Exportar PDF — Premium'
+                                                      : 'Export PDF — Premium'),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            style: TextButton.styleFrom(
+                                              minimumSize:
+                                                  const Size(0, 44),
+                                              foregroundColor: isPremium
+                                                  ? AppTheme.primary
+                                                  : AppTheme.secondary,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                     const SizedBox(
                                         height: AppSpacing.listBottomInset),
@@ -445,9 +520,14 @@ class _ResultRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(label, style: const TextStyle(color: AppTheme.labelGray)),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+          Flexible(
+            child: Text(label,
+                style: const TextStyle(color: AppTheme.labelGray)),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Text(value,
               style: TextStyle(fontWeight: FontWeight.bold, color: color)),
         ]),

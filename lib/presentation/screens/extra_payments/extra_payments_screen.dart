@@ -323,7 +323,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                           ],
                           if (_result != null) ...[
                             const SizedBox(height: AppSpacing.sm),
-                            SaveScenarioButton(onSave: _saveScenario),
+                            SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save Extra Payments', labelEs: 'Guardar pagos extra'),
                             const SizedBox(height: AppSpacing.sm),
                             ValueListenableBuilder<bool>(
                               valueListenable:
@@ -451,9 +451,14 @@ class _ResultRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(label, style: const TextStyle(color: AppTheme.labelGray)),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+          Flexible(
+            child: Text(label,
+                style: const TextStyle(color: AppTheme.labelGray)),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Text(value,
               style: TextStyle(
                 fontWeight: bold ? FontWeight.bold : FontWeight.w500,

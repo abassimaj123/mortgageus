@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
@@ -155,6 +156,35 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
 
   double _parse(String s) =>
       double.tryParse(s.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+
+  Future<void> _exportPdf(bool isEs) async {
+    final price = _parse(_homePriceCtrl.text);
+    if (price <= 0) return;
+    final rate = double.tryParse(_rateCtrl.text) ?? 7.0;
+    final down = price * _downPct / 100.0;
+    final loan = (price - down).clamp(0.0, double.infinity);
+    final ltv = price > 0 ? (loan / price) * 100.0 : 0.0;
+    final annual = _pmiAnnualRatePct(_creditScore, ltv);
+    final monthly = loan * annual / 100.0 / 12.0;
+    final m80 = _monthsToLtv(loan: loan, price: price, targetLtv: 0.80, ratePct: rate);
+    final m78 = _monthsToLtv(loan: loan, price: price, targetLtv: 0.78, ratePct: rate);
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportPmiCalculator(
+        context,
+        homePrice: price,
+        downPct: _downPct,
+        loanAmount: loan,
+        ltv: ltv,
+        creditScore: _creditScore,
+        pmiAnnualRate: annual,
+        monthlyPmi: monthly,
+        monthsTo80: m80,
+        monthsTo78: m78,
+        rate: rate,
+        isEs: isEs,
+      );
+    });
+  }
 
   /// PMI annual rate by credit score and LTV tier (% per year).
   /// Rough industry-standard grid.
@@ -419,7 +449,25 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
                                   ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      if (price > 0) SaveScenarioButton(onSave: _saveScenario),
+                      if (price > 0) SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save PMI Result', labelEs: 'Guardar resultado PMI'),
+                      if (price > 0 && annual > 0) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _exportPdf(isEs),
+                            icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                            label: Text(isEs ? 'Exportar PDF' : 'Export PDF'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.primary,
+                              side: const BorderSide(color: AppTheme.primary),
+                              padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.xl)),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,

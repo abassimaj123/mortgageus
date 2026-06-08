@@ -462,7 +462,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                       ],
                       if (!_armMode && r30 != null && r15 != null) ...[
                         const SizedBox(height: AppSpacing.sm),
-                        SaveScenarioButton(onSave: _saveScenario),
+                        SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save Comparison', labelEs: 'Guardar comparación'),
                         const SizedBox(height: AppSpacing.sm),
                         ValueListenableBuilder<bool>(
                           valueListenable: freemiumService.hasFullAccessNotifier,

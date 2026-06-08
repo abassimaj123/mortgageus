@@ -4,11 +4,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../../../main.dart'
+    show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../widgets/save_scenario_button.dart';
 
 /// USDA Loan Calculator
 /// 0% down. Upfront guarantee fee = 1% (financed). Annual fee 0.35%.
@@ -161,6 +162,46 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
   double _parse(String s) =>
       double.tryParse(s.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
 
+  Future<void> _exportPdf(bool isEs) async {
+    final price = _parse(_homePriceCtrl.text);
+    if (price <= 0) return;
+    final income = _parse(_incomeCtrl.text);
+    final input = ref.read(mortgageInputProvider);
+    final rate = input.annualRatePct > 0 ? input.annualRatePct : 7.0;
+    final term = input.termYears > 0 ? input.termYears : 30;
+    const maxIncome = _defaultAmi * _incomeLimit;
+    final incomeOk = income > 0 && income <= maxIncome;
+    final upfrontFee = price * 0.01;
+    final loan = price + upfrontFee;
+    final annualFee = loan * 0.0035;
+    final monthlyFee = annualFee / 12.0;
+    final pAndI = MortgageCalculator.calcMonthlyPayment(
+        loanAmount: loan, annualRatePct: rate, termYears: term);
+    final tax = _parse(_taxCtrl.text);
+    final ins = _parse(_insCtrl.text);
+    final total = pAndI + monthlyFee + tax + ins;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportUsda(
+        context,
+        homePrice: price,
+        income: income,
+        rate: rate,
+        termYears: term,
+        ruralEligible: _rural,
+        incomeOk: incomeOk,
+        maxIncome: maxIncome,
+        upfrontFee: upfrontFee,
+        loanAmount: loan,
+        monthlyAnnualFee: monthlyFee,
+        pAndI: pAndI,
+        propertyTax: tax,
+        insurance: ins,
+        totalMonthly: total,
+        isEs: isEs,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -186,8 +227,6 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
         final tax = _parse(_taxCtrl.text);
         final ins = _parse(_insCtrl.text);
         final total = pAndI + monthlyFee + tax + ins;
-
-
 
         return Scaffold(
           appBar: AppBar(
@@ -407,7 +446,24 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
                               ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      if (price > 0) SaveScenarioButton(onSave: _saveScenario),
+                      if (price > 0) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _exportPdf(isEs),
+                            icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                            label: Text(isEs ? 'Exportar PDF' : 'Export PDF'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.primary,
+                              side: const BorderSide(color: AppTheme.primary),
+                              padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.xl)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
                       const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,

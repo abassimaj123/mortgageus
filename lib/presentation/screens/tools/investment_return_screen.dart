@@ -7,6 +7,7 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
@@ -157,6 +158,32 @@ class _InvestmentReturnScreenState
       label: freemiumService.hasFullAccess ? label : null,
     );
     AnalyticsService.instance.logHistorySaved();
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final result = _calculate();
+    if (result == null) return;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportInvestmentReturn(
+        context,
+        price: result.price,
+        downPct: _downPct,
+        rent: _parseAmount(_rentCtrl.text),
+        appreciation: _appreciation,
+        holdYears: _holdYears,
+        rate: _defaultRate,
+        downAmt: result.downAmt,
+        initialInv: result.initialInv,
+        loanAmt: result.loanAmt,
+        mortgageMo: result.mortgageMo,
+        monthlyCF: result.monthlyCF,
+        cashOnCash: result.cashOnCash,
+        irr: result.irr,
+        npv: result.npv,
+        equityMult: result.equityMult,
+        isEs: isEs,
+      );
+    });
   }
 
   // ── Core calculation ──────────────────────────────────────────────────────
@@ -366,7 +393,23 @@ class _InvestmentReturnScreenState
                   else ...[
                     _ResultsSection(result: result, isEs: isEs),
                     const SizedBox(height: AppSpacing.md),
-                    SaveScenarioButton(onSave: _saveScenario),
+                    SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save Investment', labelEs: 'Guardar inversión'),
+                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _exportPdf(isEs),
+                        icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                        label: Text(isEs ? 'Exportar PDF' : 'Export PDF'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.primary,
+                          side: const BorderSide(color: AppTheme.primary),
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppRadius.xl)),
+                        ),
+                      ),
+                    ),
                   ],
                 ],
               ),

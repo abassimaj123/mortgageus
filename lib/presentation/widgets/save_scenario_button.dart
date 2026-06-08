@@ -3,17 +3,29 @@ import '../../core/freemium/freemium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../main.dart' show isSpanishNotifier;
 
-/// A "Save Scenario" button that pins the current calculator result.
+/// A save button that pins the current calculator result.
 ///
 /// - **Premium users**: shows a name-entry dialog before saving.
 /// - **Free users**: saves immediately without a label (3 max pinned slots).
 ///
 /// All user-facing strings are bilingual (EN/ES) via [isSpanishNotifier].
+/// Use [labelEn] / [labelEs] to customise the button text per tool.
 class SaveScenarioButton extends StatefulWidget {
   /// Called when the user confirms the save. [label] is null for free users.
   final Future<void> Function(String? label) onSave;
 
-  const SaveScenarioButton({super.key, required this.onSave});
+  /// Button text override — English. Defaults to 'Save Scenario'.
+  final String? labelEn;
+
+  /// Button text override — Spanish. Defaults to 'Guardar escenario'.
+  final String? labelEs;
+
+  const SaveScenarioButton({
+    super.key,
+    required this.onSave,
+    this.labelEn,
+    this.labelEs,
+  });
 
   @override
   State<SaveScenarioButton> createState() => _SaveScenarioButtonState();
@@ -102,7 +114,9 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
                 : const Icon(Icons.bookmark_add_outlined, size: 18),
             label: Text(_saving
                 ? (isEs ? 'Guardando…' : 'Saving…')
-                : (isEs ? 'Guardar escenario' : 'Save Scenario')),
+                : (isEs
+                    ? (widget.labelEs ?? 'Guardar escenario')
+                    : (widget.labelEn ?? 'Save Scenario'))),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
               foregroundColor: AppTheme.primary,

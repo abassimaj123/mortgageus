@@ -25,7 +25,9 @@ class MortgageUSDatabaseAdapter implements DatabaseAdapter {
     final results = (l2['results'] as Map<String, dynamic>?) ?? l2;
     final savedAt = DateTime.fromMillisecondsSinceEpoch(row['saved_at'] as int);
 
+    final screenId = (row['screen_id'] as String?) ?? _screenId;
     return DatabaseHelper.instance.insertHistory({
+      'screen_id': screenId,
       'home_price': (inputs['home_price'] as num?)?.toDouble() ?? 0.0,
       'down_percent': (inputs['down_percent'] as num?)?.toDouble() ?? 0.0,
       'annual_rate': (inputs['annual_rate'] as num?)?.toDouble() ?? 0.0,
@@ -62,6 +64,15 @@ class MortgageUSDatabaseAdapter implements DatabaseAdapter {
     if (isPinned != null) {
       where = 'is_pinned = ?';
       whereArgs = [isPinned ? 1 : 0];
+    }
+    // Always filter by screen_id — tools save to same table with their own screenId
+    final effectiveScreenId = screenId ?? _screenId;
+    if (where == null) {
+      where = 'screen_id = ?';
+      whereArgs = [effectiveScreenId];
+    } else {
+      where = '$where AND screen_id = ?';
+      whereArgs = [...?whereArgs, effectiveScreenId];
     }
     final rows = await db.query(
       'mortgage_us',
@@ -116,7 +127,8 @@ class MortgageUSDatabaseAdapter implements DatabaseAdapter {
     required String appKey,
     required int limit,
   }) async {
-    final rows = await DatabaseHelper.instance.getOldestPinnedEntries(limit);
+    final rows =
+        await DatabaseHelper.instance.getOldestPinnedEntries(limit);
     return rows.map(_toAdapterRow).toList();
   }
 
@@ -131,7 +143,7 @@ class MortgageUSDatabaseAdapter implements DatabaseAdapter {
     return {
       'id': row['id'],
       'app_key': _appKey,
-      'screen_id': _screenId,
+      'screen_id': (row['screen_id'] as String?) ?? _screenId,
       'result_hash': (row['input_hash'] as String?) ?? '',
       'l1_json': l1Json,
       'l2_json': l2Json,

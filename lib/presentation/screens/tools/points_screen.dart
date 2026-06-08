@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
@@ -151,6 +152,38 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
 
   double _parse(String s) =>
       double.tryParse(s.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+
+  Future<void> _exportPdf(bool isEs) async {
+    final loan = _parse(_loanCtrl.text);
+    if (loan <= 0) return;
+    final origRate = double.tryParse(_rateCtrl.text) ?? 7.0;
+    final newRate = (origRate - _points * _ratePerPoint).clamp(0.0, double.infinity);
+    final pointsCost = loan * _points / 100.0;
+    final origPay = MortgageCalculator.calcMonthlyPayment(
+        loanAmount: loan, annualRatePct: origRate, termYears: _term);
+    final newPay = MortgageCalculator.calcMonthlyPayment(
+        loanAmount: loan, annualRatePct: newRate, termYears: _term);
+    final monthlySav = origPay - newPay;
+    final breakeven = monthlySav > 0 ? pointsCost / monthlySav : null;
+    final lifetimeSav = monthlySav * _term * 12 - pointsCost;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportPoints(
+        context,
+        loanAmount: loan,
+        origRate: origRate,
+        points: _points,
+        termYears: _term,
+        newRate: newRate,
+        pointsCost: pointsCost,
+        origPayment: origPay,
+        newPayment: newPay,
+        monthlySavings: monthlySav,
+        breakevenMonths: breakeven,
+        lifetimeSavings: lifetimeSav,
+        isEs: isEs,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +369,25 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
                               ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      if (loan > 0) SaveScenarioButton(onSave: _saveScenario),
+                      if (loan > 0) SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save Points Analysis', labelEs: 'Guardar análisis de puntos'),
+                      if (loan > 0) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _exportPdf(isEs),
+                            icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                            label: Text(isEs ? 'Exportar PDF' : 'Export PDF'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.primary,
+                              side: const BorderSide(color: AppTheme.primary),
+                              padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.xl)),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: AppSpacing.lg),
                       Container(
                         width: double.infinity,

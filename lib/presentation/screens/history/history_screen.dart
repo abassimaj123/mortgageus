@@ -1,3 +1,4 @@
+import 'dart:convert' show jsonDecode;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +14,10 @@ import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../core/constants/mortgage_constants.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../main.dart'
-    show isSpanishNotifier, tabSwitchNotifier, smartHistoryService;
+    show
+        isSpanishNotifier,
+        tabSwitchNotifier,
+        smartHistoryService;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'history_detail_screen.dart';
@@ -175,6 +179,70 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (label == null) return;
     await smartHistoryService.rename(row['id'] as int, label.trim());
     _load();
+  }
+
+  // ── Pin auto-save entry ───────────────────────────────────────────────────
+
+  Future<void> _pinEntry(
+      BuildContext context, Map<String, dynamic> row, bool isEs) async {
+    final id = row['id'] as int?;
+    if (id == null) return;
+
+    // Free users: enforce pin limit
+    if (!freemiumService.hasFullAccess) {
+      if (_pinned.length >= MonetizationConfig.freePinnedLimit) {
+        await PaywallSoft.show(context);
+        return;
+      }
+    }
+
+    // Premium: ask for a label; free: auto-label from row data
+    String? label;
+    if (freemiumService.hasFullAccess) {
+      final ctrl = TextEditingController();
+      label = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(isEs ? 'Guardar escenario' : 'Save scenario'),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              hintText: isEs ? 'Nombre del escenario' : 'Scenario name',
+            ),
+            onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(isEs ? 'Cancelar' : 'Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+              child: Text(isEs ? 'Guardar' : 'Save'),
+            ),
+          ],
+        ),
+      );
+      ctrl.dispose();
+      if (label == null || !mounted) return;
+    }
+
+    await DatabaseHelper.instance.updateHistoryEntry(id, {
+      'is_pinned': 1,
+      if (label != null && label.isNotEmpty) 'pin_label': label,
+    });
+
+    _load();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isEs ? 'Escenario guardado' : 'Scenario pinned'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   // ── Delete helpers ────────────────────────────────────────────────────────
@@ -1277,27 +1345,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 onChanged: canSelect ? (_) => _toggleSelect(id) : null,
               )
             else
-              ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.hasFullAccessNotifier,
-                builder: (context, isPremium, _) => IconButton(
-                  icon: Icon(
-                    isPremium
-                        ? Icons.picture_as_pdf_rounded
-                        : Icons.lock_outline,
-                    size: 20,
-                    color:
-                        isPremium ? AppTheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(AppRadius.sm),
-                  tooltip: isPremium
-                      ? (isEs ? 'Exportar PDF' : 'Export PDF')
-                      : 'Premium',
-                  onPressed: isPremium
-                      ? () => _exportPdf(context, row)
-                      : () => PdfExportService.showUnlockOrPay(
-                          context, () => _exportPdf(context, row)),
-                ),
+              IconButton(
+                icon: const Icon(Icons.bookmark_add_outlined, size: 20),
+                color: AppTheme.primary,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(AppRadius.sm),
+                tooltip: isEs ? 'Guardar escenario' : 'Pin scenario',
+                onPressed: () => _pinEntry(context, row, isEs),
               ),
           ]),
         ),

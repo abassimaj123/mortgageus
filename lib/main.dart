@@ -33,9 +33,15 @@ final ValueNotifier<bool> isSpanishNotifier = ValueNotifier<bool>(false);
 final ValueNotifier<int> tabSwitchNotifier = ValueNotifier<int>(-1);
 
 // Pre-fill notifier — set by Affordability screen to pre-fill Calculator fields
-// Keys: 'homePrice', 'downPayment' (dollars), 'rate', 'termYears'
+// Keys: 'homePrice', 'downPayment' (dollars), 'rate', 'termYears',
+//        'taxRate', 'insurance', 'hoa' (all doubles)
 final ValueNotifier<Map<String, double>?> preFillNotifier =
     ValueNotifier<Map<String, double>?>(null);
+
+// Active scenario notifier — set when a pinned scenario is loaded from History.
+// Value = {'id': int, 'label': String, 'loanType': String}. null = none active.
+final ValueNotifier<Map<String, dynamic>?> activeScenarioNotifier =
+    ValueNotifier<Map<String, dynamic>?>(null);
 
 // Paywall session service — centralized, namespaced by appKey
 final paywallSession = PaywallSessionService(

@@ -8,6 +8,7 @@ import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
+import '../../../core/services/pdf_export_service.dart';
 
 /// Closing Costs by State Calculator
 ///
@@ -98,6 +99,39 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
     if (!mounted) return;
     if (t == PaywallTrigger.soft) PaywallSoft.show(context);
     if (t == PaywallTrigger.hard) PaywallHard.show(context);
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final homePrice = _parse(_homePriceCtrl.text);
+    if (homePrice <= 0) return;
+    final rate = double.tryParse(_rateCtrl.text) ?? 6.9;
+    final lines = _calcCosts(
+        homePrice: homePrice,
+        rate: rate,
+        state: _state,
+        loanType: _loanType,
+        isBuyer: _isBuyer);
+    if (lines.isEmpty) return;
+    final total = lines.fold<double>(0.0, (s, l) => s + l.amount);
+    final lineItems = lines
+        .map((l) => <String, dynamic>{
+              'labelEn': l.labelEn,
+              'labelEs': l.labelEs,
+              'amount': l.amount,
+            })
+        .toList();
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportClosingCosts(
+        context,
+        homePrice: homePrice,
+        state: _state,
+        loanType: _loanType,
+        isBuyer: _isBuyer,
+        lineItems: lineItems,
+        total: total,
+        isEs: isEs,
+      );
+    });
   }
 
   Future<void> _saveScenario(String? label) async {
@@ -627,7 +661,34 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
                           ]),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        SaveScenarioButton(onSave: _saveScenario),
+                        SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save Closing Costs', labelEs: 'Guardar costos de cierre'),
+                        const SizedBox(height: AppSpacing.sm),
+                        ValueListenableBuilder<bool>(
+                          valueListenable:
+                              freemiumService.hasFullAccessNotifier,
+                          builder: (context, hasFull, _) => SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _exportPdf(isEs),
+                              icon: const Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  size: 18),
+                              label: Text(isEs
+                                  ? 'Exportar PDF'
+                                  : 'Export PDF'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.primary,
+                                side: const BorderSide(
+                                    color: AppTheme.primary),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: AppSpacing.mdPlus),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        AppRadius.mdPlus)),
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: AppSpacing.lg),
                       ],
 

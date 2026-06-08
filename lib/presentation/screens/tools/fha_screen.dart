@@ -6,9 +6,10 @@ import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../../../main.dart'
+    show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../widgets/save_scenario_button.dart';
+import '../../../core/services/pdf_export_service.dart';
 
 /// FHA Loan Calculator
 /// Min 3.5% down. Upfront MIP = 1.75% of loan (financed).
@@ -91,6 +92,52 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         },
       },
     );
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final input = ref.read(mortgageInputProvider);
+    final effectiveRate = ((input.annualRatePct > 0 ? input.annualRatePct : 7.0) +
+            _creditAdj(_creditScore))
+        .clamp(0.0, 30.0);
+    final price = _parse(_homePriceCtrl.text);
+    if (price <= 0) return;
+    final down = price * _downPct / 100.0;
+    final baseLoan = (price - down).clamp(0.0, double.infinity);
+    final upfrontMip = baseLoan * 0.0175;
+    final loan = baseLoan + upfrontMip;
+    final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
+    final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
+    final monthlyMip = loan * annualMipRate / 12.0;
+    final term = input.termYears > 0 ? input.termYears : 30;
+    final pAndI = loan > 0
+        ? MortgageCalculator.calcMonthlyPayment(
+            loanAmount: loan,
+            annualRatePct: effectiveRate,
+            termYears: term)
+        : 0.0;
+    final tax = _parse(_taxCtrl.text);
+    final ins = _parse(_insCtrl.text);
+    final total = pAndI + monthlyMip + tax + ins;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportFha(
+        context,
+        homePrice: price,
+        downPct: _downPct,
+        annualRatePct: effectiveRate,
+        termYears: term,
+        creditScore: _creditScore,
+        baseLoan: baseLoan,
+        upfrontMip: upfrontMip,
+        loan: loan,
+        annualMipRate: annualMipRate,
+        monthlyMip: monthlyMip,
+        pAndI: pAndI,
+        monthlyTax: tax,
+        monthlyIns: ins,
+        totalMonthly: total,
+        isEs: isEs,
+      );
+    });
   }
 
   Future<void> _onInteraction() async {
@@ -450,7 +497,33 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
                                 ),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        if (price > 0) SaveScenarioButton(onSave: _saveScenario),
+                        if (price > 0)
+                          ValueListenableBuilder<bool>(
+                            valueListenable:
+                                freemiumService.hasFullAccessNotifier,
+                            builder: (context, hasFull, _) => SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _exportPdf(isEs),
+                                icon: const Icon(
+                                    Icons.picture_as_pdf_rounded,
+                                    size: 18),
+                                label: Text(isEs
+                                    ? 'Exportar PDF'
+                                    : 'Export PDF'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppTheme.primary,
+                                  side: const BorderSide(
+                                      color: AppTheme.primary),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.mdPlus),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppRadius.mdPlus)),
+                                ),
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: AppSpacing.lg),
                         Container(
                           width: double.infinity,

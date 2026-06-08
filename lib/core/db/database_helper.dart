@@ -14,13 +14,14 @@ class DatabaseHelper {
   Future<Database> _initDb() async {
     final p = join(await getDatabasesPath(), 'mortgage_us.db');
     return openDatabase(p,
-        version: 5, onCreate: _onCreate, onUpgrade: _onUpgrade);
+        version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE mortgage_us (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        screen_id TEXT NOT NULL DEFAULT 'mortgage_calculator',
         home_price REAL NOT NULL,
         down_percent REAL NOT NULL,
         annual_rate REAL NOT NULL,
@@ -70,6 +71,10 @@ class DatabaseHelper {
           'ALTER TABLE mortgage_us ADD COLUMN pin_order INTEGER NOT NULL DEFAULT 0');
       await db.execute('ALTER TABLE mortgage_us ADD COLUMN l1_json TEXT');
     }
+    if (oldVersion < 6) {
+      await db.execute(
+          "ALTER TABLE mortgage_us ADD COLUMN screen_id TEXT NOT NULL DEFAULT 'mortgage_calculator'");
+    }
   }
 
   Future<int> insertHistory(Map<String, dynamic> row) async {
@@ -77,9 +82,13 @@ class DatabaseHelper {
     return db.insert('mortgage_us', row);
   }
 
-  Future<List<Map<String, dynamic>>> getHistory() async {
+  Future<List<Map<String, dynamic>>> getHistory({
+    String screenId = 'mortgage_calculator',
+  }) async {
     final db = await database;
     return db.query('mortgage_us',
+        where: 'screen_id = ?',
+        whereArgs: [screenId],
         orderBy: 'is_pinned DESC, pin_order DESC, created_at DESC');
   }
 
@@ -95,29 +104,42 @@ class DatabaseHelper {
     return db.update('mortgage_us', values, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> countHistory({bool? isPinned}) async {
+  Future<int> countHistory({
+    bool? isPinned,
+    String screenId = 'mortgage_calculator',
+  }) async {
     final db = await database;
     final String sql;
     if (isPinned == null) {
-      sql = 'SELECT COUNT(*) FROM mortgage_us';
+      sql = "SELECT COUNT(*) FROM mortgage_us WHERE screen_id = '$screenId'";
     } else {
       sql =
-          'SELECT COUNT(*) FROM mortgage_us WHERE is_pinned = ${isPinned ? 1 : 0}';
+          "SELECT COUNT(*) FROM mortgage_us WHERE screen_id = '$screenId' AND is_pinned = ${isPinned ? 1 : 0}";
     }
     final result = await db.rawQuery(sql);
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  Future<List<Map<String, dynamic>>> getOldestAutoSaves(int limit) async {
+  Future<List<Map<String, dynamic>>> getOldestAutoSaves(
+    int limit, {
+    String screenId = 'mortgage_calculator',
+  }) async {
     final db = await database;
     return db.query('mortgage_us',
-        where: 'is_pinned = 0', orderBy: 'created_at ASC', limit: limit);
+        where: 'is_pinned = 0 AND screen_id = ?',
+        whereArgs: [screenId],
+        orderBy: 'created_at ASC',
+        limit: limit);
   }
 
-  Future<List<Map<String, dynamic>>> getOldestPinnedEntries(int limit) async {
+  Future<List<Map<String, dynamic>>> getOldestPinnedEntries(
+    int limit, {
+    String screenId = 'mortgage_calculator',
+  }) async {
     final db = await database;
     return db.query('mortgage_us',
-        where: 'is_pinned = 1',
+        where: 'is_pinned = 1 AND screen_id = ?',
+        whereArgs: [screenId],
         orderBy: 'pin_order ASC, created_at ASC',
         limit: limit);
   }

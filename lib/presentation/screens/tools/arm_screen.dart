@@ -12,6 +12,7 @@ import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
+import '../../../core/services/pdf_export_service.dart';
 
 class ArmScreen extends ConsumerStatefulWidget {
   const ArmScreen({super.key});
@@ -131,6 +132,26 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
     } catch (_) {
       setState(() => _result = null);
     }
+  }
+
+  Future<void> _exportPdf(bool isEs) async {
+    final r = _result;
+    if (r == null) return;
+    final loan = double.tryParse(_loanCtrl.text.replaceAll(',', '')) ?? 0;
+    final initRate = double.tryParse(_initRateCtrl.text) ?? 0;
+    final adjRate = double.tryParse(_adjRateCtrl.text) ?? 0;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportArm(
+        context,
+        loanAmount: loan,
+        initialRatePct: initRate,
+        fixedYears: _fixedYears,
+        adjustedRatePct: adjRate,
+        termYears: _termYears,
+        result: r,
+        isEs: isEs,
+      );
+    });
   }
 
   Future<void> _saveScenario(String? label) async {
@@ -313,7 +334,33 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
                           fixedYears: _fixedYears,
                           termYears: _termYears),
                       const SizedBox(height: AppSpacing.md),
-                      SaveScenarioButton(onSave: _saveScenario),
+                      SaveScenarioButton(onSave: _saveScenario, labelEn: 'Save ARM Result', labelEs: 'Guardar resultado ARM'),
+                      const SizedBox(height: AppSpacing.sm),
+                      ValueListenableBuilder<bool>(
+                        valueListenable:
+                            freemiumService.hasFullAccessNotifier,
+                        builder: (context, hasFull, _) => SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _exportPdf(isEs),
+                            icon: const Icon(
+                                Icons.picture_as_pdf_rounded,
+                                size: 18),
+                            label: Text(
+                                isEs ? 'Exportar PDF' : 'Export PDF'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.primary,
+                              side: const BorderSide(
+                                  color: AppTheme.primary),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.mdPlus),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      AppRadius.mdPlus)),
+                            ),
+                          ),
+                        ),
+                      ),
                     ] else ...[
                       const SizedBox(height: AppSpacing.xxl),
                       Center(

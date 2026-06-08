@@ -7,9 +7,10 @@ import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../../../main.dart'
+    show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
-import '../../widgets/save_scenario_button.dart';
+import '../../../core/services/pdf_export_service.dart';
 
 class PmiScreen extends ConsumerStatefulWidget {
   const PmiScreen({super.key});
@@ -133,6 +134,40 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
     AnalyticsService.instance.logHistorySaved();
   }
 
+  Future<void> _exportPdf(bool isEs) async {
+    final rawPrice = double.tryParse(
+            _homePriceCtrl.text.replaceAll(RegExp(r'[^\d]'), '')) ??
+        0.0;
+    if (rawPrice <= 0) return;
+    final downAmt = rawPrice * _downPct / 100.0;
+    final loan = (rawPrice - downAmt).clamp(0.0, double.infinity);
+    final ltv = rawPrice > 0 ? (loan / rawPrice) * 100.0 : 0.0;
+    final hasPmi = ltv > 80.0;
+    if (!hasPmi) return;
+    final input = ref.read(mortgageInputProvider);
+    final monthlyPmi = MortgageCalculator.calcPmiMonthly(
+        loanAmount: loan, homePrice: rawPrice, pmiAnnualRatePct: _pmiAnnualRate);
+    final dropMonth = _monthsUntilPmiDrop(
+        loanAmount: loan,
+        homePrice: rawPrice,
+        annualRatePct: input.annualRatePct,
+        termYears: input.termYears);
+    final totalPmiCost = dropMonth != null ? monthlyPmi * dropMonth : 0.0;
+    await PdfExportService.showUnlockOrPay(context, () async {
+      await PdfExportService.exportPmiSimple(
+        context,
+        homePrice: rawPrice,
+        downPct: _downPct,
+        loanAmount: loan,
+        ltv: ltv,
+        monthlyPmi: monthlyPmi,
+        dropMonth: dropMonth,
+        totalPmiCost: totalPmiCost,
+        isEs: isEs,
+      );
+    });
+  }
+
   @override
   void dispose() {
     smartHistoryService.cancelPendingSave('mortgageus', 'pmi');
@@ -202,8 +237,6 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
             : null;
 
         final totalPmiCost = (dropMonth != null) ? monthlyPmi * dropMonth : 0.0;
-
-
 
         return Scaffold(
           appBar: AppBar(
@@ -314,7 +347,32 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
                     ),
 
                   const SizedBox(height: AppSpacing.md),
-                  if (rawPrice > 0) SaveScenarioButton(onSave: _saveScenario),
+
+                  // ── Export PDF button ──────────────────────────────────────
+                  if (hasPmi)
+                    ValueListenableBuilder<bool>(
+                      valueListenable: freemiumService.hasFullAccessNotifier,
+                      builder: (context, hasFull, _) => SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _exportPdf(isEs),
+                          icon: const Icon(Icons.picture_as_pdf_rounded,
+                              size: 18),
+                          label: Text(
+                              isEs ? 'Exportar PDF' : 'Export PDF'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.primary,
+                            side: const BorderSide(color: AppTheme.primary),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.mdPlus),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.mdPlus)),
+                          ),
+                        ),
+                      ),
+                    ),
+
                   const SizedBox(height: AppSpacing.xl),
 
                   // ── Info box ───────────────────────────────────────────────

@@ -33,6 +33,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
   bool _armMode = false;
   int _fixedYears = 5;
   final _armRateCtrl = TextEditingController(text: '7.5');
+  String? _lastAutoSaveHash;
 
   @override
   void initState() {
@@ -46,8 +47,54 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('mortgageus', 'comparator');
     _armRateCtrl.dispose();
     super.dispose();
+  }
+
+  void _scheduleAutoSaveIfNeeded(
+    MortgageInputState s,
+    MortgageResult r30,
+    MortgageResult r15,
+  ) {
+    final hash = ResultHasher.hashMixed({
+      'home': ResultHasher.roundTo(s.homePrice, 1000),
+      'down': ResultHasher.roundTo(s.downPaymentPct, 0.5),
+      'rate': ResultHasher.roundTo(s.annualRatePct, 0.1),
+    });
+    if (hash == _lastAutoSaveHash) return;
+    _lastAutoSaveHash = hash;
+    final loan = s.homePrice - s.downPaymentDollar;
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'mortgageus',
+      screenId: 'comparator',
+      inputHash: hash,
+      l1: {
+        'home_price': s.homePrice,
+        'rate': s.annualRatePct,
+        'monthly_15': r15.monthly.pitiPayment,
+        'monthly_30': r30.monthly.pitiPayment,
+        'monthly_diff': r15.monthly.pitiPayment - r30.monthly.pitiPayment,
+        'interest_savings': r30.totalInterest - r15.totalInterest,
+      },
+      l2: {
+        'inputs': {
+          'home_price': s.homePrice,
+          'down_percent': s.downPaymentPct,
+          'annual_rate': s.annualRatePct,
+          'loan_amount': loan,
+        },
+        'results': {
+          'monthly_piti_30': r30.monthly.pitiPayment,
+          'monthly_piti_15': r15.monthly.pitiPayment,
+          'total_interest_30': r30.totalInterest,
+          'total_interest_15': r15.totalInterest,
+          'interest_saved_15yr': r30.totalInterest - r15.totalInterest,
+          'payoff_30': '${r30.payoffDate.month}/${r30.payoffDate.year}',
+          'payoff_15': '${r15.payoffDate.month}/${r15.payoffDate.year}',
+        },
+      },
+    );
   }
 
   Future<void> _saveComparison(
@@ -222,6 +269,12 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
     final r15 = calc(15);
     final armRes = _armMode ? calcArm() : null;
     final canSave = !_armMode && r30 != null && r15 != null;
+
+    if (!_armMode && r30 != null && r15 != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scheduleAutoSaveIfNeeded(s, r30, r15),
+      );
+    }
 
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,

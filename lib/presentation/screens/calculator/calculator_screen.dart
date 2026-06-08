@@ -50,6 +50,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   bool _advancedExpanded = false;
   String? _homePriceError;
   Timer? _autoSaveTimer;
+  /// True once the user has actually changed at least one input field.
+  /// Auto-save is skipped until then so default values are never saved.
+  bool _userHasEdited = false;
 
   // Cached 15-yr comparison result — recomputed only when inputs change.
   MortgageResult? _insightResult15yr;
@@ -162,6 +165,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   }
 
   void _scheduleAutoSave() {
+    if (!_userHasEdited) return; // Never auto-save default values on first load
     final hash = _currentHash();
     if (hash == null) return;
     final label = _autoLabel();
@@ -330,13 +334,15 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                               _TermSelector(
                                   inputState: inputState,
                                   notifier: notifier,
-                                  s: s),
+                                  s: s,
+                                  onEdit: () => setState(() => _userHasEdited = true)),
                               const SizedBox(height: AppSpacing.md),
                               // Loan type chips
                               _LoanTypeSelector(
                                   inputState: inputState,
                                   notifier: notifier,
-                                  s: s),
+                                  s: s,
+                                  onEdit: () => setState(() => _userHasEdited = true)),
                               const SizedBox(height: AppSpacing.lg),
                               const Divider(height: 1),
                               // Advanced toggle
@@ -1049,7 +1055,10 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
           if (n < 0) return es ? 'Debe ser ≥ 0' : 'Must be ≥ 0';
           return null;
         },
-        onChanged: onChanged,
+        onChanged: (v) {
+          _userHasEdited = true;
+          onChanged(v);
+        },
       ),
     );
   }
@@ -1126,8 +1135,9 @@ class _TermSelector extends ConsumerWidget {
   final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
   final AppStrings s;
+  final VoidCallback? onEdit;
   const _TermSelector(
-      {required this.inputState, required this.notifier, required this.s});
+      {required this.inputState, required this.notifier, required this.s, this.onEdit});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1157,6 +1167,7 @@ class _TermSelector extends ConsumerWidget {
                     ),
                     onSelected: (_) {
                       HapticFeedback.selectionClick();
+                      onEdit?.call();
                       notifier.updateTerm(term);
                     },
                   ),
@@ -1176,8 +1187,9 @@ class _LoanTypeSelector extends ConsumerWidget {
   final MortgageInputState inputState;
   final MortgageInputNotifier notifier;
   final AppStrings s;
+  final VoidCallback? onEdit;
   const _LoanTypeSelector(
-      {required this.inputState, required this.notifier, required this.s});
+      {required this.inputState, required this.notifier, required this.s, this.onEdit});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1192,6 +1204,7 @@ class _LoanTypeSelector extends ConsumerWidget {
           label: (t) => t.label,
           onTap: (t) {
             HapticFeedback.selectionClick();
+            onEdit?.call();
             notifier.updateLoanType(t);
           },
         ),

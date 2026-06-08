@@ -20,21 +20,24 @@ class MortgageUSDatabaseAdapter implements DatabaseAdapter {
   @override
   Future<int> insertRow(Map<String, dynamic> row) async {
     final l2 = jsonDecode(row['l2_json'] as String) as Map<String, dynamic>;
+    // Support both nested {inputs:{...}, results:{...}} and legacy flat structure.
+    final inputs = (l2['inputs'] as Map<String, dynamic>?) ?? l2;
+    final results = (l2['results'] as Map<String, dynamic>?) ?? l2;
     final savedAt = DateTime.fromMillisecondsSinceEpoch(row['saved_at'] as int);
 
     return DatabaseHelper.instance.insertHistory({
-      'home_price': (l2['home_price'] as num?)?.toDouble() ?? 0.0,
-      'down_percent': (l2['down_percent'] as num?)?.toDouble() ?? 0.0,
-      'annual_rate': (l2['annual_rate'] as num?)?.toDouble() ?? 0.0,
-      'monthly_payment': (l2['monthly_payment'] as num?)?.toDouble() ?? 0.0,
-      'total_interest': (l2['total_interest'] as num?)?.toDouble() ?? 0.0,
-      'loan_amount': (l2['loan_amount'] as num?)?.toDouble() ?? 0.0,
-      'loan_type': l2['loan_type'] ?? 'Conventional',
-      'term_years': (l2['term_years'] as num?)?.toInt() ?? 30,
-      'tax_rate': (l2['tax_rate'] as num?)?.toDouble() ?? 1.1,
-      'insurance': (l2['insurance'] as num?)?.toDouble() ?? 1750.0,
-      'hoa': (l2['hoa'] as num?)?.toDouble() ?? 0.0,
-      'label': l2['label'],
+      'home_price': (inputs['home_price'] as num?)?.toDouble() ?? 0.0,
+      'down_percent': (inputs['down_percent'] as num?)?.toDouble() ?? 0.0,
+      'annual_rate': (inputs['annual_rate'] as num?)?.toDouble() ?? 0.0,
+      'monthly_payment': (results['monthly_payment'] as num?)?.toDouble() ?? 0.0,
+      'total_interest': (results['total_interest'] as num?)?.toDouble() ?? 0.0,
+      'loan_amount': (results['loan_amount'] as num?)?.toDouble() ?? 0.0,
+      'loan_type': (inputs['loan_type'] as String?) ?? 'Conventional',
+      'term_years': (inputs['term_years'] as num?)?.toInt() ?? 30,
+      'tax_rate': (inputs['tax_rate'] as num?)?.toDouble() ?? 1.1,
+      'insurance': (inputs['insurance'] as num?)?.toDouble() ?? 1750.0,
+      'hoa': (inputs['hoa'] as num?)?.toDouble() ?? 0.0,
+      'label': inputs['label'],
       'created_at': savedAt.toIso8601String(),
       'input_hash': row['result_hash'],
       'is_pinned': row['is_pinned'] ?? 0,

@@ -307,9 +307,9 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                             ),
                             alignment: Alignment.center,
                             child: Text(s.affordTitle,
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: AppTextSize.bodyLg,
-                                    color: Colors.white,
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                     fontWeight: FontWeight.w600)),
                           ),
                         ),
@@ -338,12 +338,12 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                                 child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.calculate_rounded,
-                                          color: Colors.white, size: 18),
+                                      Icon(Icons.calculate_rounded,
+                                          color: Theme.of(context).colorScheme.onPrimary, size: 18),
                                       const SizedBox(width: AppSpacing.sm),
                                       Text(s.affordUseCalc,
-                                          style: const TextStyle(
-                                              color: Colors.white,
+                                          style: TextStyle(
+                                              color: Theme.of(context).colorScheme.onPrimary,
                                               fontWeight: FontWeight.w600)),
                                     ]),
                               ),

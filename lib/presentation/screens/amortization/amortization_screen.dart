@@ -663,13 +663,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                         Icon(Icons.calendar_today,
                                             size: 16,
                                             color: _yearlyView
-                                                ? Colors.white
+                                                ? Theme.of(context).colorScheme.onPrimary
                                                 : AppTheme.primary),
                                         const SizedBox(width: AppRadius.sm),
                                         Text(s.yearlyView,
                                             style: TextStyle(
                                                 color: _yearlyView
-                                                    ? Colors.white
+                                                    ? Theme.of(context).colorScheme.onPrimary
                                                     : AppTheme.primary,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: AppTextSize.md)),
@@ -710,13 +710,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                         Icon(Icons.view_list,
                                             size: 16,
                                             color: !_yearlyView
-                                                ? Colors.white
+                                                ? Theme.of(context).colorScheme.onPrimary
                                                 : AppTheme.primary),
                                         const SizedBox(width: AppRadius.sm),
                                         Text(s.monthlyView,
                                             style: TextStyle(
                                                 color: !_yearlyView
-                                                    ? Colors.white
+                                                    ? Theme.of(context).colorScheme.onPrimary
                                                     : AppTheme.primary,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: AppTextSize.md)),
@@ -815,11 +815,11 @@ class _SummaryRow extends StatelessWidget {
           child:
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Text(label,
-                style: const TextStyle(
-                    color: Colors.white70, fontSize: AppTextSize.md)),
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7), fontSize: AppTextSize.md)),
             Text(value,
-                style: const TextStyle(
-                    color: Colors.white,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: AppTextSize.md,
                     fontWeight: FontWeight.w600)),
           ]),

@@ -157,7 +157,7 @@ class PdfExportService {
                 _row2(tInterestRate,
                     '${input.annualRatePct.toStringAsFixed(2)}%'),
                 _row2(tLoanTerm, '${input.termYears} $tYears'),
-                _row2(tLoanType, input.loanType.label),
+                _row2(tLoanType, isEs ? _loanTypeEs(input.loanType) : input.loanType.label),
                 _row2(tLtv, '${result.currentLtv.toStringAsFixed(1)}%'),
                 if (result.isJumbo)
                   _row2(tClassification, tJumbo, highlight: true),
@@ -179,7 +179,7 @@ class PdfExportService {
                       result.pmiDropMonth != null
                           ? '$tMonth ${result.pmiDropMonth} (${(result.pmiDropMonth! / 12).ceil()} yr)'
                           : '—'),
-                  _row2('Note', tPmiNote, small: true),
+                  _row2(isEs ? 'Nota' : 'Note', tPmiNote, small: true),
                 ]),
               ],
             ])),
@@ -528,7 +528,7 @@ class PdfExportService {
               '${_usd0.format(input.homePrice)} · '
               '${input.annualRatePct.toStringAsFixed(2)}% · '
               '${input.termYears}${isEs ? 'a' : 'yr'} · '
-              '${input.loanType.label}'
+              '${isEs ? _loanTypeEs(input.loanType) : input.loanType.label}'
               '  |  ${isEs ? 'Pág.' : 'Page'} $page',
               style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
             ),
@@ -571,6 +571,15 @@ class PdfExportService {
       ]);
 
   // ── Small helpers ─────────────────────────────────────────────────────────
+
+  static String _loanTypeEs(LoanType t) {
+    switch (t) {
+      case LoanType.conventional:
+        return 'Convencional';
+      default:
+        return t.label; // FHA, VA, Jumbo, USDA same in ES
+    }
+  }
 
   static pw.Widget _tableTitle(String text) => pw.Container(
         padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),

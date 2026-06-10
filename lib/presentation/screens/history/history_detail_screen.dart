@@ -188,7 +188,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               ),
             ],
           ),
-          body: SafeArea(
+          body: CalcwisePageEntrance(
+            child: SafeArea(
             top: false,
             left: false,
             right: false,
@@ -264,6 +265,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   onExport: () => _exportPdf(context, isEs),
                 ),
               ],
+            ),
             ),
           ),
         );

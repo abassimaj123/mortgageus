@@ -256,7 +256,8 @@ class _InvestmentReturnScreenState
           appBar: AppBar(
             title: Text(isEs ? 'Retorno de Inversión' : 'Investment Return'),
           ),
-          body: Column(children: [
+          body: CalcwisePageEntrance(
+              child: Column(children: [
             Expanded(
                 child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -415,7 +416,7 @@ class _InvestmentReturnScreenState
               ),
             )),
             const CalcwiseAdFooter(),
-          ]),
+          ])),
         );
       },
     );

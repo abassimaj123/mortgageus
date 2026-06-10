@@ -733,7 +733,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ];
 
-        final bodyContent = Column(
+        final bodyContent = CalcwisePageEntrance(
+            child: Column(
               children: [
                 Expanded(
                   child: _firstLoad
@@ -1075,6 +1076,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 const CalcwiseAdFooter(),
               ],
+            ),
             );
 
         return widget.showAppBar

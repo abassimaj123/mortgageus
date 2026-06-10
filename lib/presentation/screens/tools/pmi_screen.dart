@@ -242,7 +242,8 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
           appBar: AppBar(
             title: Text(isEs ? 'Calculadora PMI' : 'PMI Calculator'),
           ),
-          body: Column(children: [
+          body: CalcwisePageEntrance(
+              child: Column(children: [
             Expanded(
                 child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -408,7 +409,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
               ),
             )),
             const CalcwiseAdFooter(),
-          ]),
+          ])),
         );
       },
     );

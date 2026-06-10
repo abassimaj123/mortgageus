@@ -206,7 +206,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
         final r = _result;
         return Scaffold(
           appBar: AppBar(title: Text(s.toolArm)),
-          body: Column(children: [
+          body: CalcwisePageEntrance(child: Column(children: [
             Expanded(
                 child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -379,7 +379,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
                   ]),
             )),
             const CalcwiseAdFooter(),
-          ]),
+          ])),
         );
       },
     );

@@ -211,6 +211,12 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       } catch (_) {}
       final inputState = ref.read(mortgageInputProvider);
       final result = ref.read(mortgageResultProvider);
+      unawaited(AnalyticsService.instance.logCalculation(
+        homePrice: inputState.homePrice,
+        downPct: inputState.downPaymentPct,
+        ratePct: inputState.annualRatePct,
+        amortYears: inputState.termYears,
+      ));
       unawaited(RateWatchService.instance
           .checkRate(inputState.annualRatePct, appLabel: 'MortgageUS'));
       // Emotional trigger: accessible monthly payment → ask for review.
@@ -1101,19 +1107,23 @@ class _HeroCard extends StatelessWidget {
       child: CalcwiseHeroCard(
         label: s.monthlyPI as String,
         value: piPayment,
+        rawValue: result?.monthly.piPayment,
+        valueFormatter: (v) => AmountFormatter.ui(v, 'USD'),
         secondary: result != null
             ? '${s.totalPITI}: ${AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')}'
             : null,
-        stats: result == null
+        rawStats: result == null
             ? null
             : [
                 (
                   label: 'Total Interest',
-                  value: AmountFormatter.ui(result!.totalInterest, 'USD'),
+                  value: result!.totalInterest,
+                  formatter: (v) => AmountFormatter.ui(v, 'USD'),
                 ),
                 (
                   label: 'Total Cost',
-                  value: AmountFormatter.ui(result!.totalCost, 'USD'),
+                  value: result!.totalCost,
+                  formatter: (v) => AmountFormatter.ui(v, 'USD'),
                 ),
               ],
       ),
@@ -1481,16 +1491,7 @@ class _BreakdownCard extends StatelessWidget {
           _Row(s.totalCost, AmountFormatter.ui(result!.totalCost, 'USD')),
           _Row(s.payoffDate,
               '${result!.payoffDate.month}/${result!.payoffDate.year}'),
-          _Row(
-            isEs ? 'LTV' : 'LTV',
-            '${result!.currentLtv.toStringAsFixed(1)}%',
-            tooltip: InfoTooltip(
-              title: isEs ? 'LTV — Préstamo a Valor' : 'LTV — Loan-to-Value',
-              body: isEs
-                  ? 'El monto del préstamo dividido por el precio de la casa. Por debajo del 80% LTV = no se requiere PMI. Un LTV más bajo generalmente significa mejores tasas.'
-                  : 'Your loan amount divided by the home price. Below 80% LTV = no PMI required. Lower LTV typically means better interest rates.',
-            ),
-          ),
+          _LtvRow(ltv: result!.currentLtv, isEs: isEs),
         ]),
       ),
     );
@@ -1534,6 +1535,64 @@ class _Row extends StatelessWidget {
           ),
         ),
       );
+}
+
+// ── LTV gauge row ─────────────────────────────────────────────────────────────
+
+class _LtvRow extends StatelessWidget {
+  final double ltv;
+  final bool isEs;
+  const _LtvRow({required this.ltv, required this.isEs});
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = ltv.clamp(0.0, 150.0);
+    final gaugeValue = (pct / 100.0).clamp(0.0, 1.0);
+    final gaugeColor = pct <= 80.0
+        ? const Color(0xFF16A34A)
+        : pct <= 95.0
+            ? AppTheme.accentWarn
+            : CalcwiseSemanticColors.error(Theme.of(context).brightness);
+
+    return Semantics(
+      label: 'LTV: ${pct.toStringAsFixed(1)}%',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Row(
+          children: [
+            CalcwiseGauge(
+              value: gaugeValue,
+              color: gaugeColor,
+              size: 40.0,
+              strokeWidth: 4.5,
+              child: CalcwiseCountUp(
+                value: pct,
+                formatter: (v) => '${v.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: gaugeColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.smPlus),
+            Text('LTV', style: TextStyle(color: AppTheme.labelGray)),
+            InfoTooltip(
+              title: isEs ? 'LTV — Préstamo a Valor' : 'LTV — Loan-to-Value',
+              body: isEs
+                  ? 'El monto del préstamo dividido por el precio de la casa. Por debajo del 80% LTV = no se requiere PMI. Un LTV más bajo generalmente significa mejores tasas.'
+                  : 'Your loan amount divided by the home price. Below 80% LTV = no PMI required. Lower LTV typically means better interest rates.',
+            ),
+            const Spacer(),
+            Text(
+              '${pct.toStringAsFixed(1)}%',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ── Generic pill chip row (same style as MortgageUK) ─────────────────────────

@@ -9,6 +9,7 @@ import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHist
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
 import '../../../core/services/pdf_export_service.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 /// Closing Costs by State Calculator
 ///
@@ -91,6 +92,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     }
     if (_logged) return;
     _logged = true;
@@ -578,8 +580,10 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
                         ),
                         const SizedBox(height: AppSpacing.lg),
 
-                        // Bar chart breakdown
-                        _BarChart(lines: lines, total: total, isEs: isEs),
+                        // Bar chart breakdown — animated reveal
+                        CalcwiseChartReveal(
+                          child: _BarChart(lines: lines, total: total, isEs: isEs),
+                        ),
                         const SizedBox(height: AppSpacing.lg),
 
                         // Line item table

@@ -293,9 +293,8 @@ class _MainShellState extends State<_MainShell> {
                   _screens.length,
                   (i) => IgnorePointer(
                         ignoring: _index != i,
-                        child: AnimatedOpacity(
-                          opacity: _index == i ? 1.0 : 0.0,
-                          duration: AppDuration.fast,
+                        child: CalcwiseTabReveal(
+                          active: _index == i,
                           child: _screens[i],
                         ),
                       )),

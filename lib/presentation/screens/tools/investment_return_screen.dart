@@ -13,6 +13,7 @@ import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 // ── Color for Investment Return tool icon (emerald-teal) ──────────────────────
 const Color _kToolColor = Color(0xFF0D9488); // teal-600
@@ -107,6 +108,7 @@ class _InvestmentReturnScreenState
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     }
     if (!_analyticsLogged) {
       _analyticsLogged = true;

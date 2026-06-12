@@ -95,6 +95,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
         },
       },
     );
+    HistoryScreen.refreshNotifier.value++;
   }
 
   Future<void> _saveComparison(

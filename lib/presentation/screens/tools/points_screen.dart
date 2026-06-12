@@ -10,6 +10,7 @@ import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 /// Points / Discount Calculator
 /// Each point = 1% of loan, lowers rate by ~0.25%.
@@ -95,6 +96,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     }
     if (_logged) return;
     _logged = true;

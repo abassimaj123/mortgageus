@@ -1,4 +1,6 @@
+import 'dart:isolate';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -32,6 +34,545 @@ const _light = PdfColor(0.945, 0.957, 0.980); // light blue-grey row alt
 // PdfBrandHelper.pageTheme(appName: 'MortgageUS', brandColor: _navy) on the
 // summary page, and keep _amortHeader as-is for the amortization MultiPage
 // (it carries loan-specific context the generic helper doesn't model yet).
+
+// ── Isolate params classes ─────────────────────────────────────────────────
+// All fields must be sendable between isolates:
+// ✅ String, int, double, bool, null, DateTime, enum
+// ✅ List<T>, Map<K,V> where T,K,V are sendable
+// ✅ Plain Dart data classes with only sendable fields
+
+class _MortgagePdfParams {
+  final MortgageInputState input;
+  final MortgageResult result;
+  final bool isEs;
+  const _MortgagePdfParams({required this.input, required this.result, required this.isEs});
+}
+
+class _ComparatorPdfParams {
+  final MortgageInputState input;
+  final MortgageResult r30;
+  final MortgageResult r15;
+  final bool isEs;
+  const _ComparatorPdfParams({required this.input, required this.r30, required this.r15, required this.isEs});
+}
+
+class _ExtraPaymentsPdfParams {
+  final MortgageInputState input;
+  final ExtraPaymentResult result;
+  final double extraMonthly;
+  final double extraAnnual;
+  final double lumpSum;
+  final bool isEs;
+  const _ExtraPaymentsPdfParams({
+    required this.input, required this.result,
+    required this.extraMonthly, required this.extraAnnual,
+    required this.lumpSum, required this.isEs,
+  });
+}
+
+class _RefinancePdfParams {
+  final double balance;
+  final double curRate;
+  final int curYears;
+  final double newRate;
+  final int newYears;
+  final double closing;
+  final RefinanceResult result;
+  final bool isEs;
+  const _RefinancePdfParams({
+    required this.balance, required this.curRate, required this.curYears,
+    required this.newRate, required this.newYears, required this.closing,
+    required this.result, required this.isEs,
+  });
+}
+
+class _InvestmentReturnPdfParams {
+  final double price;
+  final double downPct;
+  final double rent;
+  final double appreciation;
+  final int holdYears;
+  final double rate;
+  final double downAmt;
+  final double initialInv;
+  final double loanAmt;
+  final double mortgageMo;
+  final double monthlyCF;
+  final double cashOnCash;
+  final double irr;
+  final double npv;
+  final double equityMult;
+  final bool isEs;
+  const _InvestmentReturnPdfParams({
+    required this.price, required this.downPct, required this.rent,
+    required this.appreciation, required this.holdYears, required this.rate,
+    required this.downAmt, required this.initialInv, required this.loanAmt,
+    required this.mortgageMo, required this.monthlyCF, required this.cashOnCash,
+    required this.irr, required this.npv, required this.equityMult, required this.isEs,
+  });
+}
+
+class _PmiCalculatorPdfParams {
+  final double homePrice;
+  final double downPct;
+  final double loanAmount;
+  final double ltv;
+  final int creditScore;
+  final double pmiAnnualRate;
+  final double monthlyPmi;
+  final int? monthsTo80;
+  final int? monthsTo78;
+  final double rate;
+  final bool isEs;
+  const _PmiCalculatorPdfParams({
+    required this.homePrice, required this.downPct, required this.loanAmount,
+    required this.ltv, required this.creditScore, required this.pmiAnnualRate,
+    required this.monthlyPmi, required this.monthsTo80, required this.monthsTo78,
+    required this.rate, required this.isEs,
+  });
+}
+
+class _PointsPdfParams {
+  final double loanAmount;
+  final double origRate;
+  final double points;
+  final int termYears;
+  final double newRate;
+  final double pointsCost;
+  final double origPayment;
+  final double newPayment;
+  final double monthlySavings;
+  final double? breakevenMonths;
+  final double lifetimeSavings;
+  final bool isEs;
+  const _PointsPdfParams({
+    required this.loanAmount, required this.origRate, required this.points,
+    required this.termYears, required this.newRate, required this.pointsCost,
+    required this.origPayment, required this.newPayment,
+    required this.monthlySavings, required this.breakevenMonths,
+    required this.lifetimeSavings, required this.isEs,
+  });
+}
+
+class _UsdaPdfParams {
+  final double homePrice;
+  final double income;
+  final double rate;
+  final int termYears;
+  final bool ruralEligible;
+  final bool incomeOk;
+  final double maxIncome;
+  final double upfrontFee;
+  final double loanAmount;
+  final double monthlyAnnualFee;
+  final double pAndI;
+  final double propertyTax;
+  final double insurance;
+  final double totalMonthly;
+  final bool isEs;
+  const _UsdaPdfParams({
+    required this.homePrice, required this.income, required this.rate,
+    required this.termYears, required this.ruralEligible, required this.incomeOk,
+    required this.maxIncome, required this.upfrontFee, required this.loanAmount,
+    required this.monthlyAnnualFee, required this.pAndI, required this.propertyTax,
+    required this.insurance, required this.totalMonthly, required this.isEs,
+  });
+}
+
+class _VaPdfParams {
+  final double homePrice;
+  final double downPct;
+  final double downAmt;
+  final double ffRate;
+  final double fundingFee;
+  final double loanAmount;
+  final double rate;
+  final int termYears;
+  final bool reserves;
+  final bool subsequent;
+  final double pAndI;
+  final double propertyTax;
+  final double insurance;
+  final double totalMonthly;
+  final bool isEs;
+  const _VaPdfParams({
+    required this.homePrice, required this.downPct, required this.downAmt,
+    required this.ffRate, required this.fundingFee, required this.loanAmount,
+    required this.rate, required this.termYears, required this.reserves,
+    required this.subsequent, required this.pAndI, required this.propertyTax,
+    required this.insurance, required this.totalMonthly, required this.isEs,
+  });
+}
+
+class _AffordabilityPdfParams {
+  final double annualIncome;
+  final double monthlyDebts;
+  final double downPayment;
+  final double annualRatePct;
+  final int termYears;
+  final AffordabilityResult result;
+  final bool isEs;
+  const _AffordabilityPdfParams({
+    required this.annualIncome, required this.monthlyDebts, required this.downPayment,
+    required this.annualRatePct, required this.termYears,
+    required this.result, required this.isEs,
+  });
+}
+
+class _ArmPdfParams {
+  final double loanAmount;
+  final double initialRatePct;
+  final int fixedYears;
+  final double adjustedRatePct;
+  final int termYears;
+  final ARMResult result;
+  final bool isEs;
+  const _ArmPdfParams({
+    required this.loanAmount, required this.initialRatePct, required this.fixedYears,
+    required this.adjustedRatePct, required this.termYears,
+    required this.result, required this.isEs,
+  });
+}
+
+class _ClosingCostsPdfParams {
+  final double homePrice;
+  final String state;
+  final String loanType;
+  final bool isBuyer;
+  final List<Map<String, dynamic>> lineItems;
+  final double total;
+  final bool isEs;
+  const _ClosingCostsPdfParams({
+    required this.homePrice, required this.state, required this.loanType,
+    required this.isBuyer, required this.lineItems, required this.total, required this.isEs,
+  });
+}
+
+class _DtiPdfParams {
+  final double annualIncome;
+  final double piti;
+  final double carPayment;
+  final double studentLoans;
+  final double creditCards;
+  final double otherDebts;
+  final double frontEndDti;
+  final double backEndDti;
+  final bool isEs;
+  const _DtiPdfParams({
+    required this.annualIncome, required this.piti, required this.carPayment,
+    required this.studentLoans, required this.creditCards, required this.otherDebts,
+    required this.frontEndDti, required this.backEndDti, required this.isEs,
+  });
+}
+
+class _FhaPdfParams {
+  final double homePrice;
+  final double downPct;
+  final double annualRatePct;
+  final int termYears;
+  final int creditScore;
+  final double baseLoan;
+  final double upfrontMip;
+  final double loan;
+  final double annualMipRate;
+  final double monthlyMip;
+  final double pAndI;
+  final double monthlyTax;
+  final double monthlyIns;
+  final double totalMonthly;
+  final bool isEs;
+  const _FhaPdfParams({
+    required this.homePrice, required this.downPct, required this.annualRatePct,
+    required this.termYears, required this.creditScore, required this.baseLoan,
+    required this.upfrontMip, required this.loan, required this.annualMipRate,
+    required this.monthlyMip, required this.pAndI, required this.monthlyTax,
+    required this.monthlyIns, required this.totalMonthly, required this.isEs,
+  });
+}
+
+class _HelocPdfParams {
+  final double homeValue;
+  final double mortgageBalance;
+  final double maxLtv;
+  final double drawAmount;
+  final double rate;
+  final int drawPeriod;
+  final int repaymentPeriod;
+  final double availableEquity;
+  final double monthlyInterestOnly;
+  final double monthlyRepayment;
+  final double totalCost;
+  final bool isEs;
+  const _HelocPdfParams({
+    required this.homeValue, required this.mortgageBalance, required this.maxLtv,
+    required this.drawAmount, required this.rate, required this.drawPeriod,
+    required this.repaymentPeriod, required this.availableEquity,
+    required this.monthlyInterestOnly, required this.monthlyRepayment,
+    required this.totalCost, required this.isEs,
+  });
+}
+
+class _PmiSimplePdfParams {
+  final double homePrice;
+  final double downPct;
+  final double loanAmount;
+  final double ltv;
+  final double monthlyPmi;
+  final int? dropMonth;
+  final double totalPmiCost;
+  final bool isEs;
+  const _PmiSimplePdfParams({
+    required this.homePrice, required this.downPct, required this.loanAmount,
+    required this.ltv, required this.monthlyPmi, required this.dropMonth,
+    required this.totalPmiCost, required this.isEs,
+  });
+}
+
+// ── Top-level isolate builder functions ────────────────────────────────────
+// These are top-level so they can be passed to Isolate.run().
+// They call private static methods on PdfExportService (file-private in Dart).
+
+Future<Uint8List> _buildMortgagePdf(_MortgagePdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildSummaryPage(p.input, p.result, isEs: p.isEs),
+  ));
+  pdf.addPage(pw.MultiPage(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 28, 36, 28),
+    header: (ctx) => PdfExportService._amortHeader(p.input, p.result, ctx.pageNumber, isEs: p.isEs),
+    footer: (ctx) => PdfExportService._footer(ctx, isEs: p.isEs),
+    build: (_) => [
+      ...PdfExportService._buildYearlySection(p.result, isEs: p.isEs),
+      pw.SizedBox(height: 18),
+      ...PdfExportService._buildMonthlySection(p.result, isEs: p.isEs),
+    ],
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildComparatorPdf(_ComparatorPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildComparatorPage(p.input, p.r30, p.r15, isEs: p.isEs),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildExtraPaymentsPdf(_ExtraPaymentsPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildExtraPaymentsPage(
+      p.input, p.result,
+      extraMonthly: p.extraMonthly, extraAnnual: p.extraAnnual,
+      lumpSum: p.lumpSum, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildRefinancePdf(_RefinancePdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildRefinancePage(
+      balance: p.balance, curRate: p.curRate, curYears: p.curYears,
+      newRate: p.newRate, newYears: p.newYears, closing: p.closing,
+      result: p.result, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildInvestmentReturnPdf(_InvestmentReturnPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildInvestmentReturnPage(
+      price: p.price, downPct: p.downPct, rent: p.rent,
+      appreciation: p.appreciation, holdYears: p.holdYears, rate: p.rate,
+      downAmt: p.downAmt, initialInv: p.initialInv, loanAmt: p.loanAmt,
+      mortgageMo: p.mortgageMo, monthlyCF: p.monthlyCF, cashOnCash: p.cashOnCash,
+      irr: p.irr, npv: p.npv, equityMult: p.equityMult, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildPmiCalculatorPdf(_PmiCalculatorPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildPmiCalculatorPage(
+      homePrice: p.homePrice, downPct: p.downPct, loanAmount: p.loanAmount,
+      ltv: p.ltv, creditScore: p.creditScore, pmiAnnualRate: p.pmiAnnualRate,
+      monthlyPmi: p.monthlyPmi, monthsTo80: p.monthsTo80, monthsTo78: p.monthsTo78,
+      rate: p.rate, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildPointsPdf(_PointsPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildPointsPage(
+      loanAmount: p.loanAmount, origRate: p.origRate, points: p.points,
+      termYears: p.termYears, newRate: p.newRate, pointsCost: p.pointsCost,
+      origPayment: p.origPayment, newPayment: p.newPayment,
+      monthlySavings: p.monthlySavings, breakevenMonths: p.breakevenMonths,
+      lifetimeSavings: p.lifetimeSavings, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildUsdaPdf(_UsdaPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildUsdaPage(
+      homePrice: p.homePrice, income: p.income, rate: p.rate,
+      termYears: p.termYears, ruralEligible: p.ruralEligible, incomeOk: p.incomeOk,
+      maxIncome: p.maxIncome, upfrontFee: p.upfrontFee, loanAmount: p.loanAmount,
+      monthlyAnnualFee: p.monthlyAnnualFee, pAndI: p.pAndI,
+      propertyTax: p.propertyTax, insurance: p.insurance,
+      totalMonthly: p.totalMonthly, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildVaPdf(_VaPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildVaPage(
+      homePrice: p.homePrice, downPct: p.downPct, downAmt: p.downAmt,
+      ffRate: p.ffRate, fundingFee: p.fundingFee, loanAmount: p.loanAmount,
+      rate: p.rate, termYears: p.termYears, reserves: p.reserves,
+      subsequent: p.subsequent, pAndI: p.pAndI, propertyTax: p.propertyTax,
+      insurance: p.insurance, totalMonthly: p.totalMonthly, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildAffordabilityPdf(_AffordabilityPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildAffordabilityPage(
+      annualIncome: p.annualIncome, monthlyDebts: p.monthlyDebts,
+      downPayment: p.downPayment, annualRatePct: p.annualRatePct,
+      termYears: p.termYears, result: p.result, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildArmPdf(_ArmPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildArmPage(
+      loanAmount: p.loanAmount, initialRatePct: p.initialRatePct,
+      fixedYears: p.fixedYears, adjustedRatePct: p.adjustedRatePct,
+      termYears: p.termYears, result: p.result, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildClosingCostsPdf(_ClosingCostsPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildClosingCostsPage(
+      homePrice: p.homePrice, state: p.state, loanType: p.loanType,
+      isBuyer: p.isBuyer, lineItems: p.lineItems, total: p.total, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildDtiPdf(_DtiPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildDtiPage(
+      annualIncome: p.annualIncome, piti: p.piti, carPayment: p.carPayment,
+      studentLoans: p.studentLoans, creditCards: p.creditCards,
+      otherDebts: p.otherDebts, frontEndDti: p.frontEndDti,
+      backEndDti: p.backEndDti, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildFhaPdf(_FhaPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildFhaPage(
+      homePrice: p.homePrice, downPct: p.downPct, annualRatePct: p.annualRatePct,
+      termYears: p.termYears, creditScore: p.creditScore, baseLoan: p.baseLoan,
+      upfrontMip: p.upfrontMip, loan: p.loan, annualMipRate: p.annualMipRate,
+      monthlyMip: p.monthlyMip, pAndI: p.pAndI, monthlyTax: p.monthlyTax,
+      monthlyIns: p.monthlyIns, totalMonthly: p.totalMonthly, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildHelocPdf(_HelocPdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildHelocPage(
+      homeValue: p.homeValue, mortgageBalance: p.mortgageBalance, maxLtv: p.maxLtv,
+      drawAmount: p.drawAmount, rate: p.rate, drawPeriod: p.drawPeriod,
+      repaymentPeriod: p.repaymentPeriod, availableEquity: p.availableEquity,
+      monthlyInterestOnly: p.monthlyInterestOnly, monthlyRepayment: p.monthlyRepayment,
+      totalCost: p.totalCost, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
+Future<Uint8List> _buildPmiSimplePdf(_PmiSimplePdfParams p) async {
+  final pdf = pw.Document();
+  pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
+    build: (_) => PdfExportService._buildPmiSimplePage(
+      homePrice: p.homePrice, downPct: p.downPct, loanAmount: p.loanAmount,
+      ltv: p.ltv, monthlyPmi: p.monthlyPmi, dropMonth: p.dropMonth,
+      totalPmiCost: p.totalPmiCost, isEs: p.isEs,
+    ),
+  ));
+  return await pdf.save();
+}
+
 class PdfExportService {
   static final _usd2 =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
@@ -48,29 +589,9 @@ class PdfExportService {
     MortgageResult result, {
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-
-    // ── Page 1 : full summary ─────────────────────────────────────────────
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildSummaryPage(input, result, isEs: isEs),
-    ));
-
-    // ── Pages 2+ : amortization schedule (auto-paginated) ─────────────────
-    pdf.addPage(pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 28, 36, 28),
-      header: (ctx) => _amortHeader(input, result, ctx.pageNumber, isEs: isEs),
-      footer: (ctx) => _footer(ctx, isEs: isEs),
-      build: (_) => [
-        ..._buildYearlySection(result, isEs: isEs),
-        pw.SizedBox(height: 18),
-        ..._buildMonthlySection(result, isEs: isEs),
-      ],
-    ));
-
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildMortgagePdf(_MortgagePdfParams(input: input, result: result, isEs: isEs)),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -654,15 +1175,9 @@ class PdfExportService {
     MortgageResult r15, {
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildComparatorPage(input, r30, r15, isEs: isEs),
-    ));
-
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildComparatorPdf(_ComparatorPdfParams(input: input, r30: r30, r15: r15, isEs: isEs)),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_Comparator_${input.homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -800,20 +1315,13 @@ class PdfExportService {
     required double lumpSum,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildExtraPaymentsPage(
-          input, result,
-          extraMonthly: extraMonthly,
-          extraAnnual: extraAnnual,
-          lumpSum: lumpSum,
-          isEs: isEs),
-    ));
-
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildExtraPaymentsPdf(_ExtraPaymentsPdfParams(
+        input: input, result: result,
+        extraMonthly: extraMonthly, extraAnnual: extraAnnual,
+        lumpSum: lumpSum, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final loan = input.homePrice - input.downPaymentDollar;
     final pdfFile = File(
@@ -937,23 +1445,13 @@ class PdfExportService {
     required RefinanceResult result,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildRefinancePage(
-        balance: balance,
-        curRate: curRate,
-        curYears: curYears,
-        newRate: newRate,
-        newYears: newYears,
-        closing: closing,
-        result: result,
-        isEs: isEs,
-      ),
-    ));
-
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildRefinancePdf(_RefinancePdfParams(
+        balance: balance, curRate: curRate, curYears: curYears,
+        newRate: newRate, newYears: newYears, closing: closing,
+        result: result, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_Refinance_${balance.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -1137,30 +1635,15 @@ class PdfExportService {
     required double equityMult,
     required bool isEs,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildInvestmentReturnPage(
-        price: price,
-        downPct: downPct,
-        rent: rent,
-        appreciation: appreciation,
-        holdYears: holdYears,
-        rate: rate,
-        downAmt: downAmt,
-        initialInv: initialInv,
-        loanAmt: loanAmt,
-        mortgageMo: mortgageMo,
-        monthlyCF: monthlyCF,
-        cashOnCash: cashOnCash,
-        irr: irr,
-        npv: npv,
-        equityMult: equityMult,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildInvestmentReturnPdf(_InvestmentReturnPdfParams(
+        price: price, downPct: downPct, rent: rent,
+        appreciation: appreciation, holdYears: holdYears, rate: rate,
+        downAmt: downAmt, initialInv: initialInv, loanAmt: loanAmt,
+        mortgageMo: mortgageMo, monthlyCF: monthlyCF, cashOnCash: cashOnCash,
+        irr: irr, npv: npv, equityMult: equityMult, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_InvestmentReturn_${price.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -1327,25 +1810,14 @@ class PdfExportService {
     required double rate,
     required bool isEs,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildPmiCalculatorPage(
-        homePrice: homePrice,
-        downPct: downPct,
-        loanAmount: loanAmount,
-        ltv: ltv,
-        creditScore: creditScore,
-        pmiAnnualRate: pmiAnnualRate,
-        monthlyPmi: monthlyPmi,
-        monthsTo80: monthsTo80,
-        monthsTo78: monthsTo78,
-        rate: rate,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildPmiCalculatorPdf(_PmiCalculatorPdfParams(
+        homePrice: homePrice, downPct: downPct, loanAmount: loanAmount,
+        ltv: ltv, creditScore: creditScore, pmiAnnualRate: pmiAnnualRate,
+        monthlyPmi: monthlyPmi, monthsTo80: monthsTo80, monthsTo78: monthsTo78,
+        rate: rate, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_PMI_${homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -1469,26 +1941,15 @@ class PdfExportService {
     required double lifetimeSavings,
     required bool isEs,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildPointsPage(
-        loanAmount: loanAmount,
-        origRate: origRate,
-        points: points,
-        termYears: termYears,
-        newRate: newRate,
-        pointsCost: pointsCost,
-        origPayment: origPayment,
-        newPayment: newPayment,
-        monthlySavings: monthlySavings,
-        breakevenMonths: breakevenMonths,
-        lifetimeSavings: lifetimeSavings,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildPointsPdf(_PointsPdfParams(
+        loanAmount: loanAmount, origRate: origRate, points: points,
+        termYears: termYears, newRate: newRate, pointsCost: pointsCost,
+        origPayment: origPayment, newPayment: newPayment,
+        monthlySavings: monthlySavings, breakevenMonths: breakevenMonths,
+        lifetimeSavings: lifetimeSavings, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_Points_${loanAmount.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -1635,29 +2096,16 @@ class PdfExportService {
     required double totalMonthly,
     required bool isEs,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildUsdaPage(
-        homePrice: homePrice,
-        income: income,
-        rate: rate,
-        termYears: termYears,
-        ruralEligible: ruralEligible,
-        incomeOk: incomeOk,
-        maxIncome: maxIncome,
-        upfrontFee: upfrontFee,
-        loanAmount: loanAmount,
-        monthlyAnnualFee: monthlyAnnualFee,
-        pAndI: pAndI,
-        propertyTax: propertyTax,
-        insurance: insurance,
-        totalMonthly: totalMonthly,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildUsdaPdf(_UsdaPdfParams(
+        homePrice: homePrice, income: income, rate: rate,
+        termYears: termYears, ruralEligible: ruralEligible, incomeOk: incomeOk,
+        maxIncome: maxIncome, upfrontFee: upfrontFee, loanAmount: loanAmount,
+        monthlyAnnualFee: monthlyAnnualFee, pAndI: pAndI,
+        propertyTax: propertyTax, insurance: insurance,
+        totalMonthly: totalMonthly, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_USDA_${homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -1810,29 +2258,15 @@ class PdfExportService {
     required double totalMonthly,
     required bool isEs,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildVaPage(
-        homePrice: homePrice,
-        downPct: downPct,
-        downAmt: downAmt,
-        ffRate: ffRate,
-        fundingFee: fundingFee,
-        loanAmount: loanAmount,
-        rate: rate,
-        termYears: termYears,
-        reserves: reserves,
-        subsequent: subsequent,
-        pAndI: pAndI,
-        propertyTax: propertyTax,
-        insurance: insurance,
-        totalMonthly: totalMonthly,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildVaPdf(_VaPdfParams(
+        homePrice: homePrice, downPct: downPct, downAmt: downAmt,
+        ffRate: ffRate, fundingFee: fundingFee, loanAmount: loanAmount,
+        rate: rate, termYears: termYears, reserves: reserves,
+        subsequent: subsequent, pAndI: pAndI, propertyTax: propertyTax,
+        insurance: insurance, totalMonthly: totalMonthly, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_VA_${homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -1964,21 +2398,13 @@ class PdfExportService {
     required AffordabilityResult result,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildAffordabilityPage(
-        annualIncome: annualIncome,
-        monthlyDebts: monthlyDebts,
-        downPayment: downPayment,
-        annualRatePct: annualRatePct,
-        termYears: termYears,
-        result: result,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildAffordabilityPdf(_AffordabilityPdfParams(
+        annualIncome: annualIncome, monthlyDebts: monthlyDebts,
+        downPayment: downPayment, annualRatePct: annualRatePct,
+        termYears: termYears, result: result, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_Affordability_${annualIncome.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -2162,21 +2588,13 @@ class PdfExportService {
     required ARMResult result,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildArmPage(
-        loanAmount: loanAmount,
-        initialRatePct: initialRatePct,
-        fixedYears: fixedYears,
-        adjustedRatePct: adjustedRatePct,
-        termYears: termYears,
-        result: result,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildArmPdf(_ArmPdfParams(
+        loanAmount: loanAmount, initialRatePct: initialRatePct,
+        fixedYears: fixedYears, adjustedRatePct: adjustedRatePct,
+        termYears: termYears, result: result, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_ARM_${loanAmount.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -2314,21 +2732,12 @@ class PdfExportService {
     required double total,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildClosingCostsPage(
-        homePrice: homePrice,
-        state: state,
-        loanType: loanType,
-        isBuyer: isBuyer,
-        lineItems: lineItems,
-        total: total,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildClosingCostsPdf(_ClosingCostsPdfParams(
+        homePrice: homePrice, state: state, loanType: loanType,
+        isBuyer: isBuyer, lineItems: lineItems, total: total, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_ClosingCosts_${homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -2484,23 +2893,14 @@ class PdfExportService {
     required double backEndDti,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildDtiPage(
-        annualIncome: annualIncome,
-        piti: piti,
-        carPayment: carPayment,
-        studentLoans: studentLoans,
-        creditCards: creditCards,
-        otherDebts: otherDebts,
-        frontEndDti: frontEndDti,
-        backEndDti: backEndDti,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildDtiPdf(_DtiPdfParams(
+        annualIncome: annualIncome, piti: piti, carPayment: carPayment,
+        studentLoans: studentLoans, creditCards: creditCards,
+        otherDebts: otherDebts, frontEndDti: frontEndDti,
+        backEndDti: backEndDti, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_DTI_${annualIncome.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -2751,29 +3151,15 @@ class PdfExportService {
     required double totalMonthly,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildFhaPage(
-        homePrice: homePrice,
-        downPct: downPct,
-        annualRatePct: annualRatePct,
-        termYears: termYears,
-        creditScore: creditScore,
-        baseLoan: baseLoan,
-        upfrontMip: upfrontMip,
-        loan: loan,
-        annualMipRate: annualMipRate,
-        monthlyMip: monthlyMip,
-        pAndI: pAndI,
-        monthlyTax: monthlyTax,
-        monthlyIns: monthlyIns,
-        totalMonthly: totalMonthly,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildFhaPdf(_FhaPdfParams(
+        homePrice: homePrice, downPct: downPct, annualRatePct: annualRatePct,
+        termYears: termYears, creditScore: creditScore, baseLoan: baseLoan,
+        upfrontMip: upfrontMip, loan: loan, annualMipRate: annualMipRate,
+        monthlyMip: monthlyMip, pAndI: pAndI, monthlyTax: monthlyTax,
+        monthlyIns: monthlyIns, totalMonthly: totalMonthly, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_FHA_${homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -2936,26 +3322,15 @@ class PdfExportService {
     required double totalCost,
     bool isEs = false,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildHelocPage(
-        homeValue: homeValue,
-        mortgageBalance: mortgageBalance,
-        maxLtv: maxLtv,
-        drawAmount: drawAmount,
-        rate: rate,
-        drawPeriod: drawPeriod,
-        repaymentPeriod: repaymentPeriod,
-        availableEquity: availableEquity,
-        monthlyInterestOnly: monthlyInterestOnly,
-        monthlyRepayment: monthlyRepayment,
-        totalCost: totalCost,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildHelocPdf(_HelocPdfParams(
+        homeValue: homeValue, mortgageBalance: mortgageBalance, maxLtv: maxLtv,
+        drawAmount: drawAmount, rate: rate, drawPeriod: drawPeriod,
+        repaymentPeriod: repaymentPeriod, availableEquity: availableEquity,
+        monthlyInterestOnly: monthlyInterestOnly, monthlyRepayment: monthlyRepayment,
+        totalCost: totalCost, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_HELOC_${homeValue.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');
@@ -3151,22 +3526,13 @@ class PdfExportService {
     required double totalPmiCost,
     required bool isEs,
   }) async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
-      build: (_) => _buildPmiSimplePage(
-        homePrice: homePrice,
-        downPct: downPct,
-        loanAmount: loanAmount,
-        ltv: ltv,
-        monthlyPmi: monthlyPmi,
-        dropMonth: dropMonth,
-        totalPmiCost: totalPmiCost,
-        isEs: isEs,
-      ),
-    ));
-    final pdfBytes = await pdf.save();
+    final pdfBytes = await Isolate.run(
+      () => _buildPmiSimplePdf(_PmiSimplePdfParams(
+        homePrice: homePrice, downPct: downPct, loanAmount: loanAmount,
+        ltv: ltv, monthlyPmi: monthlyPmi, dropMonth: dropMonth,
+        totalPmiCost: totalPmiCost, isEs: isEs,
+      )),
+    );
     final tmpDir = await getTemporaryDirectory();
     final pdfFile = File(
         '${tmpDir.path}/MortgageUS_PMI_${homePrice.round()}_${DateTime.now().millisecondsSinceEpoch}.pdf');

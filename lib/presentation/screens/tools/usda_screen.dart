@@ -10,6 +10,7 @@ import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart'
     show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
+import '../history/history_screen.dart' show HistoryScreen;
 
 /// USDA Loan Calculator
 /// 0% down. Upfront guarantee fee = 1% (financed). Annual fee 0.35%.
@@ -98,6 +99,7 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     }
     if (_logged) return;
     _logged = true;

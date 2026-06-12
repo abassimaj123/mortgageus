@@ -11,6 +11,7 @@ import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHist
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
 import '../../../core/services/pdf_export_service.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 /// HELOC Calculator
 ///
@@ -182,6 +183,7 @@ class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
         },
       },
     );
+    HistoryScreen.refreshNotifier.value++;
   }
 
   Future<void> _saveScenario(String? label) async {

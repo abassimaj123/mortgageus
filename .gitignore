@@ -53,3 +53,6 @@ android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 lib/core/firebase/firebase_options_real.dart
 release.env
+
+# AdMob production unit IDs (injected via --dart-define-from-file)
+admob.json

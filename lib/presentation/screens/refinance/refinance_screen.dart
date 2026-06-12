@@ -13,6 +13,7 @@ import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../../widgets/save_scenario_button.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 class RefinanceScreen extends StatefulWidget {
   const RefinanceScreen({super.key});
@@ -125,6 +126,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     }
   }
 

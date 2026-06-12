@@ -8,13 +8,13 @@ MortgageUS – Loan Calculator
 
 SHORT DESCRIPTION (80 chars max)
 ---------------------------------
-The most complete US mortgage calculator. 7 tools. Free.
+The most complete US mortgage calculator. 17 tools. Free.
 
 FULL DESCRIPTION (4000 chars max)
 -----------------------------------
 MortgageUS is the most complete mortgage calculator for the United States — built for home buyers, homeowners, and real estate investors who want accurate numbers fast.
 
-★ 7 POWERFUL CALCULATORS IN ONE APP
+★ 17 POWERFUL CALCULATORS IN ONE APP
 
 🏠 MORTGAGE CALCULATOR
 Calculate your monthly payment (P&I), full PITI breakdown (Principal, Interest, Taxes, Insurance), PMI, HOA, and more. Automatically detects Conforming vs. Jumbo loans based on 2026 FHFA limits ($832,750). PMI auto-cancels at 78% LTV per the Homeowners Protection Act.
@@ -37,6 +37,33 @@ Should you refinance? Enter your current loan, new rate, and closing costs. Get 
 ⚖️ LOAN COMPARATOR
 Compare up to 3 loan scenarios side by side — different terms, rates, or down payments. See which option saves the most over the life of the loan.
 
+📐 DTI CALCULATOR
+Debt-to-income ratio calculator. See your front-end and back-end DTI instantly — know if you'll qualify before you apply.
+
+🏛️ FHA LOAN CALCULATOR
+FHA monthly payment with MIP (Mortgage Insurance Premium) auto-calculated. Upfront MIP + annual MIP split by month. Ideal for low down payment scenarios.
+
+🎖️ VA LOAN CALCULATOR
+VA funding fee automatically applied based on service type, down payment, and first/subsequent use. Zero PMI — the full VA advantage shown clearly.
+
+🌾 USDA LOAN CALCULATOR
+USDA Rural Development loan: guarantee fee + annual fee calculated automatically. Zero down payment scenarios supported.
+
+🏦 HELOC CALCULATOR
+Home Equity Line of Credit: draw period (interest-only) vs repayment period payments. See how rate changes affect your HELOC cost.
+
+💵 CLOSING COSTS CALCULATOR
+Estimate total closing costs by state. Breakdown of lender fees, title, escrow, prepaid items, and government fees — no surprises at closing.
+
+🛡️ PMI CALCULATOR
+Private Mortgage Insurance cost by LTV and loan amount. See exactly when PMI drops off (78% LTV per HPA) and how much you save.
+
+📈 INVESTMENT RETURN CALCULATOR
+Compare buying vs. renting. Opportunity cost of down payment, equity build-up, appreciation, and net investment return side by side.
+
+🔵 MORTGAGE POINTS CALCULATOR
+Should you buy down your rate? Enter points cost and new rate — see your break-even month and total lifetime savings.
+
 ★ WHY MORTGAGEUS?
 
 ✅ PMI auto-cancel at 78% LTV — the only free app that implements the HPA correctly
@@ -50,7 +77,7 @@ Compare up to 3 loan scenarios side by side — different terms, rates, or down 
 
 ★ FREEMIUM MODEL
 
-Free: full access to all 7 calculators, 5 saved calculations
+Free: full access to all 17 calculators, 5 saved calculations
 Premium ($4.99 one-time): unlimited saves, no ads, all history
 Watch a short ad: 60 minutes ad-free, up to 2× per day
 
@@ -65,7 +92,7 @@ No account. No data collection. No subscription. Just math.
 
 KEYWORDS (Play Store tags)
 ---------------------------
-mortgage calculator, home loan, PITI, amortization, refinance, ARM calculator, affordability, PMI, HOA, real estate, home buyer, loan comparison
+mortgage calculator, home loan, PITI, amortization, refinance, ARM calculator, affordability, PMI, HOA, real estate, FHA calculator, VA loan, USDA loan, DTI calculator, closing costs, HELOC, investment return, mortgage points
 
 CATEGORY
 --------

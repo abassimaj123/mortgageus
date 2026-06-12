@@ -11,6 +11,7 @@ import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 /// PMI Standalone Calculator
 /// Monthly PMI = loan × annual_rate(by credit score & LTV) / 12.
@@ -99,6 +100,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
             },
           },
         );
+        HistoryScreen.refreshNotifier.value++;
       }
     }
     if (_logged) return;

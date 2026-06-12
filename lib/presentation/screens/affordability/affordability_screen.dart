@@ -21,6 +21,7 @@ import '../../widgets/save_scenario_button.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../../../core/services/pdf_export_service.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 class AffordabilityScreen extends ConsumerStatefulWidget {
   const AffordabilityScreen({super.key});
@@ -147,6 +148,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     }
     if (mounted) {
       final trigger = await paywallSession.recordAction();

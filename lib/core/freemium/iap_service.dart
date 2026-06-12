@@ -27,7 +27,7 @@ class IAPService {
     _iap = CalcwiseIAP(
       productId: productId,
       freemium: freemiumService,
-      analytics: CalcwiseAnalytics(appName: 'mortgageus'),
+      analytics: AnalyticsService.instance,
       onPurchaseCompleted: () => ReviewService.instance.requestAfterPremium(),
     );
     await _iap!.initialize();

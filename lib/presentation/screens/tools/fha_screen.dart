@@ -10,6 +10,7 @@ import '../../../../main.dart'
     show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../core/services/pdf_export_service.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 /// FHA Loan Calculator
 /// Min 3.5% down. Upfront MIP = 1.75% of loan (financed).
@@ -92,6 +93,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         },
       },
     );
+    HistoryScreen.refreshNotifier.value++;
   }
 
   Future<void> _exportPdf(bool isEs) async {

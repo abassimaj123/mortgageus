@@ -11,6 +11,7 @@ import '../../../../main.dart'
     show paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../core/services/pdf_export_service.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 
 class PmiScreen extends ConsumerStatefulWidget {
   const PmiScreen({super.key});
@@ -78,6 +79,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     }
     if (!_analyticsLogged) {
       _analyticsLogged = true;

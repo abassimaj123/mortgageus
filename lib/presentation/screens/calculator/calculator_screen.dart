@@ -208,6 +208,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       try {
         AnalyticsService.instance.logSave();
         AnalyticsService.instance.logHistorySaved();
+        unawaited(AnalyticsService.instance.maybeLogFirstCalculate());
       } catch (_) {}
       final inputState = ref.read(mortgageInputProvider);
       final result = ref.read(mortgageResultProvider);

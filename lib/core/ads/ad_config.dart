@@ -1,12 +1,18 @@
 // ── AdMob Configuration ───────────────────────────────────────────────────────
-// BEFORE RELEASE: Replace all TEST IDs with real AdMob IDs from console.
-// Real IDs format: ca-app-pub-XXXXXXXXXXXXXXXX/NNNNNNNNNN
+// Production unit IDs are injected at build time via:
+//   flutter build appbundle --release --dart-define-from-file=admob.json
+// In debug — and in release when no prod ID is injected — Google official TEST
+// IDs are used, so a build can NEVER ship a 'ca-app-pub-...XXXXXXXXXX' placeholder.
+// The Android App ID is wired via android/local.properties (admob.app.id) →
+// manifestPlaceholder ${admobAppId} → AndroidManifest.xml.
 //
 // Rules (enforced by AdService):
 //   Banner        → permanent, Calculator screen bottom
 //   Interstitial  → after every 5 calculations, min 5-min cooldown
 //   Rewarded      → "Watch ad → 24h ad-free" bonus UX
 //   NO App Open Ad
+
+import 'package:flutter/foundation.dart';
 
 class AdConfig {
   AdConfig._();
@@ -16,31 +22,60 @@ class AdConfig {
 
   static const bool adsEnabled = !screenshotMode; // set false to disable all ads globally
 
-  // ── App IDs (replace with real IDs) ──────────────────────────────────────
-  // TODO: android app ID from AdMob → android/app/src/main/AndroidManifest.xml
-  // TODO: iOS app ID from AdMob     → ios/Runner/Info.plist
+  // ── App IDs ───────────────────────────────────────────────────────────────
+  // Android App ID is wired through android/local.properties → manifest, so the
+  // value here is the Dart-side TEST reference only. iOS App ID → ios/Runner/Info.plist.
   static const String androidAppId =
       'ca-app-pub-3940256099942544~3347511713'; // TEST
   static const String iosAppId =
       'ca-app-pub-3940256099942544~1458002511'; // TEST
 
+  // ── Google official TEST ad unit IDs (debug + release fallback) ───────────
+  static const _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
+  static const _testInterstitialAndroid =
+      'ca-app-pub-3940256099942544/1033173712';
+  static const _testRewardedAndroid = 'ca-app-pub-3940256099942544/5224354917';
+  static const _testBannerIOS = 'ca-app-pub-3940256099942544/2934735716';
+  static const _testInterstitialIOS = 'ca-app-pub-3940256099942544/4411468910';
+  static const _testRewardedIOS = 'ca-app-pub-3940256099942544/1712485313';
+
+  // ── Production IDs injected via --dart-define-from-file=admob.json ─────────
+  static const _prodBannerAndroid =
+      String.fromEnvironment('ADMOB_BANNER_ANDROID');
+  static const _prodInterstitialAndroid =
+      String.fromEnvironment('ADMOB_INTERSTITIAL_ANDROID');
+  static const _prodRewardedAndroid =
+      String.fromEnvironment('ADMOB_REWARDED_ANDROID');
+  static const _prodBannerIOS = String.fromEnvironment('ADMOB_BANNER_IOS');
+  static const _prodInterstitialIOS =
+      String.fromEnvironment('ADMOB_INTERSTITIAL_IOS');
+  static const _prodRewardedIOS = String.fromEnvironment('ADMOB_REWARDED_IOS');
+
   // ── Android Ad Unit IDs ───────────────────────────────────────────────────
-  // TODO: Create 3 ad units in AdMob for com.mortgageus.calculator (Android)
-  static const String bannerAndroid =
-      'ca-app-pub-3940256099942544/6300978111'; // TEST
-  static const String interstitialAndroid =
-      'ca-app-pub-3940256099942544/1033173712'; // TEST
-  static const String rewardedAndroid =
-      'ca-app-pub-3940256099942544/5224354917'; // TEST
+  static String get bannerAndroid =>
+      kReleaseMode && _prodBannerAndroid.isNotEmpty
+          ? _prodBannerAndroid
+          : _testBannerAndroid;
+  static String get interstitialAndroid =>
+      kReleaseMode && _prodInterstitialAndroid.isNotEmpty
+          ? _prodInterstitialAndroid
+          : _testInterstitialAndroid;
+  static String get rewardedAndroid =>
+      kReleaseMode && _prodRewardedAndroid.isNotEmpty
+          ? _prodRewardedAndroid
+          : _testRewardedAndroid;
 
   // ── iOS Ad Unit IDs ───────────────────────────────────────────────────────
-  // TODO: Create 3 ad units in AdMob for com.mortgageus.calculator (iOS)
-  static const String banneriOS =
-      'ca-app-pub-3940256099942544/2934735716'; // TEST
-  static const String interstitialiOS =
-      'ca-app-pub-3940256099942544/4411468910'; // TEST
-  static const String rewardediOS =
-      'ca-app-pub-3940256099942544/1712485313'; // TEST
+  static String get banneriOS => kReleaseMode && _prodBannerIOS.isNotEmpty
+      ? _prodBannerIOS
+      : _testBannerIOS;
+  static String get interstitialiOS =>
+      kReleaseMode && _prodInterstitialIOS.isNotEmpty
+          ? _prodInterstitialIOS
+          : _testInterstitialIOS;
+  static String get rewardediOS => kReleaseMode && _prodRewardedIOS.isNotEmpty
+      ? _prodRewardedIOS
+      : _testRewardedIOS;
 
   // ── Gate settings ─────────────────────────────────────────────────────────
   static const int calcThreshold =

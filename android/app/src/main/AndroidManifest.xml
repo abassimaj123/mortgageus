@@ -30,11 +30,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- AdMob App ID — TODO: Replace with real Android App ID from admob.google.com -->
-        <!-- Real format: ca-app-pub-XXXXXXXXXXXXXXXX~NNNNNNNNNN              -->
+        <!-- AdMob App ID — injected from android/local.properties (admob.app.id) -->
+        <!-- via manifestPlaceholder; falls back to Google TEST App ID if unset.  -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="${admobAppId}"/>
         <!-- Delay app measurement for GDPR compliance -->
         <meta-data
             android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT"

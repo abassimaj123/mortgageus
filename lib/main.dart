@@ -110,6 +110,7 @@ Future<void> main() async {
     freemium: freemiumService,
     isSpanishNotifier: isSpanishNotifier,
     onGetPremium: () => IAPService.instance.buy(),
+    analytics: AnalyticsService.instance,
   );
   CalcwiseRewardAdSheet.configure(
     adService: adService,

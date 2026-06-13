@@ -1172,17 +1172,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Row(children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.sm)),
-                      child: Text(loanType,
-                          style: const TextStyle(
-                              fontSize: AppTextSize.xs,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.primary)),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppRadius.sm)),
+                        child: Text(loanType,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: AppTextSize.xs,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.primary)),
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Flexible(
@@ -1400,39 +1404,52 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     const Icon(Icons.compare_arrows,
                         size: 16, color: AppTheme.primary),
                     const SizedBox(width: AppRadius.sm),
-                    Text(
-                      AmountFormatter.ui(homePrice, 'USD'),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: AppTextSize.bodyMd,
-                          color: AppTheme.primary),
+                    Flexible(
+                      child: Text(
+                        AmountFormatter.ui(homePrice, 'USD'),
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: AppTextSize.bodyMd,
+                            color: AppTheme.primary),
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.sm)),
-                      child: Text(loanType,
-                          style: const TextStyle(
-                              fontSize: AppTextSize.xs,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.primary)),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppRadius.sm)),
+                        child: Text(loanType,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: AppTextSize.xs,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.primary)),
+                      ),
                     ),
                   ]),
                   const SizedBox(height: AppRadius.sm),
                   // Scenario comparison row
                   Row(children: [
-                    _ScenarioPill(
-                        label: isEs ? '30a' : '30yr',
-                        value: AmountFormatter.ui(m30, 'USD'),
-                        color: AppTheme.primary),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: _ScenarioPill(
+                          label: isEs ? '30a' : '30yr',
+                          value: AmountFormatter.ui(m30, 'USD'),
+                          color: AppTheme.primary),
+                    ),
                     const SizedBox(width: AppSpacing.sm),
-                    _ScenarioPill(
-                        label: isEs ? '15a' : '15yr',
-                        value: AmountFormatter.ui(m15, 'USD'),
-                        color: AppTheme.accentGood),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: _ScenarioPill(
+                          label: isEs ? '15a' : '15yr',
+                          value: AmountFormatter.ui(m15, 'USD'),
+                          color: AppTheme.accentGood),
+                    ),
                     const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: Text(
@@ -1576,6 +1593,7 @@ class _ScenarioPill extends StatelessWidget {
         ),
         child: Text(
           '$label: $value',
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
               fontSize: AppTextSize.xs,
               color: color,

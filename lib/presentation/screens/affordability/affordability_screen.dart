@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
@@ -73,6 +74,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
   }
 
   Future<void> _calculate() async {
+    unawaited(AnalyticsService.instance.maybeLogFirstCalculate());
     if (!(_formKey.currentState?.validate() ?? true)) return;
     final income = double.tryParse(_incomeCtrl.text.replaceAll(',', '')) ?? 0;
     final debts = double.tryParse(_debtsCtrl.text.replaceAll(',', '')) ?? 0;

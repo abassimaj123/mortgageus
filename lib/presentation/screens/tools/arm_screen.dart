@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
@@ -73,6 +74,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
   }
 
   void _calculate() {
+    unawaited(AnalyticsService.instance.maybeLogFirstCalculate());
     final loan = double.tryParse(_loanCtrl.text.replaceAll(',', '')) ?? 0;
     final initRate = double.tryParse(_initRateCtrl.text) ?? 0;
     final adjRate = double.tryParse(_adjRateCtrl.text) ?? 0;

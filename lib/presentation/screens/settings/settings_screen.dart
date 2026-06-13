@@ -53,12 +53,15 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ]
                     : [
-                        CalcwiseSettingsTile(
-                          icon: Icons.star_rounded,
-                          label: s.getPremium,
-                          subtitle: s.premiumSubtitle as String?,
-                          trailing: '\$2.99',
-                          onTap: () => IAPService.instance.buy(),
+                        ValueListenableBuilder<String?>(
+                          valueListenable: IAPService.instance.localizedPrice,
+                          builder: (_, price, __) => CalcwiseSettingsTile(
+                            icon: Icons.star_rounded,
+                            label: s.getPremium,
+                            subtitle: s.premiumSubtitle as String?,
+                            trailing: price ?? '—',
+                            onTap: () => IAPService.instance.buy(),
+                          ),
                         ),
                         CalcwiseSettingsTile(
                           icon: Icons.restore,
@@ -126,6 +129,11 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.privacy_tip_rounded,
                   label: s.privacyPolicy,
                   onTap: () => _launch('https://calqwise.com/privacy'),
+                ),
+                CalcwiseSettingsTile(
+                  icon: Icons.manage_search_rounded,
+                  label: isEs ? 'Configuración de privacidad' : 'Privacy Settings',
+                  onTap: showCalcwisePrivacyOptions,
                 ),
                 CalcwiseRateAppTile(
                     label: isEs ? 'Calificar la app' : 'Rate the App'),

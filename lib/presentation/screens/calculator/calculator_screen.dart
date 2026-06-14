@@ -182,7 +182,6 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   }
 
   void _scheduleAutoSave() {
-    if (!_userHasEdited) return; // Never auto-save default values on first load
     final hash = _currentHash();
     if (hash == null) return;
     final label = _autoLabel();

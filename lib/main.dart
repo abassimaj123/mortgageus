@@ -307,6 +307,7 @@ class _MainShellState extends State<_MainShell> {
             bottomNavigationBar: NavigationBar(
               selectedIndex: _index,
               onDestinationSelected: (i) async {
+                FocusManager.instance.primaryFocus?.unfocus();
                 setState(() => _index = i);
                 adService.onAction();
                 // Analytics: log which tab was opened

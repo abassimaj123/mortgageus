@@ -516,11 +516,22 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                     s: s,
                                                     isEs: isEs),
                                               ),
+                                                              // ── Decision Timeline ──────────────────────
+                                              const SizedBox(
+                                                  height: AppSpacing.md),
+                                              CalcwiseStaggerItem(
+                                                index: 3,
+                                                child: _DecisionTimeline(
+                                                  result: result,
+                                                  termYears: inputState.termYears,
+                                                  isEs: isEs,
+                                                ),
+                                              ),
                                               // ── Reverse-Solve: max affordable home price ─
                                               const SizedBox(
                                                   height: AppSpacing.md),
                                               CalcwiseStaggerItem(
-                                                  index: 3,
+                                                  index: 4,
                                                   child: ReverseSolveCard(
                                                     title: isEs
                                                         ? '¿Qué precio puedo pagar?'
@@ -565,7 +576,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                               const SizedBox(
                                                   height: AppSpacing.sm),
                                               CalcwiseStaggerItem(
-                                                  index: 4,
+                                                  index: 5,
                                                   child: Semantics(
                                                       label: isEs
                                                           ? 'Prueba de estrés: si el interés sube a ${result.stressTestRate.toStringAsFixed(2)}%, tu pago mensual sería ${AmountFormatter.ui(result.stressTestMonthly, 'USD')}'
@@ -1588,6 +1599,164 @@ class _LtvRow extends StatelessWidget {
             Text(
               '${pct.toStringAsFixed(1)}%',
               style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Decision Timeline ─────────────────────────────────────────────────────────
+
+class _DecisionTimeline extends StatelessWidget {
+  final MortgageResult result;
+  final int termYears;
+  final bool isEs;
+
+  const _DecisionTimeline({
+    required this.result,
+    required this.termYears,
+    required this.isEs,
+  });
+
+  DateTime _milestoneDate(int monthOffset) {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month + 1);
+    final m = start.month + monthOffset - 1;
+    final y = start.year + m ~/ 12;
+    final mo = m % 12 + 1;
+    return DateTime(y, mo);
+  }
+
+  String _fmt(DateTime d) {
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${monthNames[d.month - 1]} ${d.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final totalMonths = termYears * 12;
+    final halfwayMonth = (totalMonths / 2).round();
+    final showPmi = !result.isUsda && result.pmiDropMonth != null;
+
+    final milestones = <({
+      IconData icon,
+      Color color,
+      String label,
+      String sublabel,
+    })>[];
+
+    if (showPmi) {
+      final d = _milestoneDate(result.pmiDropMonth!);
+      milestones.add((
+        icon: Icons.shield_outlined,
+        color: AppTheme.accentWarn,
+        label: isEs ? 'PMI Eliminado' : 'PMI Removed',
+        sublabel: isEs
+            ? 'Mes ${result.pmiDropMonth} — ${_fmt(d)}'
+            : 'Month ${result.pmiDropMonth} — ${_fmt(d)}',
+      ));
+    }
+
+    final halfDate = _milestoneDate(halfwayMonth);
+    milestones.add((
+      icon: Icons.trending_up_rounded,
+      color: AppTheme.infoIcon,
+      label: isEs ? 'Mitad del Camino' : 'Halfway',
+      sublabel: isEs
+          ? 'Mes $halfwayMonth — ${halfDate.year}'
+          : 'Month $halfwayMonth — ${halfDate.year}',
+    ));
+
+    final payoffDate = _milestoneDate(totalMonths);
+    milestones.add((
+      icon: Icons.home_rounded,
+      color: AppTheme.accentGood,
+      label: isEs ? 'Pagado' : 'Paid Off',
+      sublabel: isEs
+          ? 'Mes $totalMonths — ${payoffDate.year}'
+          : 'Month $totalMonths — ${payoffDate.year}',
+    ));
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        side: BorderSide(color: Theme.of(context).dividerColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isEs ? 'Hitos del Préstamo' : 'Mortgage Timeline',
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: AppTextSize.body,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(milestones.length * 2 - 1, (i) {
+                if (i.isOdd) {
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.lg),
+                      child: Divider(
+                        height: 1,
+                        thickness: 1.5,
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ),
+                  );
+                }
+                final m = milestones[i ~/ 2];
+                return Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: m.color.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: m.color.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Icon(m.icon, color: m.color, size: 22),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        m.label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: AppTextSize.sm,
+                          color: m.color,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        m.sublabel,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: AppTextSize.xs,
+                          color: AppTheme.labelGray,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
             ),
           ],
         ),

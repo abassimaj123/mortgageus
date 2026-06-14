@@ -306,7 +306,21 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                   SliverToBoxAdapter(
                     child: CalcwiseStaggerItem(
                       index: 0,
-                      child: _HeroCard(result: result, s: s),
+                      child: Container(
+                        margin: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primary.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: _HeroCard(result: result, s: s),
+                      ),
                     ),
                   ),
                   // ── Inputs + actions ───────────────────────────────────

@@ -45,6 +45,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
   int _termYears = 30;
   String? _incomeError;
   AffordabilityResult? _result;
+  Timer? _debounce;
 
   double _roundTo(double v, double step) => (v / step).round() * step;
 
@@ -60,8 +61,16 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
     });
   }
 
+  void _scheduleAutoCalc() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 600), () {
+      if (mounted) _calculate();
+    });
+  }
+
   @override
   void dispose() {
+    _debounce?.cancel();
     smartHistoryService.cancelPendingSave('mortgageus', 'affordability');
     _incomeCtrl.dispose();
     _debtsCtrl.dispose();
@@ -284,7 +293,10 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
                         const SizedBox(height: AppSpacing.md),
                         _TermRow(
                           selected: _termYears,
-                          onChanged: (y) => setState(() => _termYears = y),
+                          onChanged: (y) {
+                            setState(() => _termYears = y);
+                            _scheduleAutoCalc();
+                          },
                           s: s,
                         ),
                         // Advanced toggle
@@ -449,6 +461,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
         contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.mdPlus),
       ),
+      onChanged: (_) => _scheduleAutoCalc(),
       validator: (v) {
         final raw = (v ?? '').trim();
         final es = isSpanishNotifier.value;

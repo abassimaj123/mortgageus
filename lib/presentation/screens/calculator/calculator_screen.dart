@@ -51,9 +51,6 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
   bool _advancedExpanded = false;
   String? _homePriceError;
   Timer? _autoSaveTimer;
-  /// True once the user has actually changed at least one input field.
-  /// Auto-save and [Save Scenario] are skipped until then.
-  bool _userHasEdited = false;
 
   // Cached 15-yr comparison result — recomputed only when inputs change.
   MortgageResult? _insightResult15yr;
@@ -378,14 +375,14 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                   inputState: inputState,
                                   notifier: notifier,
                                   s: s,
-                                  onEdit: () => setState(() => _userHasEdited = true)),
+                                  onEdit: () {}),
                               const SizedBox(height: AppSpacing.md),
                               // Loan type chips
                               _LoanTypeSelector(
                                   inputState: inputState,
                                   notifier: notifier,
                                   s: s,
-                                  onEdit: () => setState(() => _userHasEdited = true)),
+                                  onEdit: () {}),
                               const SizedBox(height: AppSpacing.lg),
                               const Divider(height: 1),
                               // Advanced toggle
@@ -1100,10 +1097,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
           if (n < 0) return es ? 'Debe ser ≥ 0' : 'Must be ≥ 0';
           return null;
         },
-        onChanged: (v) {
-          _userHasEdited = true;
-          onChanged(v);
-        },
+        onChanged: onChanged,
       ),
     );
   }

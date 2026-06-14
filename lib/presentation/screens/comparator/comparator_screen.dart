@@ -282,6 +282,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
       builder: (context, isEs, _) {
         final AppStrings str = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
+          appBar: AppBar(title: Text(str.comparatorTitle)),
           bottomNavigationBar: const CalcwiseAdFooter(),
           body: CalcwisePageEntrance(child: Center(
             child: ConstrainedBox(

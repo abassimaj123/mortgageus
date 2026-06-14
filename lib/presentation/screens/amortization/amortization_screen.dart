@@ -279,6 +279,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
         final years = _buildYearGroups(schedule, result.loanAmount);
 
         return Scaffold(
+          appBar: AppBar(title: Text(s.amortTitle)),
           bottomNavigationBar: const CalcwiseAdFooter(),
           body: CalcwisePageEntrance(child: CustomScrollView(slivers: [
             // ── Summary card ───────────────────────────────────────────────────

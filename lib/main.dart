@@ -79,6 +79,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await CalcwiseTax.init(remoteFetcher: calcwiseTaxRemoteFetch);
   await CrashlyticsService.init();
 
   await themeModeService.initialize();

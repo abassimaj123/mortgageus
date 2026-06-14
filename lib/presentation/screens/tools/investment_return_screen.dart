@@ -578,36 +578,28 @@ class _ResultsCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // ── Cash flow row ──────────────────────────────────────────
+              // ── Cash flow row (always visible — basic metrics) ─────────
               _Row(
                 label: isEs ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
-                value: unlocked
-                    ? '${displayResult.monthlyCF >= 0 ? '+' : ''}'
-                        '${AmountFormatter.ui(displayResult.monthlyCF, 'USD')}'
-                    : '—',
-                color: unlocked
-                    ? (displayResult.monthlyCF >= 0
-                        ? AppTheme.accentGood
-                        : CalcwiseSemanticColors.error(
-                            Theme.of(context).brightness))
-                    : null,
+                value: '${result.monthlyCF >= 0 ? '+' : ''}'
+                    '${AmountFormatter.ui(result.monthlyCF, 'USD')}',
+                color: result.monthlyCF >= 0
+                    ? AppTheme.accentGood
+                    : CalcwiseSemanticColors.error(
+                        Theme.of(context).brightness),
                 bold: true,
               ),
               _Row(
                 label: isEs
                     ? 'Inversión inicial (enganche + cierre)'
                     : 'Initial Investment (down + closing)',
-                value: unlocked
-                    ? AmountFormatter.ui(displayResult.initialInv, 'USD')
-                    : '—',
+                value: AmountFormatter.ui(result.initialInv, 'USD'),
               ),
               _Row(
                 label: isEs
                     ? 'Pago hipotecario mensual'
                     : 'Monthly Mortgage Payment',
-                value: unlocked
-                    ? AmountFormatter.ui(displayResult.mortgageMo, 'USD')
-                    : '—',
+                value: AmountFormatter.ui(result.mortgageMo, 'USD'),
               ),
               const Divider(height: 24),
 

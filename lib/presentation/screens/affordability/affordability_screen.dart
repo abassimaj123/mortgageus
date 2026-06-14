@@ -252,6 +252,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
       builder: (context, isEs, _) {
         final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
         return Scaffold(
+          appBar: AppBar(title: Text(s.affordTitle)),
           bottomNavigationBar: const CalcwiseAdFooter(),
           body: CalcwisePageEntrance(child: Center(
             child: ConstrainedBox(

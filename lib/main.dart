@@ -92,6 +92,7 @@ Future<void> main() async {
     freemiumService.hasFullAccessNotifier.value = true;
   }
   await IAPService.instance.initialize();
+  PaywallHard.globalOnPurchase = IAPService.instance.buy;
   await requestCalcwiseConsent();
   if (AdConfig.adsEnabled) await adService.initialize();
   await RateWatchService.instance.init();

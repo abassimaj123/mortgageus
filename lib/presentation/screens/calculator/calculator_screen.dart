@@ -231,7 +231,6 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
 
   /// Save the current calculation as a pinned scenario (premium).
   Future<void> _saveScenario(String? label) async {
-    if (!_userHasEdited) return;
     final hash = _currentHash();
     if (hash == null) return;
     final effectiveLabel = (label != null && label.isNotEmpty)

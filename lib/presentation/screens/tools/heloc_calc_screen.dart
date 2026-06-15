@@ -45,6 +45,7 @@ class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('heloc_calc');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Pre-fill from main calculator provider
       final input = ref.read(mortgageInputProvider);

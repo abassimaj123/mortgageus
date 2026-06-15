@@ -37,6 +37,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('points');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     final input = ref.read(mortgageInputProvider);
     final loanAmount = input.downPaymentDollar >= input.homePrice
         ? 0.0

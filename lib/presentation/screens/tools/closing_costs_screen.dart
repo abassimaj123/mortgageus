@@ -37,6 +37,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('closing_costs');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
     _rateCtrl.text = (input.annualRatePct > 0 ? input.annualRatePct : 6.9).toStringAsFixed(2);

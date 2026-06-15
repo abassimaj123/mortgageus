@@ -52,6 +52,7 @@ class _InvestmentReturnScreenState
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('investment_return');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     // Pre-fill from current calculator values
     final input = ref.read(mortgageInputProvider);
     final price = input.homePrice > 0 ? input.homePrice : 400000;

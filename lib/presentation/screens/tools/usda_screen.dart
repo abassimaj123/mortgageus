@@ -39,6 +39,7 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('usda');
+    AnalyticsService.instance.maybeLogFirstCalculate();
   }
 
   @override

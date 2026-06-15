@@ -45,6 +45,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('dti');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     // Pre-fill PITI from main calculator if home price is set
     final input = ref.read(mortgageInputProvider);
     final loanAmt = input.homePrice * (1 - input.downPaymentPct / 100);

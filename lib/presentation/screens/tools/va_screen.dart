@@ -37,6 +37,7 @@ class _VaScreenState extends ConsumerState<VaScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('va');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
   }

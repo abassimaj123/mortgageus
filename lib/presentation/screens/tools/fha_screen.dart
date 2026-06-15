@@ -37,6 +37,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('fha');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
   }

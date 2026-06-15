@@ -37,6 +37,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('pmi_calculator');
+    AnalyticsService.instance.maybeLogFirstCalculate();
     // Pre-fill from current calculator values
     final input = ref.read(mortgageInputProvider);
     final price = input.homePrice > 0 ? input.homePrice : 400000;

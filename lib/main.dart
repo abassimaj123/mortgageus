@@ -218,6 +218,7 @@ class _MainShellState extends State<_MainShell> {
       showPremiumWelcomeSnackBar(context, isSpanish: isSpanishNotifier.value);
     }
     _wasPremium = now;
+    unawaited(AnalyticsService.instance.setUserPremium(now));
   }
 
   String _tabTitle(int i, bool isEs) {

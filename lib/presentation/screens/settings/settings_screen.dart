@@ -60,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
                             label: s.getPremium,
                             subtitle: s.premiumSubtitle as String?,
                             trailing: price ?? '—',
-                            onTap: () => IAPService.instance.buy(),
+                            onTap: () => PaywallHard.show(context),
                           ),
                         ),
                         CalcwiseSettingsTile(

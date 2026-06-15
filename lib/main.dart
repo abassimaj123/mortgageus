@@ -184,6 +184,7 @@ class _MainShellState extends State<_MainShell> {
     _wasPremium = freemiumService.hasFullAccess;
     freemiumService.isPremiumNotifier.addListener(_onPremiumChange);
     iapErrorNotifier.addListener(_onIapError);
+    iapRestoreResultNotifier.addListener(_onRestoreResult);
     tabSwitchNotifier.addListener(_onTabSwitch);
     WidgetsBinding.instance.addPostFrameCallback(
         (_) async => await paywallSession.recordSession());
@@ -193,6 +194,7 @@ class _MainShellState extends State<_MainShell> {
   void dispose() {
     freemiumService.isPremiumNotifier.removeListener(_onPremiumChange);
     iapErrorNotifier.removeListener(_onIapError);
+    iapRestoreResultNotifier.removeListener(_onRestoreResult);
     tabSwitchNotifier.removeListener(_onTabSwitch);
     super.dispose();
   }
@@ -209,6 +211,19 @@ class _MainShellState extends State<_MainShell> {
     if (msg == null || !mounted) return;
     showIapErrorSnackBar(context, msg);
     iapErrorNotifier.value = null;
+  }
+
+  void _onRestoreResult() {
+    final result = iapRestoreResultNotifier.value;
+    if (result == null || !mounted) return;
+    final isEs = isSpanishNotifier.value;
+    final msg = result == 'restored'
+        ? (isEs ? '¡Premium restaurado!' : 'Premium restored!')
+        : (isEs ? 'No hay compras para restaurar.' : 'No purchases to restore.');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+    );
+    iapRestoreResultNotifier.value = null;
   }
 
   void _onPremiumChange() {

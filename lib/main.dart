@@ -95,6 +95,9 @@ Future<void> main() async {
   PaywallHard.globalOnPurchase = IAPService.instance.buy;
   await requestCalcwiseConsent();
   if (AdConfig.adsEnabled) await adService.initialize();
+  unawaited(MobileAds.instance.updateRequestConfiguration(
+    RequestConfiguration(testDeviceIds: ['FD16D4616C3A21C3ACE5E48F8DC9C1DC']),
+  ));
   await RateWatchService.instance.init();
   await paywallSession.initialize();
 
@@ -210,11 +213,7 @@ class _MainShellState extends State<_MainShell> {
 
   void _onPremiumChange() {
     final now = freemiumService.hasFullAccess;
-    if (now && !_wasPremium) {
-      AnalyticsService.instance.setUserPremium(true);
-    }
     if (now && !_wasPremium && mounted) {
-      final isEs = isSpanishNotifier.value;
       showPremiumWelcomeSnackBar(context, isSpanish: isSpanishNotifier.value);
     }
     _wasPremium = now;

@@ -230,6 +230,7 @@ class _MainShellState extends State<_MainShell> {
     final now = freemiumService.hasFullAccess;
     if (now && !_wasPremium && mounted) {
       showPremiumWelcomeSnackBar(context, isSpanish: isSpanishNotifier.value);
+      try { AnalyticsService.instance.logPaywallConverted('iap'); } catch (_) {}
     }
     _wasPremium = now;
     unawaited(AnalyticsService.instance.setUserPremium(now));

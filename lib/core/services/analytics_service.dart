@@ -73,6 +73,9 @@ class AnalyticsService extends CalcwiseAnalytics {
   Future<void> logFhaVaSelected(String type) =>
       log('fha_va_selected', {'type': type});
 
+  Future<void> logPaywallConverted(String source) =>
+      log('paywall_converted', {'source': source});
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   String _priceBucket(double price) {

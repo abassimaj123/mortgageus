@@ -295,8 +295,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
             behavior: HitTestBehavior.translucent,
             child: SafeArea(
               bottom: false,
-              child: CalcwisePageEntrance(
-                  child: CustomScrollView(
+              child: CustomScrollView(
                 slivers: [
                   // ── Hero card ──────────────────────────────────────────
                   SliverToBoxAdapter(
@@ -513,7 +512,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                 child: result != null
                                     ? KeyedSubtree(
                                         key: const ValueKey('results'),
-                                        child: Column(
+                                        child: CalcwisePageEntrance(
+                                          child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
@@ -931,6 +931,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                                                 ),
                                               ),
                                             ]),
+                                        ), // CalcwisePageEntrance closes
                                       )
                                     : Padding(
                                         key: const ValueKey('empty'),
@@ -972,7 +973,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                     ),
                   ),
                 ],
-              )), // CalcwisePageEntrance closes
+              ), // CustomScrollView closes
             ), // SafeArea closes
           ), // GestureDetector closes
         );

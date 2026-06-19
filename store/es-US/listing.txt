@@ -8,13 +8,13 @@ MortgageUS – Calculadora Hipotecas
 
 DESCRIPCIÓN CORTA (80 caracteres máx.)
 ----------------------------------------
-La calculadora hipotecaria más completa de EE.UU. 7 herramientas. Gratis.
+La calculadora hipotecaria más completa de EE.UU. 17 herramientas. Gratis.
 
 DESCRIPCIÓN COMPLETA (4000 caracteres máx.)
 ---------------------------------------------
 MortgageUS es la calculadora hipotecaria más completa para Estados Unidos — diseñada para compradores de vivienda, propietarios e inversores que necesitan números precisos de inmediato.
 
-★ 7 CALCULADORAS PODEROSAS EN UNA SOLA APP
+★ 17 CALCULADORAS PODEROSAS EN UNA SOLA APP
 
 🏠 CALCULADORA DE HIPOTECA
 Calcula tu pago mensual (capital + interés), desglose completo PITI (Principal, Interés, Impuestos, Seguro), PMI, HOA y más. Detecta automáticamente préstamos Conformes vs. Jumbo según los límites FHFA 2026 ($832,750). El PMI se cancela automáticamente al 78% LTV según la Ley de Protección al Propietario.
@@ -50,7 +50,7 @@ Compara hasta 3 escenarios de préstamo lado a lado — diferentes plazos, tasas
 
 ★ MODELO FREEMIUM
 
-Gratis: acceso completo a las 7 calculadoras, 5 cálculos guardados
+Gratis: acceso completo a las 17 calculadoras, 5 cálculos guardados
 Premium ($4.99 pago único): guardados ilimitados, sin anuncios, historial completo
 Ver un anuncio corto: 60 minutos sin anuncios, hasta 2× por día
 
@@ -77,4 +77,4 @@ abassimaj@gmail.com
 
 SITIO WEB / POLÍTICA DE PRIVACIDAD
 ------------------------------------
-https://abassimaj.github.io/mortgageus-privacy/
+https://calqwise.com/privacy

@@ -5,6 +5,7 @@ import 'package:calcwise_core/calcwise_core.dart'
 import 'core/ads/ad_config.dart';
 import 'core/db/mortgage_us_database_adapter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,9 +96,11 @@ Future<void> main() async {
   PaywallHard.globalOnPurchase = IAPService.instance.buy;
   await requestCalcwiseConsent();
   if (AdConfig.adsEnabled) await adService.initialize();
-  unawaited(MobileAds.instance.updateRequestConfiguration(
-    RequestConfiguration(testDeviceIds: ['FD16D4616C3A21C3ACE5E48F8DC9C1DC']),
-  ));
+  if (kDebugMode) {
+    await MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(testDeviceIds: ['FD16D4616C3A21C3ACE5E48F8DC9C1DC']),
+    );
+  }
   await RateWatchService.instance.init();
   await paywallSession.initialize();
 

@@ -818,14 +818,14 @@ class _ToggleChip extends StatelessWidget {
             duration: AppDuration.fast,
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.smPlus),
             decoration: BoxDecoration(
-              color: selected ? AppTheme.primary : const Color(0xFFF1F5F9),
+              color: selected ? AppTheme.primary : CalcwiseTheme.of(context).surfaceHigh,
               borderRadius: BorderRadius.circular(AppRadius.mdPlus),
             ),
             child: Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: selected ? Colors.white : const Color(0xFF334155),
+                color: selected ? Colors.white : CalcwiseTheme.of(context).textPrimary,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 fontSize: AppTextSize.md,
               ),

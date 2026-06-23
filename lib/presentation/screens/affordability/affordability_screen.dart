@@ -161,11 +161,11 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
       );
       HistoryScreen.refreshNotifier.value++;
     }
-    if (mounted) {
-      final trigger = await paywallSession.recordAction();
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-    }
+    if (!mounted) return;
+    final trigger = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
   }
 
   Future<void> _saveScenario(String? label) async {

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'dart:io';
@@ -15,7 +16,6 @@ import '../../domain/models/extra_payment_result.dart';
 import '../../domain/models/refinance_result.dart';
 import '../../domain/models/affordability_result.dart';
 import '../../domain/models/arm_result.dart';
-import '../freemium/iap_service.dart';
 import '../theme/app_theme.dart';
 import '../../main.dart' show adService, isSpanishNotifier;
 import '../freemium/freemium_service.dart' show freemiumService;
@@ -333,6 +333,7 @@ class _PmiSimplePdfParams {
 // They call private static methods on PdfExportService (file-private in Dart).
 
 Future<Uint8List> _buildMortgagePdf(_MortgagePdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -354,6 +355,7 @@ Future<Uint8List> _buildMortgagePdf(_MortgagePdfParams p) async {
 }
 
 Future<Uint8List> _buildComparatorPdf(_ComparatorPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -364,6 +366,7 @@ Future<Uint8List> _buildComparatorPdf(_ComparatorPdfParams p) async {
 }
 
 Future<Uint8List> _buildExtraPaymentsPdf(_ExtraPaymentsPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -378,6 +381,7 @@ Future<Uint8List> _buildExtraPaymentsPdf(_ExtraPaymentsPdfParams p) async {
 }
 
 Future<Uint8List> _buildRefinancePdf(_RefinancePdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -392,6 +396,7 @@ Future<Uint8List> _buildRefinancePdf(_RefinancePdfParams p) async {
 }
 
 Future<Uint8List> _buildInvestmentReturnPdf(_InvestmentReturnPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -408,6 +413,7 @@ Future<Uint8List> _buildInvestmentReturnPdf(_InvestmentReturnPdfParams p) async 
 }
 
 Future<Uint8List> _buildPmiCalculatorPdf(_PmiCalculatorPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -423,6 +429,7 @@ Future<Uint8List> _buildPmiCalculatorPdf(_PmiCalculatorPdfParams p) async {
 }
 
 Future<Uint8List> _buildPointsPdf(_PointsPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -439,6 +446,7 @@ Future<Uint8List> _buildPointsPdf(_PointsPdfParams p) async {
 }
 
 Future<Uint8List> _buildUsdaPdf(_UsdaPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -456,6 +464,7 @@ Future<Uint8List> _buildUsdaPdf(_UsdaPdfParams p) async {
 }
 
 Future<Uint8List> _buildVaPdf(_VaPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -472,6 +481,7 @@ Future<Uint8List> _buildVaPdf(_VaPdfParams p) async {
 }
 
 Future<Uint8List> _buildAffordabilityPdf(_AffordabilityPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -486,6 +496,7 @@ Future<Uint8List> _buildAffordabilityPdf(_AffordabilityPdfParams p) async {
 }
 
 Future<Uint8List> _buildArmPdf(_ArmPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -500,6 +511,7 @@ Future<Uint8List> _buildArmPdf(_ArmPdfParams p) async {
 }
 
 Future<Uint8List> _buildClosingCostsPdf(_ClosingCostsPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -513,6 +525,7 @@ Future<Uint8List> _buildClosingCostsPdf(_ClosingCostsPdfParams p) async {
 }
 
 Future<Uint8List> _buildDtiPdf(_DtiPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -528,6 +541,7 @@ Future<Uint8List> _buildDtiPdf(_DtiPdfParams p) async {
 }
 
 Future<Uint8List> _buildFhaPdf(_FhaPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -544,6 +558,7 @@ Future<Uint8List> _buildFhaPdf(_FhaPdfParams p) async {
 }
 
 Future<Uint8List> _buildHelocPdf(_HelocPdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -560,6 +575,7 @@ Future<Uint8List> _buildHelocPdf(_HelocPdfParams p) async {
 }
 
 Future<Uint8List> _buildPmiSimplePdf(_PmiSimplePdfParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -578,8 +594,8 @@ class PdfExportService {
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
   static final _usd0 =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-  static final _dateLong = DateFormat('MMMM d, yyyy');
-  static final _dateShort = DateFormat('MMM yy');
+  static DateFormat _dateLong(bool isEs) => DateFormat('MMMM d, yyyy', isEs ? 'es' : 'en');
+  static DateFormat _dateShort(bool isEs) => DateFormat('MMM yy', isEs ? 'es' : 'en');
 
   // ── Public entry point ────────────────────────────────────────────────────
 
@@ -658,7 +674,7 @@ class PdfExportService {
                       style: const pw.TextStyle(
                           fontSize: AppTextSize.xs, color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style:
                     const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -694,7 +710,8 @@ class PdfExportService {
                     highlight: false),
                 _row2(tTotalCost, _usd0.format(result.totalCost), bold: true),
                 _row2(tPayoffDate,
-                    DateFormat('MMM yyyy').format(result.payoffDate)),
+                    DateFormat('MMM yyyy', isEs ? 'es' : 'en')
+                        .format(result.payoffDate)),
               ]),
               if (result.hasPmi) ...[
                 pw.SizedBox(height: 10),
@@ -703,7 +720,7 @@ class PdfExportService {
                   _row2(
                       tPmiDropsAt,
                       result.pmiDropMonth != null
-                          ? '$tMonth ${result.pmiDropMonth} (${(result.pmiDropMonth! / 12).ceil()} yr)'
+                          ? '$tMonth ${result.pmiDropMonth} (${(result.pmiDropMonth! / 12).ceil()} ${(result.pmiDropMonth! / 12).ceil() == 1 ? (isEs ? 'año' : 'year') : (isEs ? 'años' : 'years')})'
                           : '-'),
                   _row2(isEs ? 'Nota' : 'Note', tPmiNote, small: true),
                 ]),
@@ -971,7 +988,7 @@ class PdfExportService {
     final rows = result.schedule
         .map((e) => [
               e.month.toString(),
-              _dateShort.format(e.date),
+              _dateShort(isEs).format(e.date),
               _usd0.format(e.payment),
               _usd0.format(e.principal),
               _usd0.format(e.interest),
@@ -1229,7 +1246,7 @@ class PdfExportService {
                   style: const pw.TextStyle(
                       fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -1375,7 +1392,7 @@ class PdfExportService {
                   style: const pw.TextStyle(
                       fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -1542,7 +1559,7 @@ class PdfExportService {
                       style: const pw.TextStyle(
                           fontSize: AppTextSize.xs, color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(
                     fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -1724,7 +1741,7 @@ class PdfExportService {
               pw.Text(tReport,
                   style: const pw.TextStyle(fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -1882,7 +1899,7 @@ class PdfExportService {
               pw.Text(tReport,
                   style: const pw.TextStyle(fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -2021,7 +2038,7 @@ class PdfExportService {
               pw.Text(tReport,
                   style: const pw.TextStyle(fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -2174,7 +2191,7 @@ class PdfExportService {
               pw.Text(tReport,
                   style: const pw.TextStyle(fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -2329,7 +2346,7 @@ class PdfExportService {
               pw.Text(tReport,
                   style: const pw.TextStyle(fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -2486,7 +2503,7 @@ class PdfExportService {
                           fontSize: AppTextSize.xs,
                           color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(
                     fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -2664,7 +2681,7 @@ class PdfExportService {
                           fontSize: AppTextSize.xs,
                           color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(
                     fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -2797,7 +2814,7 @@ class PdfExportService {
                           fontSize: AppTextSize.xs,
                           color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(
                     fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -3000,7 +3017,7 @@ class PdfExportService {
                           fontSize: AppTextSize.xs,
                           color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(
                     fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -3231,7 +3248,7 @@ class PdfExportService {
                           fontSize: AppTextSize.xs,
                           color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(
                     fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -3418,7 +3435,7 @@ class PdfExportService {
                           fontSize: AppTextSize.xs,
                           color: PdfColors.grey700)),
                 ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(
                     fontSize: 9, color: PdfColors.grey600)),
           ],
@@ -3590,7 +3607,7 @@ class PdfExportService {
               pw.Text(tReport,
                   style: const pw.TextStyle(fontSize: AppTextSize.xs, color: PdfColors.grey700)),
             ]),
-            pw.Text(_dateLong.format(now),
+            pw.Text(_dateLong(isEs).format(now),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ],
         ),
@@ -3789,7 +3806,7 @@ class _PdfUnlockSheetState extends State<_PdfUnlockSheet> {
             child: ElevatedButton.icon(
               onPressed: () {
                 Navigator.pop(context);
-                IAPService.instance.buy();
+                PaywallHard.show(context);
               },
               icon: const Icon(Icons.workspace_premium, size: 18),
               label: Text(

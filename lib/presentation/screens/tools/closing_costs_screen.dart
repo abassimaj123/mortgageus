@@ -176,7 +176,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
           'total_closing_costs': total,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

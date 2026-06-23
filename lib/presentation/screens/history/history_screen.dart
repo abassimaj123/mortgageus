@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
-import '../../../core/freemium/iap_service.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/pdf_export_service.dart';
@@ -902,7 +901,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               ),
                                               TextButton(
                                                 onPressed: () =>
-                                                    IAPService.instance.buy(),
+                                                    PaywallHard.show(context),
                                                 style: TextButton.styleFrom(
                                                     padding: EdgeInsets.zero),
                                                 child: Text(

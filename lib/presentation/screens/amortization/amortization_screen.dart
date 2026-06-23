@@ -161,7 +161,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
           'payoff_date': result.payoffDate.toIso8601String(),
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }
@@ -275,7 +275,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
         }
 
         final schedule = result.schedule;
-        final fmtDate = DateFormat('MMM yyyy');
+        final fmtDate = DateFormat('MMM yyyy', isEs ? 'es' : 'en');
         final years = _buildYearGroups(schedule, result.loanAmount);
 
         return Scaffold(
@@ -336,7 +336,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                   }
                                 }
                               } else {
-                                IAPService.instance.buy();
+                                PaywallHard.show(context);
                               }
                             },
                             icon: Icon(
@@ -876,7 +876,7 @@ class _YearlyList extends StatelessWidget {
                   ? '+$_lockedYears años · +$_lockedMonths meses restantes'
                   : '+$_lockedYears years · +$_lockedMonths months remaining',
               price: IAPService.instance.localizedPrice,
-              onUnlock: () => IAPService.instance.buy(),
+              onUnlock: () => PaywallHard.show(context),
               buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
               subtitle: isEs
                   ? 'Acceso único · Sin suscripción'
@@ -1192,7 +1192,7 @@ class _MonthlyList extends StatelessWidget {
                   ? '+$_lockedYears años · +$_lockedMonths meses restantes'
                   : '+$_lockedYears years · +$_lockedMonths months remaining',
               price: IAPService.instance.localizedPrice,
-              onUnlock: () => IAPService.instance.buy(),
+              onUnlock: () => PaywallHard.show(context),
               buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
               subtitle: isEs
                   ? 'Acceso único · Sin suscripción'

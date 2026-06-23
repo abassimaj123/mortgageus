@@ -158,7 +158,7 @@ class _InvestmentReturnScreenState
           'coc': result.cashOnCash,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

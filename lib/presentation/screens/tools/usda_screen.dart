@@ -157,7 +157,7 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
           'dti': dti,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

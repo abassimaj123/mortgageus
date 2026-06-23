@@ -173,7 +173,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
           'qualifies': backEndDti <= 43.0,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

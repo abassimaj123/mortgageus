@@ -194,7 +194,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
           'worst_case_payment': r.payment2,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

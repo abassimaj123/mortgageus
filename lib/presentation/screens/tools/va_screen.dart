@@ -156,7 +156,7 @@ class _VaScreenState extends ConsumerState<VaScreen> {
           'monthly_payment': total,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

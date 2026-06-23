@@ -12,7 +12,6 @@ import '../../../domain/models/mortgage_result.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
-import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/pdf_export_service.dart';
 import '../history/history_screen.dart';
 import '../../../core/services/analytics_service.dart';
@@ -211,7 +210,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
               : null,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }
@@ -501,7 +500,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                       }
                                     }
                                   } else {
-                                    IAPService.instance.buy();
+                                    PaywallHard.show(context);
                                   }
                                 },
                                 icon: Icon(
@@ -938,7 +937,7 @@ class _ArmCompareTable extends StatelessWidget {
                 else
                   Text(
                       '${s.armCrossesAt} ${arm.breakEvenMonths}'
-                      ' (${(arm.breakEvenMonths! / 12).toStringAsFixed(1)} yrs)',
+                      ' (${(arm.breakEvenMonths! / 12).toStringAsFixed(1)} ${s.years})',
                       style: const TextStyle(fontSize: AppTextSize.md)),
               ] else ...[
                 Text(

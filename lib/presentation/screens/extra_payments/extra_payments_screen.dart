@@ -9,7 +9,6 @@ import '../../providers/mortgage_providers.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, smartHistoryService;
 import '../../../core/freemium/freemium_service.dart' show freemiumService;
-import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/pdf_export_service.dart';
 import '../../widgets/save_scenario_button.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
@@ -126,7 +125,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
           'new_payoff_months': r.newPayoffMonths,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }
@@ -374,7 +373,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                           }
                                         }
                                       } else {
-                                        IAPService.instance.buy();
+                                        PaywallHard.show(context);
                                       }
                                     },
                                     icon: Icon(

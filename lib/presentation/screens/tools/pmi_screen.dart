@@ -131,7 +131,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
           'total_pmi_paid': totalPmiCost,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

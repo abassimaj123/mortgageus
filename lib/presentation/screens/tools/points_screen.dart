@@ -148,7 +148,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
           'break_even_months': breakeven?.round() ?? 0,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }
@@ -286,7 +286,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
                       Wrap(spacing: AppSpacing.sm, children: [
                         for (final t in const [15, 20, 30])
                           _TermChip(
-                            label: '$t yr',
+                            label: isEs ? '$t años' : '$t years',
                             selected: _term == t,
                             onTap: () {
                               setState(() => _term = t);

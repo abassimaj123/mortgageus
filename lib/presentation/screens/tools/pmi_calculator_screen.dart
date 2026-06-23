@@ -152,7 +152,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
           'months_to_removal': m80 ?? 0,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

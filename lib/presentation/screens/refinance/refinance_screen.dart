@@ -3,7 +3,6 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
-import '../../../core/freemium/iap_service.dart';
 import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../domain/models/refinance_result.dart';
@@ -206,7 +205,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
           'total_savings': r.totalSavingsOverLife,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }
@@ -321,7 +320,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                                             ? 'N/A — nunca'
                                                             : 'N/A — never')
                                                         : '${r.breakEvenMonths} ${s.months}'
-                                                            ' (${(r.breakEvenMonths / 12).toStringAsFixed(1)} yrs)'),
+                                                            ' (${(r.breakEvenMonths / 12).toStringAsFixed(1)} ${s.years})'),
                                             _ResultRow(
                                                 s.totalSavings,
                                                 AmountFormatter.ui(
@@ -414,7 +413,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                               if (isPremium) {
                                                 _exportPdf(isEs);
                                               } else {
-                                                IAPService.instance.buy();
+                                                PaywallHard.show(context);
                                               }
                                             },
                                             icon: Icon(

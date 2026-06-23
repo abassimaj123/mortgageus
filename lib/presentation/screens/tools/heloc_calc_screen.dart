@@ -230,7 +230,7 @@ class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
           'total_interest': totalCost,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }
@@ -709,7 +709,9 @@ class _ChipRow extends StatelessWidget {
         spacing: AppSpacing.sm,
         children: options
             .map((v) => ChoiceChip(
-                  label: Text('$v yr'),
+                  label: Text(isSpanishNotifier.value
+                      ? '$v ${v == 1 ? 'año' : 'años'}'
+                      : '$v ${v == 1 ? 'year' : 'years'}'),
                   selected: selected == v,
                   onSelected: (_) => onSelected(v),
                   selectedColor: AppTheme.primary.withValues(alpha: 0.15),

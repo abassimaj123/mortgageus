@@ -233,7 +233,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
           'monthly_mip': monthlyMip,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

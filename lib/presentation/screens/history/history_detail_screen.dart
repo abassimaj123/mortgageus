@@ -12,7 +12,8 @@ import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
-import '../../../main.dart' show isSpanishNotifier;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier;
 import 'history_screen.dart' show HistoryScreen;
 import 'package:calcwise_core/calcwise_core.dart';
 import '../../widgets/paywall_hard.dart';
@@ -43,6 +44,31 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       default:
         return LoanType.conventional;
     }
+  }
+
+  void _loadIntoCalculator(BuildContext context) {
+    final row = widget.row;
+    final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
+    final downPercent = (row['down_percent'] as num?)?.toDouble() ?? 20.0;
+    final annualRate = (row['annual_rate'] as num?)?.toDouble() ?? 6.5;
+    final termYears = (row['term_years'] as num?)?.toInt() ?? 30;
+    final taxRate = (row['tax_rate'] as num?)?.toDouble() ?? MortgageConstants.defaultPropertyTaxRate;
+    final insurance = (row['insurance'] as num?)?.toDouble() ?? MortgageConstants.defaultHomeInsurance;
+    final hoa = (row['hoa'] as num?)?.toDouble() ?? 0.0;
+    final loanType = _parseLoanType(row['loan_type'] as String? ?? 'Conventional');
+
+    final notifier = ProviderScope.containerOf(context).read(mortgageInputProvider.notifier);
+    notifier.updateHomePrice(homePrice);
+    notifier.updateDownPaymentPct(downPercent);
+    notifier.updateRate(annualRate);
+    notifier.updateTerm(termYears);
+    notifier.updateLoanType(loanType);
+    notifier.updatePropertyTaxRate(taxRate);
+    notifier.updateHomeInsurance(insurance);
+    notifier.updateHoa(hoa);
+
+    tabSwitchNotifier.value = 0; // switch to Calculator tab
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   Future<void> _delete(bool isEs) async {
@@ -263,6 +289,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 _BottomBar(
                   isEs: isEs,
                   onExport: () => _exportPdf(context, isEs),
+                  onLoadIntoCalculator: () => _loadIntoCalculator(context),
                 ),
               ],
             ),
@@ -279,8 +306,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 class _BottomBar extends StatelessWidget {
   final bool isEs;
   final Future<void> Function() onExport;
+  final VoidCallback onLoadIntoCalculator;
 
-  const _BottomBar({required this.isEs, required this.onExport});
+  const _BottomBar({
+    required this.isEs,
+    required this.onExport,
+    required this.onLoadIntoCalculator,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -328,6 +360,29 @@ class _BottomBar extends StatelessWidget {
                     AnalyticsService.instance.logExportStarted();
                   } catch (_) {}
                 },
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.edit_rounded, size: 18),
+                label: Text(
+                  isEs ? 'Cargar en calculadora' : 'Load into Calculator',
+                  style: const TextStyle(
+                      fontSize: AppTextSize.body, fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primary,
+                  side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.6)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.lg)),
+                ),
+                onPressed: onLoadIntoCalculator,
               ),
             ),
           ),

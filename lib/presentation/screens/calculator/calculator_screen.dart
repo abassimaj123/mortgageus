@@ -1113,23 +1113,26 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pitiPayment = result != null
+        ? AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')
+        : '--';
     final piPayment = result != null
         ? AmountFormatter.ui(result!.monthly.piPayment, 'USD')
-        : '--';
+        : null;
     return Semantics(
       label: result != null
-          ? 'Monthly principal and interest: $piPayment. '
-              'Total PITI: ${AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')}. '
+          ? 'Total monthly payment PITI: $pitiPayment. '
+              'Principal and interest: $piPayment. '
               'Total interest: ${AmountFormatter.ui(result!.totalInterest, 'USD')}. '
               'Total cost: ${AmountFormatter.ui(result!.totalCost, 'USD')}.'
           : 'Monthly payment: enter values above to calculate',
       child: CalcwiseHeroCard(
-        label: s.monthlyPI as String,
-        value: piPayment,
-        rawValue: result?.monthly.piPayment,
+        label: s.monthlyPITI as String,
+        value: pitiPayment,
+        rawValue: result?.monthly.pitiPayment,
         valueFormatter: (v) => AmountFormatter.ui(v, 'USD'),
         secondary: result != null
-            ? '${s.totalPITI}: ${AmountFormatter.ui(result!.monthly.pitiPayment, 'USD')}'
+            ? '${s.monthlyPILabel}: $piPayment'
             : null,
         rawStats: result == null
             ? null

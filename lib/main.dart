@@ -15,6 +15,7 @@ import 'core/services/crashlytics_service.dart';
 import 'core/freemium/freemium_service.dart';
 import 'core/freemium/iap_service.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'core/firebase/firebase_options.dart';
 import 'presentation/screens/calculator/calculator_screen.dart';
 import 'presentation/screens/amortization/amortization_screen.dart';
@@ -148,6 +149,7 @@ class MortgageUSApp extends StatelessWidget {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeMode,
+            navigatorObservers: [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)],
             home: const SplashScreen(),
             routes: {
               '/home': (_) => const _MainShell(),

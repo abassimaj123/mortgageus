@@ -26,6 +26,7 @@ import 'presentation/screens/splash_screen.dart';
 import 'l10n/strings_en.dart';
 import 'l10n/strings_es.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'presentation/widgets/paywall_hard.dart';
 
 // Global language notifier — false = English, true = Spanish
@@ -79,6 +80,7 @@ AppStringsES get strES => AppStringsES();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   unawaited(CalcwiseRemoteConfig.initialize());
@@ -112,6 +114,7 @@ Future<void> main() async {
   isSpanishNotifier.value = (saved ?? systemLang) == 'es';
 
   // Analytics: startup events
+  unawaited(AnalyticsService.instance.initialize());
   await AnalyticsService.instance.logAppOpen();
   await AnalyticsService.instance.setUserPremium(freemiumService.hasFullAccess);
 

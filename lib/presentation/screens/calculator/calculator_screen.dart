@@ -238,7 +238,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       inputHash: hash,
       l1: _l1Payload(effectiveLabel),
       l2: _l2Payload(effectiveLabel),
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     HistoryScreen.refreshNotifier.value++;
     adService.onSave();

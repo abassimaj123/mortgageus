@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -101,7 +102,7 @@ class _InvestmentReturnScreenState
             'hold_years': _holdYears,
           },
           'results': {
-            'future_value': price * (1 + _appreciation / 100) * _holdYears,
+            'future_value': price * pow(1 + _appreciation / 100.0, _holdYears.toDouble()),
             'equity': result.downAmt,
             'total_return': result.equityMult,
             'annualized_return': result.irr,
@@ -151,7 +152,7 @@ class _InvestmentReturnScreenState
           'hold_years': _holdYears,
         },
         'results': {
-          'future_value': price * (1 + _appreciation / 100) * _holdYears,
+          'future_value': price * pow(1 + _appreciation / 100.0, _holdYears.toDouble()),
           'equity': result.downAmt,
           'total_return': result.equityMult,
           'annualized_return': result.irr,
@@ -222,6 +223,9 @@ class _InvestmentReturnScreenState
       propertyValue: price,
       appreciationPercent: _appreciation,
       annualMortgagePayment: annualMortgage,
+      loanAmount: loanAmt,
+      annualRatePct: _defaultRate,
+      termMonths: _defaultTerm * 12,
       years: _holdYears,
     );
 

@@ -2,6 +2,8 @@
 /// Ported from PropertyROISuite/lib/core/roi_engine.dart (IRR/NPV section only).
 library;
 
+import 'dart:math';
+
 class IrrEngine {
   // ── IRR / NPV ─────────────────────────────────────────────────────────────
 
@@ -51,25 +53,52 @@ class IrrEngine {
   /// cashFlows[0]      = −(downPayment + closingCosts)
   /// cashFlows[1..n-1] = annual net cash flow (rent − mortgage − expenses)
   /// cashFlows[n]      = annual cash flow + net sale proceeds
+  ///
+  /// [loanAmount]   — original loan principal (property price − down payment).
+  /// [annualRatePct] — mortgage annual interest rate (e.g. 7.0 for 7%).
+  /// [termMonths]   — loan term in months (e.g. 360 for 30 years).
   static List<double> buildRentalCashFlows({
     required double initialInvestment,
     required double annualCashFlow,
     required double propertyValue,
     required double appreciationPercent,
     required double annualMortgagePayment,
+    required double loanAmount,
+    required double annualRatePct,
+    required int termMonths,
     int years = 10,
   }) {
     final flows = <double>[-initialInvestment.abs()];
     double value = propertyValue;
-    double remainingLoan = propertyValue * 0.80;
+
+    // Pre-compute monthly payment for amortization-based remaining balance.
+    final monthlyRate = annualRatePct / 12.0 / 100.0;
+    final double monthlyPayment = (loanAmount > 0 && monthlyRate > 0)
+        ? loanAmount *
+            monthlyRate /
+            (1 - pow(1 + monthlyRate, -termMonths))
+        : (termMonths > 0 ? loanAmount / termMonths : 0.0);
+
     for (int y = 1; y <= years; y++) {
       value *= (1 + appreciationPercent / 100);
-      remainingLoan -=
-          annualMortgagePayment > 0 ? (annualMortgagePayment * 0.25) : 0;
       if (y < years) {
         flows.add(annualCashFlow);
       } else {
-        final saleNet = value * 0.94 - remainingLoan.clamp(0, value * 0.94);
+        // Remaining loan balance at end of hold period via amortization formula.
+        final n = y * 12; // months elapsed at sale
+        final double remainingBalance;
+        if (monthlyRate > 0 && loanAmount > 0) {
+          remainingBalance = loanAmount * pow(1 + monthlyRate, n) -
+              monthlyPayment *
+                  (pow(1 + monthlyRate, n) - 1) /
+                  monthlyRate;
+        } else {
+          // Zero-rate fallback: straight-line principal reduction.
+          remainingBalance =
+              (loanAmount - monthlyPayment * n).clamp(0.0, loanAmount);
+        }
+        final saleNet = value * 0.94 -
+            remainingBalance.clamp(0.0, value * 0.94);
         flows.add(annualCashFlow + saleNet);
       }
     }

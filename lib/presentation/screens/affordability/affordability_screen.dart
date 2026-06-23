@@ -208,7 +208,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
           'dti': r.monthlyPI,
         },
       },
-      label: freemiumService.hasFullAccess ? label : null,
+      label: label,
     );
     AnalyticsService.instance.logHistorySaved();
   }

@@ -308,9 +308,14 @@ class MortgageCalculator {
     final breakEvenMonths =
         monthlySavings > 0 ? (closingCosts / monthlySavings).ceil() : 999999;
 
+    final remainingMonths = currentYearsRemaining * 12;
     final newTotalMonths = newTermYears * 12;
+    // Cap comparison horizon to the shorter of the two terms to avoid
+    // overstating savings when the new loan extends the repayment period.
+    final horizonMonths =
+        newTotalMonths > remainingMonths ? remainingMonths : newTotalMonths;
     final totalSavings =
-        (monthlySavings * newTotalMonths.toDouble()) - closingCosts;
+        (monthlySavings * horizonMonths.toDouble()) - closingCosts;
 
     // Makes sense if break-even < 7 years (84 months)
     final makesSense = breakEvenMonths <= 84 && monthlySavings > 0;

@@ -109,7 +109,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
     final upfrontMip = baseLoan * 0.0175;
     final loan = baseLoan + upfrontMip;
     final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-    final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
+    final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
     final monthlyMip = loan * annualMipRate / 12.0;
     final term = input.termYears > 0 ? input.termYears : 30;
     final pAndI = loan > 0
@@ -154,7 +154,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
       final upfrontMip = baseLoan * 0.0175;
       final loan = baseLoan + upfrontMip;
       final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-      final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
+      final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
       final monthlyMip = loan * annualMipRate / 12.0;
       final term = input.termYears > 0 ? input.termYears : 30;
       final pAndI = loan > 0
@@ -192,7 +192,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
     final upfrontMip = baseLoan * 0.0175;
     final loan = baseLoan + upfrontMip;
     final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-    final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
+    final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
     final monthlyMip = loan * annualMipRate / 12.0;
     final term = input.termYears > 0 ? input.termYears : 30;
     final pAndI = loan > 0
@@ -270,7 +270,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         final upfrontMip = baseLoan * 0.0175;
         final loan = baseLoan + upfrontMip; // financed
         final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-        final annualMipRate = ltv > 90 ? 0.0055 : 0.0050;
+        final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
         final monthlyMip = loan * annualMipRate / 12.0;
         // Reactive term — stays in sync with the main calculator tab
         final term = input.termYears > 0 ? input.termYears : 30;

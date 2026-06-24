@@ -12,7 +12,7 @@ import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../domain/models/mortgage_result.dart';
-import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier, smartHistoryService, adService;
+import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier, smartHistoryService, adService, paywallSession;
 import '../../../core/services/analytics_service.dart';
 import '../../widgets/save_scenario_button.dart';
 import '../history/history_screen.dart' show HistoryScreen;
@@ -127,6 +127,13 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
     _loadPref();
     freemiumService.isRewardedNotifier.addListener(_rebuild);
     freemiumService.isPremiumNotifier.addListener(_rebuild);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || freemiumService.hasFullAccess) return;
+      final trigger = await paywallSession.recordAction();
+      if (!mounted) return;
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    });
   }
 
   Future<void> _saveScenario(String? label) async {

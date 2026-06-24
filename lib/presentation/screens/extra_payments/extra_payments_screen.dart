@@ -54,6 +54,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
   void _recalculate(MortgageInputState s) {
     final loan = s.homePrice - s.downPaymentDollar;
     if (loan <= 0) return;
+    AnalyticsService.instance.maybeLogFirstCalculate();
     final extraMonthly =
         double.tryParse(_extraMonthlyCtrl.text.replaceAll(',', '')) ?? 0;
     final extraAnnual =

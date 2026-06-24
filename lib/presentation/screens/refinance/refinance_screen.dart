@@ -73,6 +73,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
               : null);
       return;
     }
+    AnalyticsService.instance.maybeLogFirstCalculate();
     setState(() {
       _balanceError = null;
       try {

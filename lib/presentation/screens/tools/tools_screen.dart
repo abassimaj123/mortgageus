@@ -18,10 +18,21 @@ import 'dti_screen.dart';
 import 'heloc_calc_screen.dart';
 import 'closing_costs_screen.dart';
 import '../affordability/affordability_screen.dart';
+import '../../../core/services/analytics_service.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 
-class ToolsScreen extends StatelessWidget {
+class ToolsScreen extends StatefulWidget {
   const ToolsScreen({super.key});
+  @override
+  State<ToolsScreen> createState() => _ToolsScreenState();
+}
+
+class _ToolsScreenState extends State<ToolsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView('tools');
+  }
 
   @override
   Widget build(BuildContext context) {

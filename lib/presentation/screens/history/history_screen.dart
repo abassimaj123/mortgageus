@@ -149,6 +149,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _unpin(int id) async {
     HapticFeedback.mediumImpact();
     await smartHistoryService.unpin(id);
+    if (!mounted) return;
     _load();
   }
 
@@ -260,6 +261,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (confirm == true) {
       HapticFeedback.mediumImpact();
       await DatabaseHelper.instance.deleteHistory(id);
+      if (!mounted) return;
       _load();
     }
   }
@@ -271,6 +273,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (confirm == true) {
       HapticFeedback.mediumImpact();
       await DatabaseHelper.instance.deleteByComparisonId(comparisonId);
+      if (!mounted) return;
       _load();
     }
   }
@@ -305,6 +308,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _clearAll() async {
     await DatabaseHelper.instance.clearHistory();
+    if (!mounted) return;
     _load();
   }
 

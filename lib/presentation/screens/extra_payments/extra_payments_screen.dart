@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
@@ -84,6 +85,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
   }
 
   Future<void> _saveScenario(String? label) async {
+    HapticFeedback.mediumImpact();
     final r = _result;
     if (r == null) return;
     final inputState = ref.read(mortgageInputProvider);
@@ -303,6 +305,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                 width: double.infinity,
                                 child: OutlinedButton.icon(
                                   onPressed: () async {
+                                    HapticFeedback.mediumImpact();
                                     final text = isEs
                                         ? '💰 Pagos Extra\n'
                                             'Ahorro en intereses: ${AmountFormatter.ui(r.interestSaved, 'USD')}\n'
@@ -334,6 +337,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                   width: double.infinity,
                                   child: TextButton.icon(
                                     onPressed: () async {
+                                      HapticFeedback.mediumImpact();
                                       if (isPremium) {
                                         final inputState =
                                             ref.read(mortgageInputProvider);

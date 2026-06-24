@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/irr_engine.dart';
@@ -124,6 +125,7 @@ class _InvestmentReturnScreenState
   }
 
   Future<void> _saveScenario(String? label) async {
+    HapticFeedback.mediumImpact();
     final result = _calculate();
     if (result == null) return;
     final price = result.price;
@@ -406,7 +408,10 @@ class _InvestmentReturnScreenState
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: () => _exportPdf(isEs),
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          _exportPdf(isEs);
+                        },
                         icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
                         label: Text(isEs ? 'Exportar PDF' : 'Export PDF'),
                         style: OutlinedButton.styleFrom(

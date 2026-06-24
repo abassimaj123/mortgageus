@@ -1,5 +1,6 @@
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
@@ -104,6 +105,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
     MortgageResult r15,
     bool isEs,
   ) async {
+    HapticFeedback.mediumImpact();
     if (!freemiumService.hasFullAccess) {
       PaywallSoft.show(context);
       return;
@@ -152,6 +154,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
   }
 
   Future<void> _saveScenario(String? label) async {
+    HapticFeedback.mediumImpact();
     final inputState = ref.read(mortgageInputProvider);
     final loan = inputState.homePrice - inputState.downPaymentDollar;
     if (loan <= 0 || inputState.homePrice <= 0) return;
@@ -473,6 +476,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                               width: double.infinity,
                               child: TextButton.icon(
                                 onPressed: () async {
+                                  HapticFeedback.mediumImpact();
                                   if (isPremium) {
                                     try {
                                       await PdfExportService.exportComparator(

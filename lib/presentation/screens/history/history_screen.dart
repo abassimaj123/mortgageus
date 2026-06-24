@@ -1,8 +1,10 @@
 import 'dart:convert' show jsonDecode;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../../core/db/database_helper.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/freemium/freemium_service.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import '../../../core/theme/app_theme.dart';
@@ -72,6 +74,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('history');
     _load();
     HistoryScreen.refreshNotifier.addListener(_silentRefresh);
   }
@@ -144,11 +147,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // ── Pin management ─────────────────────────────────────────────────────────
 
   Future<void> _unpin(int id) async {
+    HapticFeedback.mediumImpact();
     await smartHistoryService.unpin(id);
     _load();
   }
 
   Future<void> _rename(Map<String, dynamic> row, bool isEs) async {
+    HapticFeedback.mediumImpact();
     final ctrl = TextEditingController(
       text: (row['pin_label'] as String?) ?? '',
     );
@@ -185,6 +190,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _pinEntry(
       BuildContext context, Map<String, dynamic> row, bool isEs) async {
+    HapticFeedback.mediumImpact();
     final id = row['id'] as int?;
     if (id == null) return;
 
@@ -251,6 +257,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final isEs = isSpanishNotifier.value;
     final confirm = await _confirmDelete(context, isEs);
     if (confirm == true) {
+      HapticFeedback.mediumImpact();
       await DatabaseHelper.instance.deleteHistory(id);
       _load();
     }
@@ -261,6 +268,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final isEs = isSpanishNotifier.value;
     final confirm = await _confirmDelete(context, isEs, isComparison: true);
     if (confirm == true) {
+      HapticFeedback.mediumImpact();
       await DatabaseHelper.instance.deleteByComparisonId(comparisonId);
       _load();
     }
@@ -342,6 +350,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _exportPdf(
       BuildContext context, Map<String, dynamic> row) async {
+    HapticFeedback.mediumImpact();
     final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
     final downPercent = (row['down_percent'] as num?)?.toDouble() ?? 20.0;
     final annualRate = (row['annual_rate'] as num?)?.toDouble() ?? 6.5;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
@@ -458,7 +459,10 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            onPressed: () => _exportPdf(isEs),
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              _exportPdf(isEs);
+                            },
                             icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
                             label: Text(isEs ? 'Exportar PDF' : 'Export PDF'),
                             style: OutlinedButton.styleFrom(

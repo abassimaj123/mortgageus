@@ -1,5 +1,6 @@
 import 'dart:convert' show jsonDecode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/freemium/freemium_service.dart';
@@ -47,6 +48,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   }
 
   void _loadIntoCalculator(BuildContext context) {
+    HapticFeedback.mediumImpact();
     final row = widget.row;
     final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
     final downPercent = (row['down_percent'] as num?)?.toDouble() ?? 20.0;
@@ -96,6 +98,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       ),
     );
     if (confirm == true) {
+      HapticFeedback.mediumImpact();
       await DatabaseHelper.instance.deleteHistory(id);
       HistoryScreen.refreshNotifier.value++;
       if (mounted) Navigator.pop(context);
@@ -103,6 +106,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   }
 
   Future<void> _exportPdf(BuildContext context, bool isEs) async {
+    HapticFeedback.mediumImpact();
     final row = widget.row;
     final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
     final downPercent = (row['down_percent'] as num?)?.toDouble() ?? 20.0;

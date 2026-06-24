@@ -1,5 +1,6 @@
 import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -129,6 +130,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
   }
 
   Future<void> _saveScenario(String? label) async {
+    HapticFeedback.mediumImpact();
     final result = ref.read(mortgageResultProvider);
     if (result == null) return;
     final inputState = ref.read(mortgageInputProvider);
@@ -308,6 +310,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                           width: double.infinity,
                           child: TextButton.icon(
                             onPressed: () async {
+                              HapticFeedback.mediumImpact();
                               if (isPremium) {
                                 try {
                                   await PdfExportService.exportMortgage(

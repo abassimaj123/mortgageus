@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/freemium/freemium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../main.dart' show isSpanishNotifier;
@@ -34,6 +35,7 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
   bool _saving = false;
 
   Future<void> _handleTap() async {
+    HapticFeedback.mediumImpact();
     final isEs = isSpanishNotifier.value;
     String? label;
 

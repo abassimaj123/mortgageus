@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
@@ -131,6 +132,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
   }
 
   Future<void> _saveScenario(String? label) async {
+    HapticFeedback.mediumImpact();
     final annualIncome = _parse(_annualIncomeCtrl.text);
     final piti = _parse(_pitiCtrl.text);
     final car = _parse(_carPaymentCtrl.text);
@@ -179,6 +181,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
   }
 
   Future<void> _exportPdf(bool isEs) async {
+    HapticFeedback.mediumImpact();
     final annualIncome = _parse(_annualIncomeCtrl.text);
     if (annualIncome <= 0) return;
     final piti = _parse(_pitiCtrl.text);

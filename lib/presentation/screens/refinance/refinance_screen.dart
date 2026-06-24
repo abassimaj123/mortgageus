@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
@@ -381,6 +382,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                         Expanded(
                                           child: OutlinedButton.icon(
                                             onPressed: () async {
+                                              HapticFeedback.mediumImpact();
                                               final text = isEs
                                                   ? '📊 Refinanciamiento\n'
                                                       'Pago actual: ${AmountFormatter.ui(r!.oldMonthlyPayment, 'USD')}/mes\n'
@@ -410,6 +412,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
                                           width: double.infinity,
                                           child: TextButton.icon(
                                             onPressed: () {
+                                              HapticFeedback.mediumImpact();
                                               if (isPremium) {
                                                 _exportPdf(isEs);
                                               } else {

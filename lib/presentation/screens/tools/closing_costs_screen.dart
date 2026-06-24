@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
@@ -105,6 +106,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
   }
 
   Future<void> _exportPdf(bool isEs) async {
+    HapticFeedback.mediumImpact();
     final homePrice = _parse(_homePriceCtrl.text);
     if (homePrice <= 0) return;
     final rate = double.tryParse(_rateCtrl.text) ?? 6.9;
@@ -138,6 +140,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
   }
 
   Future<void> _saveScenario(String? label) async {
+    HapticFeedback.mediumImpact();
     final homePrice = _parse(_homePriceCtrl.text);
     final rate = double.tryParse(_rateCtrl.text) ?? 6.9;
     if (homePrice <= 0) return;

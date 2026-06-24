@@ -82,7 +82,8 @@ AppStringsES get strES => AppStringsES();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting();
+  await initializeDateFormatting('en_US', null);
+  await initializeDateFormatting('es_US', null);
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   unawaited(CalcwiseRemoteConfig.initialize());

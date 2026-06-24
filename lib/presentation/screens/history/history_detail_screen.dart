@@ -30,7 +30,8 @@ class HistoryDetailScreen extends StatefulWidget {
 }
 
 class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
-  final _fmtDate = DateFormat('MMMM d, yyyy – HH:mm');
+  DateFormat _fmtDate(bool isEs) =>
+      DateFormat('MMMM d, yyyy – HH:mm', isEs ? 'es' : 'en');
 
   @override
   void initState() {
@@ -212,7 +213,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(_fmtDate.format(createdAt.toLocal()),
+            title: Text(_fmtDate(isEs).format(createdAt.toLocal()),
                 style: const TextStyle(fontSize: AppTextSize.body)),
             actions: [
               IconButton(

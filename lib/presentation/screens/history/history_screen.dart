@@ -69,7 +69,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _compareMode = false;
   final Set<int> _selectedIds = {}; // ids of selected single rows
 
-  final _fmtDate = DateFormat('MMM d, yyyy – HH:mm');
+  DateFormat _fmtDate(bool isEs) =>
+      DateFormat('MMM d, yyyy – HH:mm', isEs ? 'es' : 'en');
 
   @override
   void initState() {
@@ -490,7 +491,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         .onSurface
                         .withValues(alpha: 0.65)),
               ),
-              Text(_fmtDate.format(createdAt.toLocal()),
+              Text(_fmtDate(isEs).format(createdAt.toLocal()),
                   style: TextStyle(
                       fontSize: AppTextSize.xs, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               const Divider(height: 24),
@@ -1218,7 +1219,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ]),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(_fmtDate.format(createdAt.toLocal()),
+                  Text(_fmtDate(isEs).format(createdAt.toLocal()),
                       style: const TextStyle(
                           fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
                 ],
@@ -1353,7 +1354,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ]),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(_fmtDate.format(createdAt.toLocal()),
+                  Text(_fmtDate(isEs).format(createdAt.toLocal()),
                       style: TextStyle(
                           fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
                 ],
@@ -1478,7 +1479,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ]),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(_fmtDate.format(createdAt.toLocal()),
+                  Text(_fmtDate(isEs).format(createdAt.toLocal()),
                       style: TextStyle(
                           fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
                 ],
@@ -1923,7 +1924,7 @@ class _HistoryCompareScreen extends StatelessWidget {
     required this.isEs,
   });
 
-  static final _fmtDate = DateFormat('MMM d, yyyy');
+  DateFormat get _fmtDate => DateFormat('MMM d, yyyy', isEs ? 'es' : 'en');
 
   String _colLabel(Map<String, dynamic> row) {
     final label = row['label'] as String?;

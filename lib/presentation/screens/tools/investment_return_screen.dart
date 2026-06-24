@@ -112,6 +112,7 @@ class _InvestmentReturnScreenState
         },
       );
       HistoryScreen.refreshNotifier.value++;
+      adService.onSave();
     }
     adService.onAction();
     if (!_analyticsLogged) {

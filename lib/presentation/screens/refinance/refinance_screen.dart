@@ -128,6 +128,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
         },
       );
       HistoryScreen.refreshNotifier.value++;
+      adService.onSave();
     }
   }
 

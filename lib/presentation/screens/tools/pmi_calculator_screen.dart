@@ -103,6 +103,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
           },
         );
         HistoryScreen.refreshNotifier.value++;
+        adService.onSave();
       }
     }
     if (_logged) return;

@@ -99,6 +99,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
         },
       );
       HistoryScreen.refreshNotifier.value++;
+      adService.onSave();
     }
     adService.onAction();
     if (_logged) return;

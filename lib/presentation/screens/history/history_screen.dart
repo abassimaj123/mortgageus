@@ -64,6 +64,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<Map<String, dynamic>> _history = [];
   List<_HistoryItem> _items = [];
   bool _firstLoad = true;
+  String _searchQuery = '';
 
   // Compare mode
   bool _compareMode = false;
@@ -144,6 +145,64 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
     return _autoSaves.take(MonetizationConfig.freeRingBufferSize).toList();
   }
+
+  // ── Search helpers ─────────────────────────────────────────────────────────
+
+  String _pinnedRowTitle(Map<String, dynamic> row) {
+    final pinLabel = row['pin_label'] as String?;
+    final label = row['label'] as String?;
+    final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
+    final annualRate = (row['annual_rate'] as num?)?.toDouble() ?? 0.0;
+    final termYears = (row['term_years'] as num?)?.toInt() ?? 30;
+    final loanType = row['loan_type'] as String? ?? 'Conventional';
+    final humanLabel =
+        '${AmountFormatter.ui(homePrice, 'USD')} · ${annualRate.toStringAsFixed(2)}% · ${termYears}yr $loanType';
+    return (pinLabel != null && pinLabel.isNotEmpty)
+        ? pinLabel
+        : (label != null && label.isNotEmpty ? label : humanLabel);
+  }
+
+  String _itemTitle(_HistoryItem item) {
+    if (item.isComparison) {
+      final r30 = item.comparison!.firstWhere(
+          (r) => (r['term_years'] as int? ?? 30) == 30,
+          orElse: () => item.comparison!.first);
+      final homePrice = (r30['home_price'] as num?)?.toDouble() ?? 0.0;
+      final loanType = r30['loan_type'] as String? ?? 'Conventional';
+      return '${AmountFormatter.ui(homePrice, 'USD')} · $loanType';
+    }
+    final row = item.single!;
+    final label = row['label'] as String?;
+    final homePrice = (row['home_price'] as num?)?.toDouble() ?? 0.0;
+    final annualRate = (row['annual_rate'] as num?)?.toDouble() ?? 0.0;
+    final termYears = (row['term_years'] as num?)?.toInt() ?? 30;
+    final loanType = row['loan_type'] as String? ?? 'Conventional';
+    final humanLabel =
+        '${AmountFormatter.ui(homePrice, 'USD')} · ${annualRate.toStringAsFixed(2)}% · ${termYears}yr $loanType';
+    return label != null && label.isNotEmpty ? label : humanLabel;
+  }
+
+  bool _pinnedRowMatchesQuery(Map<String, dynamic> row) {
+    if (_searchQuery.isEmpty) return true;
+    final pinLabel = (row['pin_label'] as String? ?? '').toLowerCase();
+    final title = _pinnedRowTitle(row).toLowerCase();
+    return pinLabel.contains(_searchQuery) || title.contains(_searchQuery);
+  }
+
+  bool _itemMatchesQuery(_HistoryItem item) {
+    if (_searchQuery.isEmpty) return true;
+    final pinLabel = item.isComparison
+        ? ''
+        : (item.single!['pin_label'] as String? ?? '').toLowerCase();
+    final title = _itemTitle(item).toLowerCase();
+    return pinLabel.contains(_searchQuery) || title.contains(_searchQuery);
+  }
+
+  List<Map<String, dynamic>> get _filteredPinned =>
+      _pinned.where(_pinnedRowMatchesQuery).toList();
+
+  List<_HistoryItem> get _filteredItems =>
+      _items.where(_itemMatchesQuery).toList();
 
   // ── Pin management ─────────────────────────────────────────────────────────
 
@@ -940,6 +999,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   ),
                                 ),
                               ),
+                              if (_history.isNotEmpty)
+                                SliverToBoxAdapter(
+                                  child: CalcwiseSearchBar(
+                                    hintText: isEs
+                                        ? 'Buscar cálculos…'
+                                        : 'Search calculations…',
+                                    onChanged: (q) =>
+                                        setState(() => _searchQuery = q),
+                                  ),
+                                ),
                               if (_pinned.isEmpty && _items.isEmpty)
                                 SliverFillRemaining(
                                   hasScrollBody: false,
@@ -957,9 +1026,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     onAction: () => tabSwitchNotifier.value = 0,
                                   ),
                                 )
+                              else if (_searchQuery.isNotEmpty &&
+                                  _filteredPinned.isEmpty &&
+                                  _filteredItems.isEmpty)
+                                SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: CalcwiseEmptyState(
+                                    icon: Icons.search_off_rounded,
+                                    title: isEs
+                                        ? 'Sin resultados'
+                                        : 'No results',
+                                    body: isEs
+                                        ? 'Ningún cálculo coincide con tu búsqueda.'
+                                        : 'No calculations match your search.',
+                                  ),
+                                )
                               else ...[
                                 // ── Saved Scenarios (pinned) ────────────────
-                                if (_pinned.isNotEmpty) ...[
+                                if (_filteredPinned.isNotEmpty) ...[
                                   SliverToBoxAdapter(
                                     child: _sectionHeader(
                                         context,
@@ -974,14 +1058,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         padding: const EdgeInsets.fromLTRB(
                                             16, 0, 16, 8),
                                         child: _buildPinnedCard(
-                                            context, _pinned[i], isEs),
+                                            context, _filteredPinned[i], isEs),
                                       ),
-                                      childCount: _pinned.length,
+                                      childCount: _filteredPinned.length,
                                     ),
                                   ),
                                 ],
                                 // ── Recent Calculations (auto-saves) ────────
-                                if (_items.isNotEmpty)
+                                if (_filteredItems.isNotEmpty)
                                   SliverToBoxAdapter(
                                     child: _sectionHeader(
                                         context,
@@ -993,13 +1077,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 SliverList(
                                   delegate: SliverChildBuilderDelegate(
                                     (context, i) {
-                                      final item = _items[i];
+                                      final item = _filteredItems[i];
                                       final currentGroup =
                                           _dateGroup(_itemDate(item), isEs);
                                       final prevGroup = i == 0
                                           ? null
                                           : _dateGroup(
-                                              _itemDate(_items[i - 1]), isEs);
+                                              _itemDate(_filteredItems[i - 1]),
+                                              isEs);
                                       final showHeader =
                                           currentGroup != prevGroup;
                                       return Column(
@@ -1080,7 +1165,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         ],
                                       );
                                     },
-                                    childCount: _items.length,
+                                    childCount: _filteredItems.length,
                                   ),
                                 ),
                               ],

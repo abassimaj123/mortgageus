@@ -32,6 +32,12 @@ class HistoryDetailScreen extends StatefulWidget {
 class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   final _fmtDate = DateFormat('MMMM d, yyyy – HH:mm');
 
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView('history_detail');
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   LoanType _parseLoanType(String label) {

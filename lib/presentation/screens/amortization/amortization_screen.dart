@@ -12,7 +12,7 @@ import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/models/amortization_entry.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../domain/models/mortgage_result.dart';
-import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier, smartHistoryService;
+import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier, smartHistoryService, adService;
 import '../../../core/services/analytics_service.dart';
 import '../../widgets/save_scenario_button.dart';
 import '../history/history_screen.dart' show HistoryScreen;

@@ -29,6 +29,7 @@ import 'l10n/strings_es.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'presentation/widgets/paywall_hard.dart';
+import 'presentation/widgets/paywall_soft.dart';
 
 // Global language notifier — false = English, true = Spanish
 final ValueNotifier<bool> isSpanishNotifier = ValueNotifier<bool>(false);
@@ -131,6 +132,8 @@ Future<void> main() async {
     freemium: freemiumService,
     isSpanishNotifier: isSpanishNotifier,
   );
+  PaywallHard.setAnalytics(AnalyticsService.instance);
+  PaywallSoft.setAnalytics(AnalyticsService.instance);
   runApp(const ProviderScope(child: MortgageUSApp()));
 }
 

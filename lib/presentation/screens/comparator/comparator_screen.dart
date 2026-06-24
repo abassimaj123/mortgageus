@@ -40,6 +40,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
     super.initState();
     AnalyticsService.instance.logScreenView('comparator');
     AnalyticsService.instance.logComparatorUsed();
+    AnalyticsService.instance.maybeLogFirstCalculate();
     // ARM adjusted-rate field is reactive (calcArm runs in build) —
     // trigger a rebuild whenever the user types a new rate.
     _armRateCtrl.addListener(() => setState(() {}));

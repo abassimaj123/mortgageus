@@ -85,6 +85,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
     adService.onAction();
     if (!_analyticsLogged) {
       _analyticsLogged = true;
+      AnalyticsService.instance.maybeLogFirstCalculate();
       AnalyticsService.instance.logPmiCalculated();
       final trigger = await paywallSession.recordAction();
       if (mounted) {

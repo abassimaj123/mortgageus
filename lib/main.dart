@@ -345,6 +345,7 @@ class _MainShellState extends State<_MainShell> {
                 if (i < _tabNames.length) {
                   AnalyticsService.instance.logTabChanged(_tabNames[i]);
                 }
+                if (i == 0) return;
                 final trigger = await paywallSession.recordAction();
                 if (!mounted) return;
                 if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;

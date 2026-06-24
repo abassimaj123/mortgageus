@@ -160,6 +160,8 @@ class _VaScreenState extends ConsumerState<VaScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
     AnalyticsService.instance.logHistorySaved();
   }
 

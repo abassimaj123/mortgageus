@@ -135,6 +135,8 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
     AnalyticsService.instance.logHistorySaved();
   }
 

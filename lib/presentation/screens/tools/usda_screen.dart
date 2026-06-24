@@ -161,6 +161,8 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
     AnalyticsService.instance.logHistorySaved();
   }
 

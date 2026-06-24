@@ -127,6 +127,7 @@ class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
         totalCost: totalCost,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

@@ -210,6 +210,7 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
         backEndDti: backEndDti,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

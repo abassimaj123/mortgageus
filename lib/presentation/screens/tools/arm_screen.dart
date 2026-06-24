@@ -156,6 +156,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
         result: r,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

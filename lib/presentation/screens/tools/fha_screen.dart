@@ -141,6 +141,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         totalMonthly: total,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

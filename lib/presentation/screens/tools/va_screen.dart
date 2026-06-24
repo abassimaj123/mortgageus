@@ -203,6 +203,7 @@ class _VaScreenState extends ConsumerState<VaScreen> {
         totalMonthly: total,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

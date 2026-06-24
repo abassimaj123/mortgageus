@@ -204,6 +204,7 @@ class _UsdaScreenState extends ConsumerState<UsdaScreen> {
         totalMonthly: total,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

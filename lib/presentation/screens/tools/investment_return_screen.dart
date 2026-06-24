@@ -190,6 +190,7 @@ class _InvestmentReturnScreenState
         equityMult: result.equityMult,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

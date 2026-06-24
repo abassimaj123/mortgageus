@@ -137,6 +137,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
         total: total,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

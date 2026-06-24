@@ -169,6 +169,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
         totalPmiCost: totalPmiCost,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

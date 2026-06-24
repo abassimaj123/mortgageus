@@ -187,6 +187,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
         rate: rate,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

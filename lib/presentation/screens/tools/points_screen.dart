@@ -187,6 +187,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
         lifetimeSavings: lifetimeSav,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

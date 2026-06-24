@@ -234,6 +234,7 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
         result: r,
         isEs: isEs,
       );
+      AnalyticsService.instance.logPdfExported();
     });
   }
 

@@ -1498,6 +1498,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       size: 20),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(AppRadius.sm),
+                  tooltip: isEs ? 'Eliminar' : 'Delete',
                   onPressed: () => _deleteComparison(cid, context),
                 ),
               ],

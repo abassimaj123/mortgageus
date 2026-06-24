@@ -211,6 +211,8 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
     AnalyticsService.instance.logHistorySaved();
   }
 

@@ -236,6 +236,8 @@ class _HelocCalcScreenState extends ConsumerState<HelocCalcScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
     AnalyticsService.instance.logHistorySaved();
   }
 

@@ -167,6 +167,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
       label: label,
     );
     HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
     AnalyticsService.instance.logHistorySaved();
   }
 

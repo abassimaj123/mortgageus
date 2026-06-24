@@ -177,6 +177,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
+    adService.onSave();
     AnalyticsService.instance.logHistorySaved();
   }
 

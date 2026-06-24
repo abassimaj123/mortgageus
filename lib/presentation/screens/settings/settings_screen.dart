@@ -18,8 +18,18 @@ Future<void> _setLang(bool isSpanish) async {
   await prefs.setString('language', isSpanish ? 'es' : 'en');
 }
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView('settings');
+  }
 
   Future<void> _launch(String url) async {
     final uri = Uri.parse(url);

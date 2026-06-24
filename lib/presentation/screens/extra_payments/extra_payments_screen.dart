@@ -11,6 +11,7 @@ import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, s
 import '../../../core/freemium/freemium_service.dart' show freemiumService;
 import '../../../core/services/pdf_export_service.dart';
 import '../../widgets/save_scenario_button.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
@@ -127,6 +128,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
     AnalyticsService.instance.logHistorySaved();
   }
 

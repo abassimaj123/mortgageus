@@ -14,6 +14,7 @@ import '../../../domain/models/mortgage_result.dart';
 import '../../../main.dart' show isSpanishNotifier, tabSwitchNotifier, smartHistoryService;
 import '../../../core/services/analytics_service.dart';
 import '../../widgets/save_scenario_button.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart';
@@ -163,6 +164,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
     AnalyticsService.instance.logHistorySaved();
   }
 

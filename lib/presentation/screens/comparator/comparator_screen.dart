@@ -351,6 +351,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                             setState(() => _armMode = true);
                             AnalyticsService.instance.logArmCalculated();
                             final trigger = await paywallSession.recordAction();
+                            if (!mounted) return;
                             if (trigger == PaywallTrigger.soft)
                               PaywallSoft.show(context);
                             if (trigger == PaywallTrigger.hard)

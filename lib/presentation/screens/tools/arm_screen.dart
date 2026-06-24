@@ -13,6 +13,7 @@ import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
+import '../history/history_screen.dart' show HistoryScreen;
 import '../../../core/services/pdf_export_service.dart';
 
 class ArmScreen extends ConsumerStatefulWidget {
@@ -196,6 +197,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
     AnalyticsService.instance.logHistorySaved();
   }
 

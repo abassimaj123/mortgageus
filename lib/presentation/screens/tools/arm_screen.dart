@@ -9,7 +9,7 @@ import '../../../core/services/analytics_service.dart';
 import '../../../domain/models/arm_result.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show isSpanishNotifier, paywallSession, smartHistoryService;
+import '../../../../main.dart' show adService, isSpanishNotifier, paywallSession, smartHistoryService;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
@@ -98,6 +98,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
         totalTermYears: _termYears,
       );
       setState(() => _result = r);
+      adService.onAction();
       _onInteraction();
       // SmartHistory auto-save
       final hash = ResultHasher.hashMixed({

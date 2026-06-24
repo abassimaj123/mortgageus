@@ -12,7 +12,7 @@ import '../../../core/services/analytics_service.dart';
 import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../../../main.dart' show adService, paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
 import '../history/history_screen.dart' show HistoryScreen;
@@ -113,6 +113,7 @@ class _InvestmentReturnScreenState
       );
       HistoryScreen.refreshNotifier.value++;
     }
+    adService.onAction();
     if (!_analyticsLogged) {
       _analyticsLogged = true;
       AnalyticsService.instance.logInvestmentReturnCalculated();

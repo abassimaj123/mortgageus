@@ -8,7 +8,7 @@ import '../../../core/services/analytics_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart'
-    show paywallSession, isSpanishNotifier, smartHistoryService;
+    show adService, paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../core/services/pdf_export_service.dart';
 import '../history/history_screen.dart' show HistoryScreen;
@@ -174,6 +174,7 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         annualMipRate: annualMipRate,
       );
     }
+    adService.onAction();
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logFhaCalculated();

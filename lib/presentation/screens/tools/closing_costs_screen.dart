@@ -6,7 +6,7 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
-import '../../../../main.dart' show paywallSession, isSpanishNotifier, smartHistoryService;
+import '../../../../main.dart' show adService, paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../widgets/save_scenario_button.dart';
 import '../../../core/services/pdf_export_service.dart';
@@ -96,6 +96,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
       );
       HistoryScreen.refreshNotifier.value++;
     }
+    adService.onAction();
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logClosingCostsCalculated();

@@ -9,7 +9,7 @@ import '../../../core/services/analytics_service.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../../../main.dart'
-    show paywallSession, isSpanishNotifier, smartHistoryService;
+    show adService, paywallSession, isSpanishNotifier, smartHistoryService;
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../core/services/pdf_export_service.dart';
 import '../history/history_screen.dart' show HistoryScreen;
@@ -82,6 +82,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
       );
       HistoryScreen.refreshNotifier.value++;
     }
+    adService.onAction();
     if (!_analyticsLogged) {
       _analyticsLogged = true;
       AnalyticsService.instance.logPmiCalculated();

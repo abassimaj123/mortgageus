@@ -119,10 +119,9 @@ class _InvestmentReturnScreenState
       _analyticsLogged = true;
       AnalyticsService.instance.logInvestmentReturnCalculated();
       final trigger = await paywallSession.recordAction();
-      if (mounted) {
-        if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-        if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-      }
+      if (!mounted) return;
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
     }
   }
 

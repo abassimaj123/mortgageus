@@ -88,10 +88,9 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
       AnalyticsService.instance.maybeLogFirstCalculate();
       AnalyticsService.instance.logPmiCalculated();
       final trigger = await paywallSession.recordAction();
-      if (mounted) {
-        if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-        if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-      }
+      if (!mounted) return;
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
     }
   }
 

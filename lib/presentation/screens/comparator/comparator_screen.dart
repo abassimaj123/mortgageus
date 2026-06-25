@@ -352,15 +352,9 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                           label: str.armMode,
                           icon: Icons.show_chart,
                           selected: _armMode,
-                          onTap: () async {
+                          onTap: () {
                             setState(() => _armMode = true);
                             AnalyticsService.instance.logArmCalculated();
-                            final trigger = await paywallSession.recordAction();
-                            if (!mounted) return;
-                            if (trigger == PaywallTrigger.soft)
-                              PaywallSoft.show(context);
-                            if (trigger == PaywallTrigger.hard)
-                              PaywallHard.show(context);
                           },
                         )),
                       ]),

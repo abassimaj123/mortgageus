@@ -127,13 +127,6 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
     _loadPref();
     freemiumService.isRewardedNotifier.addListener(_rebuild);
     freemiumService.isPremiumNotifier.addListener(_rebuild);
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || freemiumService.hasFullAccess) return;
-      final trigger = await paywallSession.recordAction();
-      if (!mounted) return;
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-    });
   }
 
   Future<void> _saveScenario(String? label) async {

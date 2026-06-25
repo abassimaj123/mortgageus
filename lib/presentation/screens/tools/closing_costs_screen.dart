@@ -97,7 +97,6 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
       HistoryScreen.refreshNotifier.value++;
       adService.onSave();
     }
-    adService.onAction();
     if (_logged) return;
     _logged = true;
     AnalyticsService.instance.logClosingCostsCalculated();

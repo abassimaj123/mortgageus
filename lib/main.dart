@@ -337,7 +337,6 @@ class _MainShellState extends State<_MainShell> {
               onDestinationSelected: (i) async {
                 FocusManager.instance.primaryFocus?.unfocus();
                 setState(() => _index = i);
-                adService.onAction();
                 // Analytics: log which tab was opened
                 const _tabNames = [
                   'calculator',

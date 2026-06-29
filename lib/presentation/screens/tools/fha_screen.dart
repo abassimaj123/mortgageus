@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/constants/mortgage_constants.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
 import '../../../../main.dart'
@@ -107,10 +108,14 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
     if (price <= 0) return;
     final down = price * _downPct / 100.0;
     final baseLoan = (price - down).clamp(0.0, double.infinity);
-    final upfrontMip = baseLoan * 0.0175;
+    final upfrontMip = baseLoan * MortgageConstants.fhaUpfrontMip;
     final loan = baseLoan + upfrontMip;
     final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-    final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
+    // High-LTV & low-LTV annual MIP from registry; mid-tier 0.0070 and the
+    // $726,200 size threshold are NOT in the registry (kept hardcoded).
+    final annualMipRate = ltv > 90
+        ? MortgageConstants.fhaAnnualMip
+        : (baseLoan > 726200 ? 0.0070 : MortgageConstants.fhaAnnualMipLowLtv);
     final monthlyMip = loan * annualMipRate / 12.0;
     final term = input.termYears > 0 ? input.termYears : 30;
     final pAndI = loan > 0
@@ -153,10 +158,14 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
     if (price > 0) {
       final down = price * _downPct / 100.0;
       final baseLoan = (price - down).clamp(0.0, double.infinity);
-      final upfrontMip = baseLoan * 0.0175;
+      final upfrontMip = baseLoan * MortgageConstants.fhaUpfrontMip;
       final loan = baseLoan + upfrontMip;
       final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-      final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
+      // High-LTV & low-LTV annual MIP from registry; mid-tier 0.0070 and the
+    // $726,200 size threshold are NOT in the registry (kept hardcoded).
+    final annualMipRate = ltv > 90
+        ? MortgageConstants.fhaAnnualMip
+        : (baseLoan > 726200 ? 0.0070 : MortgageConstants.fhaAnnualMipLowLtv);
       final monthlyMip = loan * annualMipRate / 12.0;
       final term = input.termYears > 0 ? input.termYears : 30;
       final pAndI = loan > 0
@@ -192,10 +201,14 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
     if (price <= 0) return;
     final down = price * _downPct / 100.0;
     final baseLoan = (price - down).clamp(0.0, double.infinity);
-    final upfrontMip = baseLoan * 0.0175;
+    final upfrontMip = baseLoan * MortgageConstants.fhaUpfrontMip;
     final loan = baseLoan + upfrontMip;
     final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-    final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
+    // High-LTV & low-LTV annual MIP from registry; mid-tier 0.0070 and the
+    // $726,200 size threshold are NOT in the registry (kept hardcoded).
+    final annualMipRate = ltv > 90
+        ? MortgageConstants.fhaAnnualMip
+        : (baseLoan > 726200 ? 0.0070 : MortgageConstants.fhaAnnualMipLowLtv);
     final monthlyMip = loan * annualMipRate / 12.0;
     final term = input.termYears > 0 ? input.termYears : 30;
     final pAndI = loan > 0
@@ -272,10 +285,14 @@ class _FhaScreenState extends ConsumerState<FhaScreen> {
         final price = _parse(_homePriceCtrl.text);
         final down = price * _downPct / 100.0;
         final baseLoan = (price - down).clamp(0.0, double.infinity);
-        final upfrontMip = baseLoan * 0.0175;
+        final upfrontMip = baseLoan * MortgageConstants.fhaUpfrontMip;
         final loan = baseLoan + upfrontMip; // financed
         final ltv = price > 0 ? (baseLoan / price) * 100.0 : 0.0;
-        final annualMipRate = ltv > 90 ? 0.0055 : (baseLoan > 726200 ? 0.0070 : 0.0050);
+        // High-LTV & low-LTV annual MIP from registry; mid-tier 0.0070 and the
+    // $726,200 size threshold are NOT in the registry (kept hardcoded).
+    final annualMipRate = ltv > 90
+        ? MortgageConstants.fhaAnnualMip
+        : (baseLoan > 726200 ? 0.0070 : MortgageConstants.fhaAnnualMipLowLtv);
         final monthlyMip = loan * annualMipRate / 12.0;
         // Reactive term — stays in sync with the main calculator tab
         final term = input.termYears > 0 ? input.termYears : 30;

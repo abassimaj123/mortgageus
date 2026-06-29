@@ -63,6 +63,49 @@ void main() {
     });
   });
 
+  // Guardrail: these now source from the CalcwiseTax registry (verified 2026).
+  // Pin exact figures and assert DECIMAL units to catch percent-vs-decimal bugs.
+  group('Registry-sourced limits & rates (decimal units)', () {
+    test('Conforming baseline = \$832,750 (registry)', () {
+      expect(MortgageConstants.conformingLimit1Unit, equals(832750.0));
+    });
+
+    test('Conforming ceiling = \$1,249,125 (registry)', () {
+      expect(MortgageConstants.conformingLimitHighCost, equals(1249125.0));
+    });
+
+    test('FHA floor = \$541,287 / ceiling = \$1,249,125 (registry)', () {
+      expect(MortgageConstants.fhaFloor, equals(541287.0));
+      expect(MortgageConstants.fhaCeiling, equals(1249125.0));
+    });
+
+    test('FHA annual MIP high-LTV = 0.0055 (0.55%, decimal)', () {
+      expect(MortgageConstants.fhaAnnualMip, equals(0.0055));
+      expect(MortgageConstants.fhaAnnualMip, lessThan(0.1)); // decimal, not %
+    });
+
+    test('FHA annual MIP low-LTV = 0.005 (0.50%, decimal)', () {
+      expect(MortgageConstants.fhaAnnualMipLowLtv, equals(0.005));
+    });
+
+    test('FHA upfront MIP = 0.0175 (1.75%, decimal)', () {
+      expect(MortgageConstants.fhaUpfrontMip, equals(0.0175));
+    });
+
+    test('VA funding fee first-use, <5% down = 0.0215 (2.15%, decimal)', () {
+      expect(MortgageConstants.vaFundingFeeFirst, equals(0.0215));
+      expect(MortgageConstants.vaFundingFeeFirst, lessThan(0.1));
+    });
+
+    test('VA funding fee subsequent-use = 0.033 (3.3%, decimal)', () {
+      expect(MortgageConstants.vaFundingFeeSubsequent, equals(0.033));
+    });
+
+    test('PMI applies above 0.80 LTV (decimal)', () {
+      expect(MortgageConstants.pmiLtvThreshold, equals(0.80));
+    });
+  });
+
   group('VA loan — no PMI regardless of LTV', () {
     test('VA loan requiresPmi = false even at 95% LTV', () {
       final va = MortgageInput(

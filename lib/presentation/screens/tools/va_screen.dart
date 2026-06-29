@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/constants/mortgage_constants.dart';
 import '../../../core/services/pdf_export_service.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
 import '../../providers/mortgage_providers.dart';
@@ -210,8 +211,10 @@ class _VaScreenState extends ConsumerState<VaScreen> {
   }
 
   double _fundingFeeRate() {
-    if (_subsequent) return 0.0330;
-    return _reserves ? 0.0240 : 0.0215;
+    // First-use (<5% down) and subsequent-use rates come from the registry.
+    // The reserves/National Guard rate (0.0240) is NOT in the registry.
+    if (_subsequent) return MortgageConstants.vaFundingFeeSubsequent;
+    return _reserves ? 0.0240 : MortgageConstants.vaFundingFeeFirst;
   }
 
   @override

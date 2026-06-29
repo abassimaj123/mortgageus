@@ -1,3 +1,4 @@
+import '../../core/constants/mortgage_constants.dart';
 import 'loan_type.dart';
 
 class MortgageInput {
@@ -30,6 +31,6 @@ class MortgageInput {
       homePrice > 0 ? (downPayment / homePrice) * 100 : 0;
   double get ltv => homePrice > 0 ? (loanAmount / homePrice) * 100 : 0;
 
-  bool get isJumbo => loanAmount > 832750.0;
+  bool get isJumbo => loanAmount > MortgageConstants.conformingLimit1Unit;
   bool get requiresPmi => ltv > 80.0 && loanType != LoanType.va;
 }

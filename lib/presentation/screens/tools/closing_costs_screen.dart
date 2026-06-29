@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/mortgage_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
@@ -377,11 +378,12 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
 
     // Loan-type specific add-ons
     if (loanType == 'FHA') {
-      lines.add(_CostLine(
-          'Upfront MIP (1.75%)', 'MIP Inicial (1.75%)', loanAmount * 0.0175));
+      lines.add(_CostLine('Upfront MIP (1.75%)', 'MIP Inicial (1.75%)',
+          loanAmount * MortgageConstants.fhaUpfrontMip));
     } else if (loanType == 'VA') {
       lines.add(_CostLine('VA Funding Fee (2.15%)',
-          'Tarifa de Financ. VA (2.15%)', loanAmount * 0.0215));
+          'Tarifa de Financ. VA (2.15%)',
+          loanAmount * MortgageConstants.vaFundingFeeFirst));
     } else if (loanType == 'USDA') {
       lines.add(_CostLine('USDA Guarantee Fee (1%)',
           'Tarifa de Garantía USDA (1%)', loanAmount * 0.01));

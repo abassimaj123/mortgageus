@@ -725,7 +725,7 @@ class _ChipRow extends StatelessWidget {
                   side: BorderSide(
                     color: selected == v
                         ? AppTheme.primary
-                        : const Color(0xFFCBD5E1),
+                        : CalcwiseSemanticColors.slateLight,
                   ),
                   labelStyle: TextStyle(
                     fontWeight: FontWeight.w600,

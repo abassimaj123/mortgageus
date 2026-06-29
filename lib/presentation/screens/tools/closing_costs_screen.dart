@@ -517,7 +517,7 @@ class _ClosingCostsScreenState extends ConsumerState<ClosingCostsScreen> {
                                   side: BorderSide(
                                     color: _loanType == t
                                         ? AppTheme.primary
-                                        : const Color(0xFFCBD5E1),
+                                        : CalcwiseSemanticColors.slateLight,
                                   ),
                                   labelStyle: TextStyle(
                                     fontWeight: FontWeight.w600,

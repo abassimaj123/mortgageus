@@ -1759,7 +1759,7 @@ class PdfExportService {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(verdictLabel, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: verdictColor)),
-              pw.Text('${irr.toStringAsFixed(1)}% IRR', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: verdictColor)),
+              pw.Text('${irr.toStringAsFixed(1)}${isEs ? '% TIR' : '% IRR'}', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: verdictColor)),
             ],
           ),
         ),
@@ -3707,7 +3707,7 @@ class _PdfUnlockSheetState extends State<_PdfUnlockSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFCBD5E1),
+                color: CalcwiseSemanticColors.slateLight,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

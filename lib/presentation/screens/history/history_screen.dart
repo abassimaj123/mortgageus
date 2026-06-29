@@ -521,7 +521,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                      color: const Color(0xFFCBD5E1),
+                      color: CalcwiseSemanticColors.slateLight,
                       borderRadius: BorderRadius.circular(2)),
                 ),
               ),
@@ -659,7 +659,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             side: BorderSide(
                                 color: unlocked
                                     ? AppTheme.primary
-                                    : const Color(0xFFCBD5E1)),
+                                    : CalcwiseSemanticColors.slateLight),
                           ),
                         ),
                       ),
@@ -701,7 +701,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             side: BorderSide(
                                 color: unlocked
                                     ? AppTheme.accentGood
-                                    : const Color(0xFFCBD5E1)),
+                                    : CalcwiseSemanticColors.slateLight),
                           ),
                         ),
                       ),
@@ -1306,13 +1306,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   const SizedBox(height: AppSpacing.xs),
                   Text(_fmtDate(isEs).format(createdAt.toLocal()),
                       style: const TextStyle(
-                          fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
+                          fontSize: AppTextSize.xs, color: CalcwiseSemanticColors.slateMid)),
                 ],
               ),
             ),
             PopupMenuButton<_PinAction>(
               icon: const Icon(Icons.more_vert_rounded,
-                  size: 18, color: Color(0xFF94A3B8)),
+                  size: 18, color: CalcwiseSemanticColors.slateMid),
               onSelected: (action) {
                 switch (action) {
                   case _PinAction.unpin:
@@ -1441,7 +1441,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   const SizedBox(height: AppSpacing.xs),
                   Text(_fmtDate(isEs).format(createdAt.toLocal()),
                       style: TextStyle(
-                          fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
+                          fontSize: AppTextSize.xs, color: CalcwiseSemanticColors.slateMid)),
                 ],
               ),
             ),
@@ -1566,7 +1566,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   const SizedBox(height: AppSpacing.xs),
                   Text(_fmtDate(isEs).format(createdAt.toLocal()),
                       style: TextStyle(
-                          fontSize: AppTextSize.xs, color: Color(0xFF94A3B8))),
+                          fontSize: AppTextSize.xs, color: CalcwiseSemanticColors.slateMid)),
                 ],
               ),
             ),
@@ -2134,7 +2134,7 @@ class _HistoryCompareScreen extends StatelessWidget {
                         vertical: AppSpacing.smPlus, horizontal: 6),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF475569),
+                      color: CalcwiseSemanticColors.slateText,
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Text(

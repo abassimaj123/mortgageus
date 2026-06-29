@@ -1591,7 +1591,7 @@ class _LtvRow extends StatelessWidget {
                 value: pct,
                 formatter: (v) => '${v.toStringAsFixed(0)}%',
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: AppTextSize.xxs,
                   fontWeight: FontWeight.w700,
                   color: gaugeColor,
                 ),

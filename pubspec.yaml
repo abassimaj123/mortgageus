@@ -15,7 +15,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
   intl: ^0.20.0
-  fl_chart: ^0.68.0
+  fl_chart: ^1.2.0
   pdf: ^3.11.1
   printing: ^5.13.1
   share_plus: ^10.1.4

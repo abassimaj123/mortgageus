@@ -200,7 +200,7 @@ class _ExtraPaymentsScreenState extends ConsumerState<ExtraPaymentsScreen> with 
                                           color: AppTheme.primary,
                                         )),
                                     Text(
-                                        '${inputState.annualRatePct}% for ${inputState.termYears} ${s.years}',
+                                        '${inputState.annualRatePct}% ${isEs ? 'por' : 'for'} ${inputState.termYears} ${s.years}',
                                         style: TextStyle(
                                             color: AppTheme.primary
                                                 .withValues(alpha: 0.7))),

@@ -160,7 +160,9 @@ class MortgageCalculator {
     );
 
     final totalInterest = schedule.last.cumulativeInterest;
-    final totalCost = loan + totalInterest;
+    // Use the financed amount (effectiveLoan) so USDA/FHA/VA total cost includes
+    // the financed upfront fee — base `loan` would understate it.
+    final totalCost = effectiveLoan + totalInterest;
     final payoffDate = schedule.last.date;
 
     // Find PMI drop month

@@ -809,7 +809,8 @@ class _SummaryCard extends StatelessWidget {
         _SummaryRow(s.totalInterest, AmountFormatter.ui(result.totalInterest, 'USD')),
         _SummaryRow(s.totalPayments, AmountFormatter.ui(result.totalCost, 'USD')),
         if (result.pmiDropMonth != null)
-          _SummaryRow(s.pmiRemoved, 'Month ${result.pmiDropMonth}'),
+          _SummaryRow(s.pmiRemoved,
+              '${isSpanishNotifier.value ? 'Mes' : 'Month'} ${result.pmiDropMonth}'),
       ]),
     );
   }

@@ -298,9 +298,8 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                     children: [
                       // Header info
                       Semantics(
-                        label: isEs
-                            ? '${str.home} ${AmountFormatter.ui(s.homePrice, 'USD')}, ${str.down} ${AmountFormatter.ui(s.downPaymentDollar, 'USD')} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%'
-                            : '${str.home} ${AmountFormatter.ui(s.homePrice, 'USD')}, ${str.down} ${AmountFormatter.ui(s.downPaymentDollar, 'USD')} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%',
+                        label:
+                            '${str.home} ${AmountFormatter.ui(s.homePrice, 'USD')}, ${str.down} ${AmountFormatter.ui(s.downPaymentDollar, 'USD')} (${s.downPaymentPct.toStringAsFixed(1)}%), ${str.rate} ${s.annualRatePct}%',
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.lg,
@@ -868,7 +867,10 @@ class _ArmCompareTable extends StatelessWidget {
       Row(children: [
         const Expanded(flex: 3, child: SizedBox()),
         Expanded(
-            flex: 4, child: _ScenarioHeader('Fixed 30yr', AppTheme.primary)),
+            flex: 4,
+            child: _ScenarioHeader(
+                isSpanishNotifier.value ? 'Fija 30 años' : 'Fixed 30yr',
+                AppTheme.primary)),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
             flex: 4,
@@ -942,7 +944,7 @@ class _ArmCompareTable extends StatelessWidget {
                       style: const TextStyle(fontSize: AppTextSize.md)),
               ] else ...[
                 Text(
-                  '${s.armTotalInterest}: ${AmountFormatter.ui(armInterestSavings.abs(), 'USD')} more vs fixed',
+                  '${s.armTotalInterest}: ${AmountFormatter.ui(armInterestSavings.abs(), 'USD')} ${isSpanishNotifier.value ? 'más vs fija' : 'more vs fixed'}',
                   style: const TextStyle(
                       color: CalcwiseSemanticColors.warnIcon,
                       fontWeight: FontWeight.bold,
@@ -950,7 +952,9 @@ class _ArmCompareTable extends StatelessWidget {
                 ),
                 const SizedBox(height: AppRadius.sm),
                 Text(
-                  'Rate reset to ${adjRate.toStringAsFixed(2)}% increases long-term cost.',
+                  isSpanishNotifier.value
+                      ? 'El reajuste de tasa a ${adjRate.toStringAsFixed(2)}% aumenta el costo a largo plazo.'
+                      : 'Rate reset to ${adjRate.toStringAsFixed(2)}% increases long-term cost.',
                   style: const TextStyle(fontSize: AppTextSize.md),
                 ),
               ],

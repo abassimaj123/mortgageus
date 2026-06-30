@@ -1138,12 +1138,12 @@ class _HeroCard extends StatelessWidget {
             ? null
             : [
                 (
-                  label: 'Total Interest',
+                  label: s.totalInterest,
                   value: result!.totalInterest,
                   formatter: (v) => AmountFormatter.ui(v, 'USD'),
                 ),
                 (
-                  label: 'Total Cost',
+                  label: s.totalCost,
                   value: result!.totalCost,
                   formatter: (v) => AmountFormatter.ui(v, 'USD'),
                 ),
@@ -1640,11 +1640,16 @@ class _DecisionTimeline extends StatelessWidget {
   }
 
   String _fmt(DateTime d) {
-    const monthNames = [
+    const monthNamesEn = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
-    return '${monthNames[d.month - 1]} ${d.year}';
+    const monthNamesEs = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    final names = isSpanishNotifier.value ? monthNamesEs : monthNamesEn;
+    return '${names[d.month - 1]} ${d.year}';
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:calcwise_core/calcwise_core.dart';
+import '../../main.dart' show isSpanishNotifier;
 
 /// Cross-promo banner: promotes Salary Calculator to free MortgageUS users.
 /// Dismissible · re-shown after 7 days · hidden for premium users.
@@ -94,7 +95,7 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
                       fontWeight: FontWeight.bold)),
             ),
             const SizedBox(width: AppRadius.sm),
-            Text('Also from us',
+            Text(isSpanishNotifier.value ? 'También de nosotros' : 'Also from us',
                 style: TextStyle(
                     fontSize: AppTextSize.xs, color: ct.textSecondary)),
           ]),
@@ -104,7 +105,7 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
                   fontSize: AppTextSize.md,
                   fontWeight: FontWeight.w600,
                   color: ct.textPrimary)),
-          Text(_tagline,
+          Text(isSpanishNotifier.value ? 'Conoce tu sueldo neto real' : _tagline,
               style:
                   TextStyle(fontSize: AppTextSize.xs, color: ct.textSecondary)),
         ])),
@@ -112,8 +113,8 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
         Column(children: [
           IconButton(
             onPressed: _dismiss,
-            tooltip: 'Dismiss',
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            tooltip: isSpanishNotifier.value ? 'Descartar' : 'Dismiss',
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             padding: EdgeInsets.zero,
             icon:
                 Icon(Icons.close_rounded, size: 16, color: ct.textSecondary),
@@ -128,8 +129,8 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
                 decoration: BoxDecoration(
                     color: _color,
                     borderRadius: BorderRadius.circular(AppRadius.md)),
-                child: const Text('Free',
-                    style: TextStyle(
+                child: Text(isSpanishNotifier.value ? 'Gratis' : 'Free',
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: AppTextSize.xs,
                         fontWeight: FontWeight.bold)),

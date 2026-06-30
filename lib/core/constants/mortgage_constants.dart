@@ -72,8 +72,9 @@ class MortgageConstants {
   // lender & credit), not a published statutory figure — kept hardcoded.
   static const double pmiDefaultAnnualRate =
       0.0080; // 0.80% — standard mid-range estimate
-  // Default mortgage rate tracks the live market, not a registry constant.
-  static const double defaultInterestRate = 6.5; // % — April 2026 market
+  // Default pre-fill shown to user before they enter their own rate; not
+  // used for calculations and not a market-accuracy claim.
+  static const double defaultInterestRate = 6.5; // %
 
   // ── Defaults ─────────────────────────────────────────────────────────────
   static const int defaultTermYears = 30;
@@ -81,6 +82,10 @@ class MortgageConstants {
   static const double defaultHomeInsurance = 1750.0; // $/year average
   static const double defaultDownPaymentPct = 20.0; // %
   static const double defaultRefiClosingCosts = 4000.0;
+  /// Purchase closing costs estimate (decimal % of purchase price).
+  /// Used for purchase-analysis tools (e.g. investment property purchases),
+  /// distinct from `defaultRefiClosingCosts` which is a flat refi estimate.
+  static const double defaultPurchaseClosingCostsPct = 0.02; // 2% of price
 
   // ── Term presets ─────────────────────────────────────────────────────────
   static const List<int> termPresets = [10, 15, 20, 25, 30];

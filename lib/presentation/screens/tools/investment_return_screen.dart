@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/irr_engine.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/mortgage_constants.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/freemium/freemium_service.dart';
 import '../../../core/freemium/iap_service.dart';
@@ -203,7 +204,8 @@ class _InvestmentReturnScreenState
 
     final downAmt = price * _downPct / 100;
     final loanAmt = price - downAmt;
-    final closingCosts = price * 0.02; // 2% closing costs estimate
+    final closingCosts =
+        price * MortgageConstants.defaultPurchaseClosingCostsPct;
     final initialInv = downAmt + closingCosts;
 
     final mortgageMo = loanAmt > 0

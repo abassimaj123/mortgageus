@@ -2022,10 +2022,13 @@ class _HistoryCompareScreen extends StatelessWidget {
 
   String _fmt(dynamic v) => AmountFormatter.ui((v as num?)?.toDouble() ?? 0.0, 'USD');
 
-  Color _winner(double v1, double v2, {required bool lowerIsBetter}) {
+  Color _winner(BuildContext context, double v1, double v2,
+      {required bool lowerIsBetter}) {
+    final loseColor =
+        CalcwiseSemanticColors.error(Theme.of(context).brightness);
     if (lowerIsBetter)
-      return v1 < v2 ? AppTheme.accentGood : const Color(0xFFEF4444);
-    return v1 > v2 ? AppTheme.accentGood : const Color(0xFFEF4444);
+      return v1 < v2 ? AppTheme.accentGood : loseColor;
+    return v1 > v2 ? AppTheme.accentGood : loseColor;
   }
 
   @override
@@ -2051,22 +2054,22 @@ class _HistoryCompareScreen extends StatelessWidget {
         label: isEs ? 'Pago mensual' : 'Monthly Payment',
         v1: _fmt(monthly1),
         v2: _fmt(monthly2),
-        c1: _winner(monthly1, monthly2, lowerIsBetter: true),
-        c2: _winner(monthly2, monthly1, lowerIsBetter: true),
+        c1: _winner(context, monthly1, monthly2, lowerIsBetter: true),
+        c2: _winner(context, monthly2, monthly1, lowerIsBetter: true),
       ),
       _CRow(
         label: isEs ? 'Interés total' : 'Total Interest',
         v1: _fmt(interest1),
         v2: _fmt(interest2),
-        c1: _winner(interest1, interest2, lowerIsBetter: true),
-        c2: _winner(interest2, interest1, lowerIsBetter: true),
+        c1: _winner(context, interest1, interest2, lowerIsBetter: true),
+        c2: _winner(context, interest2, interest1, lowerIsBetter: true),
       ),
       _CRow(
         label: isEs ? 'Costo total' : 'Total Cost',
         v1: _fmt(total1),
         v2: _fmt(total2),
-        c1: _winner(total1, total2, lowerIsBetter: true),
-        c2: _winner(total2, total1, lowerIsBetter: true),
+        c1: _winner(context, total1, total2, lowerIsBetter: true),
+        c2: _winner(context, total2, total1, lowerIsBetter: true),
       ),
       _CRow(
         label: isEs ? 'Precio vivienda' : 'Home Price',
@@ -2079,8 +2082,8 @@ class _HistoryCompareScreen extends StatelessWidget {
         label: isEs ? 'Tasa' : 'Rate',
         v1: '${rate1.toStringAsFixed(2)}%',
         v2: '${rate2.toStringAsFixed(2)}%',
-        c1: _winner(rate1, rate2, lowerIsBetter: true),
-        c2: _winner(rate2, rate1, lowerIsBetter: true),
+        c1: _winner(context, rate1, rate2, lowerIsBetter: true),
+        c2: _winner(context, rate2, rate1, lowerIsBetter: true),
       ),
       _CRow(
         label: isEs ? 'Plazo' : 'Term',
@@ -2167,7 +2170,10 @@ class _HistoryCompareScreen extends StatelessWidget {
                           .withValues(alpha: 0.65)),
                 ),
                 const SizedBox(width: AppSpacing.lg),
-                const Icon(Icons.circle, size: 10, color: Color(0xFFEF4444)),
+                Icon(Icons.circle,
+                    size: 10,
+                    color: CalcwiseSemanticColors.error(
+                        Theme.of(context).brightness)),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   isEs ? 'Valor más alto' : 'Higher value',

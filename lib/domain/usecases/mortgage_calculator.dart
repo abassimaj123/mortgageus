@@ -129,9 +129,16 @@ class MortgageCalculator {
 
     final isUsda = input.loanType == LoanType.usda;
     final isVa = input.loanType == LoanType.va;
+    final isFha = input.loanType == LoanType.fha;
 
     // USDA: 1% upfront guarantee fee is financed into the loan
-    final effectiveLoan = isUsda ? loan * 1.01 : loan;
+    // FHA: 1.75% upfront MIP (UFMIP) is financed into the loan
+    double effectiveLoan = loan;
+    if (isUsda) {
+      effectiveLoan = loan * 1.01;
+    } else if (isFha) {
+      effectiveLoan = loan * (1.0 + MortgageConstants.fhaUpfrontMip);
+    }
 
     final pi = calcMonthlyPayment(
       loanAmount: effectiveLoan,
@@ -144,9 +151,19 @@ class MortgageCalculator {
     final insuranceMonthly = input.homeInsuranceAnnual / 12.0;
     final ltv = input.ltv;
 
-    // PMI / USDA annual fee (0.35% — never drops)
-    final hasPmi = isUsda || (ltv > 80.0 && !isVa);
-    final pmiRate = isUsda ? 0.35 : input.pmiAnnualRatePct;
+    // PMI / USDA/FHA annual fee (never drops for USDA/FHA)
+    // FHA: 0.55% for LTV > 90%, 0.50% for LTV ≤ 90%
+    final hasPmi = isUsda || isFha || (ltv > 80.0 && !isVa);
+    double pmiRate;
+    if (isUsda) {
+      pmiRate = 0.35; // USDA annual guarantee fee
+    } else if (isFha) {
+      pmiRate = ltv > 90.0
+          ? MortgageConstants.fhaAnnualMip * 100.0 // Convert to percentage
+          : MortgageConstants.fhaAnnualMipLowLtv * 100.0;
+    } else {
+      pmiRate = input.pmiAnnualRatePct;
+    }
     final pmiMonthly = hasPmi ? (effectiveLoan * pmiRate / 100.0) / 12.0 : 0.0;
 
     final schedule = buildSchedule(
@@ -155,7 +172,7 @@ class MortgageCalculator {
       termYears: input.termYears,
       homePrice: input.homePrice,
       pmiAnnualRatePct: pmiRate,
-      pmiNeverDrops: isUsda,
+      pmiNeverDrops: isUsda || isFha, // FHA MIP never drops
       startDate: input.startDate,
     );
 

@@ -1858,12 +1858,17 @@ class _CompareBarChart extends StatelessWidget {
             ),
           ]),
           const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            height: 200,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: maxVal * 1.2,
+          Semantics(
+            label: isEs
+                ? 'Gráfico de comparación: pago mensual, interés total y costo total de $labelA frente a $labelB'
+                : 'Comparison chart: monthly payment, total interest, and total cost of $labelA versus $labelB',
+            excludeSemantics: true,
+            child: SizedBox(
+              height: 200,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: maxVal * 1.2,
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipItem: (group, groupIndex, rod, rodIndex) =>
@@ -1948,6 +1953,7 @@ class _CompareBarChart extends StatelessWidget {
                 }),
               ),
               swapAnimationDuration: CalcwiseChartTokens.swapDuration,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.md),

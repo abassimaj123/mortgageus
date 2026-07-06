@@ -210,11 +210,15 @@ class _AffordabilityPdfParams {
   final double downPayment;
   final double annualRatePct;
   final int termYears;
+  final double propertyTaxRatePct;
+  final double homeInsuranceAnnual;
+  final double hoaMonthly;
   final AffordabilityResult result;
   final bool isEs;
   const _AffordabilityPdfParams({
     required this.annualIncome, required this.monthlyDebts, required this.downPayment,
     required this.annualRatePct, required this.termYears,
+    required this.propertyTaxRatePct, required this.homeInsuranceAnnual, required this.hoaMonthly,
     required this.result, required this.isEs,
   });
 }
@@ -489,7 +493,11 @@ Future<Uint8List> _buildAffordabilityPdf(_AffordabilityPdfParams p) async {
     build: (_) => PdfExportService._buildAffordabilityPage(
       annualIncome: p.annualIncome, monthlyDebts: p.monthlyDebts,
       downPayment: p.downPayment, annualRatePct: p.annualRatePct,
-      termYears: p.termYears, result: p.result, isEs: p.isEs,
+      termYears: p.termYears,
+      propertyTaxRatePct: p.propertyTaxRatePct,
+      homeInsuranceAnnual: p.homeInsuranceAnnual,
+      hoaMonthly: p.hoaMonthly,
+      result: p.result, isEs: p.isEs,
     ),
   ));
   return await pdf.save();
@@ -2412,6 +2420,9 @@ class PdfExportService {
     required double downPayment,
     required double annualRatePct,
     required int termYears,
+    required double propertyTaxRatePct,
+    required double homeInsuranceAnnual,
+    required double hoaMonthly,
     required AffordabilityResult result,
     bool isEs = false,
   }) async {
@@ -2419,7 +2430,11 @@ class PdfExportService {
       () => _buildAffordabilityPdf(_AffordabilityPdfParams(
         annualIncome: annualIncome, monthlyDebts: monthlyDebts,
         downPayment: downPayment, annualRatePct: annualRatePct,
-        termYears: termYears, result: result, isEs: isEs,
+        termYears: termYears,
+        propertyTaxRatePct: propertyTaxRatePct,
+        homeInsuranceAnnual: homeInsuranceAnnual,
+        hoaMonthly: hoaMonthly,
+        result: result, isEs: isEs,
       )),
     );
     final tmpDir = await getTemporaryDirectory();
@@ -2436,6 +2451,9 @@ class PdfExportService {
     required double downPayment,
     required double annualRatePct,
     required int termYears,
+    required double propertyTaxRatePct,
+    required double homeInsuranceAnnual,
+    required double hoaMonthly,
     required AffordabilityResult result,
     bool isEs = false,
   }) {
@@ -2448,6 +2466,9 @@ class PdfExportService {
     final tRate = isEs ? 'Tasa de interés' : 'Interest Rate';
     final tTerm = isEs ? 'Plazo' : 'Loan Term';
     final tYears = isEs ? 'años' : 'years';
+    final tTaxRateInput = isEs ? 'Tasa impuesto predial' : 'Property Tax Rate';
+    final tInsuranceInput = isEs ? 'Seguro del hogar (anual)' : 'Home Insurance (annual)';
+    final tHoaInput = isEs ? 'HOA mensual' : 'HOA Monthly';
     final tResults = isEs ? 'PRECIOS MÁXIMOS' : 'MAX HOME PRICES';
     final tConservative = isEs ? 'Conservador (28% DTI)' : 'Conservative (28% DTI)';
     final tStandard = isEs ? 'Estándar (43% DTI)' : 'Standard (43% DTI)';
@@ -2523,6 +2544,10 @@ class PdfExportService {
                   _row2(tDownPayment, _usd0.format(downPayment)),
                   _row2(tRate, '${annualRatePct.toStringAsFixed(2)}%'),
                   _row2(tTerm, '$termYears $tYears'),
+                  _row2(tTaxRateInput, '${propertyTaxRatePct.toStringAsFixed(2)}%'),
+                  _row2(tInsuranceInput, _usd0.format(homeInsuranceAnnual)),
+                  if (hoaMonthly > 0)
+                    _row2(tHoaInput, _usd0.format(hoaMonthly)),
                 ]),
                 pw.SizedBox(height: 10),
                 _sectionBox(tVerdictSection, [

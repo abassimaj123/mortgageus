@@ -258,5 +258,78 @@ void main() {
           reason: 'Pinned scenario must survive ring buffer eviction');
       expect(pinned.first.l1['home_price'], 750000.0);
     });
+
+    // Regression: affordability_screen.dart previously excluded tax_rate /
+    // insurance / hoa from the L2 save map even though these fields reach the
+    // engine and change the calculated max-home-price. Reopening a saved
+    // scenario would silently recompute against hardcoded defaults
+    // (1.1% tax / $1750 insurance / $0 HOA) instead of the user's real inputs.
+    test('scenario: affordability save→restore round-trip preserves custom tax/insurance/HOA',
+        () async {
+      const income = 120000.0;
+      const debts = 400.0;
+      const down = 80000.0;
+      const rate = 6.5;
+      const termYears = 30;
+      // Deliberately non-default values — the bug this test guards against
+      // silently drops these back to 1.1% / $1750 / $0 on restore.
+      const customTaxRate = 2.4;
+      const customInsurance = 3200.0;
+      const customHoa = 250.0;
+
+      final hash = ResultHasher.hashMixed({
+        'income': ResultHasher.roundTo(income, 5000),
+        'debts': ResultHasher.roundTo(debts, 100),
+        'rate': ResultHasher.roundTo(rate, 0.25),
+        'term': termYears.toDouble(),
+      });
+
+      await svc.saveScenario(
+        appKey: 'mortgageus',
+        screenId: 'affordability',
+        inputHash: hash,
+        l1: {
+          'income': income,
+          'max_home_price': 420000.0,
+          'max_monthly': 2800.0,
+          'down_pct': 19.0,
+        },
+        l2: {
+          'inputs': {
+            'annual_income': income,
+            'monthly_debts': debts,
+            'down_payment': down,
+            'rate': rate,
+            'term_years': termYears,
+            'tax_rate': customTaxRate,
+            'insurance': customInsurance,
+            'hoa': customHoa,
+          },
+          'results': {
+            'max_loan': 340000.0,
+            'max_home_price': 420000.0,
+            'max_monthly': 2800.0,
+            'dti': 2100.0,
+          },
+        },
+        label: 'Custom affordability scenario',
+      );
+
+      final pinned = await svc.getPinned('mortgageus');
+      expect(pinned, isNotEmpty);
+      final restoredInputs =
+          pinned.first.l2['inputs'] as Map<String, dynamic>;
+
+      expect(restoredInputs['tax_rate'], customTaxRate,
+          reason: 'Custom property tax rate must round-trip through save/restore');
+      expect(restoredInputs['insurance'], customInsurance,
+          reason: 'Custom home insurance must round-trip through save/restore');
+      expect(restoredInputs['hoa'], customHoa,
+          reason: 'Custom HOA must round-trip through save/restore');
+      // Guard against silently falling back to the screen's hardcoded defaults.
+      expect(restoredInputs['tax_rate'], isNot(1.1));
+      expect(restoredInputs['insurance'], isNot(1750.0));
+      expect(restoredInputs['hoa'], isNot(0.0));
+    });
   });
 }

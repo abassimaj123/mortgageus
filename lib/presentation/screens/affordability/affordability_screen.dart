@@ -151,6 +151,9 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
             'down_payment': down,
             'rate': rate,
             'term_years': _termYears,
+            'tax_rate': tax,
+            'insurance': ins,
+            'hoa': hoa,
           },
           'results': {
             'max_loan': maxHomePrice - down,
@@ -176,6 +179,10 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
     final debts = double.tryParse(_debtsCtrl.text.replaceAll(',', '')) ?? 0;
     final down = double.tryParse(_downCtrl.text.replaceAll(',', '')) ?? 0;
     final rate = double.tryParse(_rateCtrl.text) ?? MortgageConstants.defaultInterestRate;
+    final tax = double.tryParse(_taxCtrl.text) ?? 1.1;
+    final ins =
+        double.tryParse(_insuranceCtrl.text.replaceAll(',', '')) ?? 1750;
+    final hoa = double.tryParse(_hoaCtrl.text.replaceAll(',', '')) ?? 0;
     final maxHomePrice = r.maxHomePriceStandard > 0 ? r.maxHomePriceStandard : r.maxHomePriceConservative;
     final hash = ResultHasher.hashMixed({
       'income': _roundTo(income, 5000),
@@ -201,6 +208,9 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
           'down_payment': down,
           'rate': rate,
           'term_years': _termYears,
+          'tax_rate': tax,
+          'insurance': ins,
+          'hoa': hoa,
         },
         'results': {
           'max_loan': maxHomePrice - down,
@@ -223,6 +233,10 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
     final debts = double.tryParse(_debtsCtrl.text.replaceAll(',', '')) ?? 0;
     final down = double.tryParse(_downCtrl.text.replaceAll(',', '')) ?? 0;
     final rate = double.tryParse(_rateCtrl.text) ?? MortgageConstants.defaultInterestRate;
+    final tax = double.tryParse(_taxCtrl.text) ?? 1.1;
+    final ins =
+        double.tryParse(_insuranceCtrl.text.replaceAll(',', '')) ?? 1750;
+    final hoa = double.tryParse(_hoaCtrl.text.replaceAll(',', '')) ?? 0;
     await PdfExportService.showUnlockOrPay(context, () async {
       await PdfExportService.exportAffordability(
         context,
@@ -231,6 +245,9 @@ class _AffordabilityScreenState extends ConsumerState<AffordabilityScreen> {
         downPayment: down,
         annualRatePct: rate,
         termYears: _termYears,
+        propertyTaxRatePct: tax,
+        homeInsuranceAnnual: ins,
+        hoaMonthly: hoa,
         result: r,
         isEs: isEs,
       );

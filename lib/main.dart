@@ -82,6 +82,9 @@ AppStringsES get strES => AppStringsES();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Android 15+ (API 35) forces edge-to-edge; draw under transparent system
+  // bars ourselves instead of painting them opaque (deprecated pattern).
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await initializeDateFormatting('en_US', null);
   await initializeDateFormatting('es_US', null);
 
@@ -294,7 +297,10 @@ class _MainShellState extends State<_MainShell> {
         builder: (context, isEs, _) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
           SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-            systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+            // Transparent — the app draws under the system nav bar
+            // (edge-to-edge) instead of painting it opaque, per Android 15's
+            // forced behavior.
+            systemNavigationBarColor: Colors.transparent,
             systemNavigationBarIconBrightness:
                 isDark ? Brightness.light : Brightness.dark,
           ));

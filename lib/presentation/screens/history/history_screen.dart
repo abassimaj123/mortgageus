@@ -6,9 +6,10 @@ import 'package:intl/intl.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/freemium/freemium_service.dart';
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/pdf_export_service.dart';
+import '../../widgets/paywall_hard.dart';
 import '../../../domain/models/loan_type.dart';
 import '../../../domain/models/mortgage_input.dart';
 import '../../../domain/usecases/mortgage_calculator.dart';
@@ -215,6 +216,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _rename(Map<String, dynamic> row, bool isEs) async {
     HapticFeedback.mediumImpact();
+    if (!freemiumService.hasFullAccess) {
+      await PaywallHard.show(context);
+      return;
+    }
     final ctrl = TextEditingController(
       text: (row['pin_label'] as String?) ?? '',
     );

@@ -3543,6 +3543,10 @@ class PdfExportService {
     BuildContext context,
     Future<void> Function() onExport,
   ) async {
+    if (freemiumService.hasFullAccess) {
+      await onExport();
+      return;
+    }
     final isEs = isSpanishNotifier.value;
     await PaywallHard.show(
       context,
@@ -3551,8 +3555,6 @@ class PdfExportService {
           ? ['Exportar PDF completo', 'Sin anuncios', 'Historial ilimitado', 'Acceso completo']
           : ['Full PDF export', 'No ads', 'Unlimited history', 'Full access'],
     );
-    if (!freemiumService.hasFullAccess) return;
-    await onExport();
   }
 
   // ── PMI Simple PDF export (pmi_screen) ───────────────────────────────────

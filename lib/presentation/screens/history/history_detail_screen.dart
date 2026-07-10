@@ -362,7 +362,7 @@ class _BottomBar extends StatelessWidget {
                         fontWeight: FontWeight.w600)),
                 onPressed: () async {
                   if (!isPremium && !freemiumService.isRewarded) {
-                    if (context.mounted) await PaywallHard.show(context);
+                    if (context.mounted) await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
                     return;
                   }
                   if (!context.mounted) return;

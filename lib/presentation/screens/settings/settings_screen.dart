@@ -70,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             label: s.getPremium,
                             subtitle: s.premiumSubtitle as String?,
                             trailing: price ?? '—',
-                            onTap: () => PaywallHard.show(context),
+                            onTap: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                           ),
                         ),
                         CalcwiseSettingsTile(

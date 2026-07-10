@@ -36,6 +36,9 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
     AnalyticsService.instance.logScreenView('pmi');
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice > 0 ? input.homePrice.toStringAsFixed(0) : '400000';
+    if (input.downPaymentPct > 0 && input.downPaymentPct < 20) {
+      _downPct = input.downPaymentPct;
+    }
   }
 
   Future<void> _onInteraction() async {
@@ -89,8 +92,8 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
       AnalyticsService.instance.logPmiCalculated();
       final trigger = await paywallSession.recordAction();
       if (!mounted) return;
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
     }
   }
 

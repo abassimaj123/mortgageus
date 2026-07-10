@@ -111,8 +111,8 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
     AnalyticsService.instance.logPmiStandaloneCalculated();
     final t = await paywallSession.recordAction();
     if (!mounted) return;
-    if (t == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (t == PaywallTrigger.hard) PaywallHard.show(context);
+    if (t == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (t == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   Future<void> _saveScenario(String? label) async {
@@ -156,6 +156,7 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
     AnalyticsService.instance.logHistorySaved();
   }
 

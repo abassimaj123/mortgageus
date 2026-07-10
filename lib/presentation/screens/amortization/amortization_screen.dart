@@ -342,7 +342,7 @@ class _AmortizationScreenState extends ConsumerState<AmortizationScreen> {
                                   }
                                 }
                               } else {
-                                PaywallHard.show(context);
+                                PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
                               }
                             },
                             icon: Icon(
@@ -883,7 +883,7 @@ class _YearlyList extends StatelessWidget {
                   ? '+$_lockedYears años · +$_lockedMonths meses restantes'
                   : '+$_lockedYears years · +$_lockedMonths months remaining',
               price: IAPService.instance.localizedPrice,
-              onUnlock: () => PaywallHard.show(context),
+              onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
               buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
               subtitle: isEs
                   ? 'Acceso único · Sin suscripción'
@@ -1199,7 +1199,7 @@ class _MonthlyList extends StatelessWidget {
                   ? '+$_lockedYears años · +$_lockedMonths meses restantes'
                   : '+$_lockedYears years · +$_lockedMonths months remaining',
               price: IAPService.instance.localizedPrice,
-              onUnlock: () => PaywallHard.show(context),
+              onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
               buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
               subtitle: isEs
                   ? 'Acceso único · Sin suscripción'

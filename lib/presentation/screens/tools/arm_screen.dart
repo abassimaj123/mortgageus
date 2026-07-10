@@ -40,8 +40,8 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
     _logged = true;
     final t = await paywallSession.recordAction();
     if (!mounted) return;
-    if (t == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (t == PaywallTrigger.hard) PaywallHard.show(context);
+    if (t == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (t == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   static const _fixedOptions = [5, 7, 10];
@@ -134,6 +134,7 @@ class _ArmScreenState extends ConsumerState<ArmScreen> with CalcwiseAutoCalcMixi
           },
         },
       );
+      HistoryScreen.refreshNotifier.value++;
     } catch (_) {
       setState(() => _result = null);
     }

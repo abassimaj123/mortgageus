@@ -106,8 +106,8 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
     AnalyticsService.instance.logPointsCalculated();
     final t = await paywallSession.recordAction();
     if (!mounted) return;
-    if (t == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (t == PaywallTrigger.hard) PaywallHard.show(context);
+    if (t == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (t == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   Future<void> _saveScenario(String? label) async {
@@ -152,6 +152,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
     AnalyticsService.instance.logHistorySaved();
   }
 

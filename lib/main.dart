@@ -322,7 +322,7 @@ class _MainShellState extends State<_MainShell> {
                     ),
                   ),
                   onRewardAd: () => CalcwiseRewardAdSheet.show(context),
-                  onPremium: () => PaywallHard.show(context),
+                  onPremium: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                 ),
               ],
             ),
@@ -359,10 +359,10 @@ class _MainShellState extends State<_MainShell> {
                 if (!mounted) return;
                 if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
                 if (trigger == PaywallTrigger.soft) {
-                  PaywallSoft.show(context);
+                  PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
                 }
                 if (trigger == PaywallTrigger.hard) {
-                  PaywallHard.show(context);
+                  PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
                 }
               },
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,

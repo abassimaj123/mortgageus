@@ -109,7 +109,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
   ) async {
     HapticFeedback.mediumImpact();
     if (!freemiumService.hasFullAccess) {
-      PaywallSoft.show(context);
+      PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
       return;
     }
     setState(() => _isSaving = true);
@@ -500,7 +500,7 @@ class _ComparatorScreenState extends ConsumerState<ComparatorScreen> {
                                       }
                                     }
                                   } else {
-                                    PaywallHard.show(context);
+                                    PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
                                   }
                                 },
                                 icon: Icon(

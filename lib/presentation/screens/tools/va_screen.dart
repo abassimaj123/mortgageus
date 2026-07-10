@@ -42,6 +42,13 @@ class _VaScreenState extends ConsumerState<VaScreen> {
     AnalyticsService.instance.maybeLogFirstCalculate();
     final input = ref.read(mortgageInputProvider);
     _homePriceCtrl.text = input.homePrice.toStringAsFixed(0);
+    if (input.homePrice > 0) {
+      final monthlyTax = input.homePrice * input.propertyTaxRatePct / 100 / 12;
+      if (monthlyTax > 0) _taxCtrl.text = monthlyTax.toStringAsFixed(0);
+    }
+    if (input.homeInsuranceAnnual > 0) {
+      _insCtrl.text = (input.homeInsuranceAnnual / 12).toStringAsFixed(0);
+    }
   }
 
   @override
@@ -109,8 +116,8 @@ class _VaScreenState extends ConsumerState<VaScreen> {
     AnalyticsService.instance.logVaCalculated();
     final t = await paywallSession.recordAction();
     if (!mounted) return;
-    if (t == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (t == PaywallTrigger.hard) PaywallHard.show(context);
+    if (t == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (t == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   Future<void> _saveScenario(String? label) async {

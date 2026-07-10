@@ -217,7 +217,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _rename(Map<String, dynamic> row, bool isEs) async {
     HapticFeedback.mediumImpact();
     if (!freemiumService.hasFullAccess) {
-      await PaywallHard.show(context);
+      await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
       return;
     }
     final ctrl = TextEditingController(
@@ -264,7 +264,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // Free users: enforce pin limit
     if (!freemiumService.hasFullAccess) {
       if (_pinned.length >= MonetizationConfig.freePinnedLimit) {
-        await PaywallSoft.show(context);
+        await PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
         return;
       }
     }
@@ -982,7 +982,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               ),
                                               TextButton(
                                                 onPressed: () =>
-                                                    PaywallHard.show(context),
+                                                    PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                                                 style: TextButton.styleFrom(
                                                     padding: EdgeInsets.zero),
                                                 child: Text(

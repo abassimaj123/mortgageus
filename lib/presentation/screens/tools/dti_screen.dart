@@ -239,8 +239,8 @@ class _DtiScreenState extends ConsumerState<DtiScreen> {
     AnalyticsService.instance.logDtiCalculated();
     final t = await paywallSession.recordAction();
     if (!mounted) return;
-    if (t == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (t == PaywallTrigger.hard) PaywallHard.show(context);
+    if (t == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (t == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   double _parse(String s) =>

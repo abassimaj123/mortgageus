@@ -120,8 +120,8 @@ class _InvestmentReturnScreenState
       AnalyticsService.instance.logInvestmentReturnCalculated();
       final trigger = await paywallSession.recordAction();
       if (!mounted) return;
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
     }
   }
 
@@ -164,6 +164,7 @@ class _InvestmentReturnScreenState
       },
       label: label,
     );
+    HistoryScreen.refreshNotifier.value++;
     AnalyticsService.instance.logHistorySaved();
   }
 
@@ -488,7 +489,7 @@ class _ResultsSection extends StatelessWidget {
                         ? 'Desbloquea IRR, NPV y análisis completo'
                         : 'Unlock IRR, NPV & full analysis',
                     price: IAPService.instance.localizedPrice,
-                    onUnlock: () => PaywallHard.show(context),
+                    onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                     buttonLabel: isEs ? 'Desbloquear Premium' : 'Unlock Premium',
                     subtitle: isEs
                         ? 'Acceso único · Sin suscripción'

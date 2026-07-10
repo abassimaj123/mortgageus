@@ -125,6 +125,11 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
     final result = ref.read(mortgageResultProvider);
     if (result == null || result.loanAmount <= 0) return null;
     final inputState = ref.read(mortgageInputProvider);
+    // Guard against transient mid-typing states (e.g. home price briefly
+    // "$4" while retyping "$400,000") — an implausibly low home price still
+    // yields a positive loanAmount and would otherwise persist a
+    // nonsensical entry to History looking like a real saved scenario.
+    if (inputState.homePrice < 10000) return null;
     return ResultHasher.hashMixed({
       'home': ResultHasher.roundTo(inputState.homePrice, 1000),
       'down': ResultHasher.roundTo(inputState.downPaymentPct, 0.5),

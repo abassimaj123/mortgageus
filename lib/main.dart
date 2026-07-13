@@ -296,11 +296,11 @@ class _MainShellState extends State<_MainShell> {
         valueListenable: isSpanishNotifier,
         builder: (context, isEs, _) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
+          // No color params — MainActivity already enables edge-to-edge, so
+          // bars are transparent by default. Setting systemNavigationBarColor
+          // here, even to Colors.transparent, triggers Android 15's
+          // deprecated Window.setNavigationBarColor.
           SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-            // Transparent — the app draws under the system nav bar
-            // (edge-to-edge) instead of painting it opaque, per Android 15's
-            // forced behavior.
-            systemNavigationBarColor: Colors.transparent,
             systemNavigationBarIconBrightness:
                 isDark ? Brightness.light : Brightness.dark,
           ));

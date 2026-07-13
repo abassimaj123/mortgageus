@@ -83,12 +83,12 @@ class DatabaseHelper {
   }
 
   Future<List<Map<String, dynamic>>> getHistory({
-    String screenId = 'mortgage_calculator',
+    String? screenId,
   }) async {
     final db = await database;
     return db.query('mortgage_us',
-        where: 'screen_id = ?',
-        whereArgs: [screenId],
+        where: screenId == null ? null : 'screen_id = ?',
+        whereArgs: screenId == null ? null : [screenId],
         orderBy: 'is_pinned DESC, pin_order DESC, created_at DESC');
   }
 
@@ -106,40 +106,60 @@ class DatabaseHelper {
 
   Future<int> countHistory({
     bool? isPinned,
-    String screenId = 'mortgage_calculator',
+    String? screenId,
   }) async {
     final db = await database;
-    final String sql;
-    if (isPinned == null) {
-      sql = "SELECT COUNT(*) FROM mortgage_us WHERE screen_id = '$screenId'";
-    } else {
-      sql =
-          "SELECT COUNT(*) FROM mortgage_us WHERE screen_id = '$screenId' AND is_pinned = ${isPinned ? 1 : 0}";
+    final where = <String>[];
+    final whereArgs = <Object>[];
+    if (screenId != null) {
+      where.add('screen_id = ?');
+      whereArgs.add(screenId);
     }
-    final result = await db.rawQuery(sql);
+    if (isPinned != null) {
+      where.add('is_pinned = ?');
+      whereArgs.add(isPinned ? 1 : 0);
+    }
+    final result = await db.query(
+      'mortgage_us',
+      columns: ['COUNT(*) AS c'],
+      where: where.isEmpty ? null : where.join(' AND '),
+      whereArgs: where.isEmpty ? null : whereArgs,
+    );
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
   Future<List<Map<String, dynamic>>> getOldestAutoSaves(
     int limit, {
-    String screenId = 'mortgage_calculator',
+    String? screenId,
   }) async {
     final db = await database;
+    final where = <String>['is_pinned = 0'];
+    final whereArgs = <Object>[];
+    if (screenId != null) {
+      where.add('screen_id = ?');
+      whereArgs.add(screenId);
+    }
     return db.query('mortgage_us',
-        where: 'is_pinned = 0 AND screen_id = ?',
-        whereArgs: [screenId],
+        where: where.join(' AND '),
+        whereArgs: whereArgs,
         orderBy: 'created_at ASC',
         limit: limit);
   }
 
   Future<List<Map<String, dynamic>>> getOldestPinnedEntries(
     int limit, {
-    String screenId = 'mortgage_calculator',
+    String? screenId,
   }) async {
     final db = await database;
+    final where = <String>['is_pinned = 1'];
+    final whereArgs = <Object>[];
+    if (screenId != null) {
+      where.add('screen_id = ?');
+      whereArgs.add(screenId);
+    }
     return db.query('mortgage_us',
-        where: 'is_pinned = 1 AND screen_id = ?',
-        whereArgs: [screenId],
+        where: where.join(' AND '),
+        whereArgs: whereArgs,
         orderBy: 'pin_order ASC, created_at ASC',
         limit: limit);
   }

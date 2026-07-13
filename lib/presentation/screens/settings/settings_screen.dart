@@ -50,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             // ── Premium ────────────────────────────────────────
             ValueListenableBuilder<bool>(
-              valueListenable: freemiumService.hasFullAccessNotifier,
+              valueListenable: freemiumService.isPremiumNotifier,
               builder: (context, isPremium, _) => CalcwiseSettingsSection(
                 title: 'Premium',
                 children: isPremium

@@ -92,10 +92,15 @@ class DatabaseHelper {
         orderBy: 'is_pinned DESC, pin_order DESC, created_at DESC');
   }
 
-  Future<Map<String, dynamic>?> getHistoryByHash(String hash) async {
+  Future<Map<String, dynamic>?> getHistoryByHash(
+    String hash, {
+    required String screenId,
+  }) async {
     final db = await database;
     final rows = await db.query('mortgage_us',
-        where: 'input_hash = ?', whereArgs: [hash], limit: 1);
+        where: 'input_hash = ? AND screen_id = ?',
+        whereArgs: [hash, screenId],
+        limit: 1);
     return rows.isEmpty ? null : rows.first;
   }
 

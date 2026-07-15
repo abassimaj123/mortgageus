@@ -46,11 +46,15 @@ class _MemoryAdapter implements DatabaseAdapter {
   @override
   Future<Map<String, dynamic>?> getRowByHash({
     required String appKey,
+    required String screenId,
     required String resultHash,
   }) async {
     try {
       return _rows.firstWhere(
-        (r) => r['app_key'] == appKey && r['result_hash'] == resultHash,
+        (r) =>
+            r['app_key'] == appKey &&
+            r['screen_id'] == screenId &&
+            r['result_hash'] == resultHash,
       );
     } catch (_) {
       return null;

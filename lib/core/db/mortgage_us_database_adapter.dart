@@ -8,8 +8,10 @@ import 'database_helper.dart';
 /// Bridges SmartHistoryService (which speaks HistoryEntry / l1_json / l2_json)
 /// to MortgageUS's flat sqflite `mortgage_us` table.
 ///
-/// `app_key` / `screen_id` are always 'mortgageus' / 'calculator' for this app.
-/// Only the MAIN calculator's single-result auto-save / scenarios are routed
+/// `app_key` is always 'mortgageus'; `screen_id` varies per calculator/tool
+/// screen (e.g. 'mortgage_calculator', 'affordability', 'refinance', 'dti', ...)
+/// and is persisted per-row so hash lookups/dedup stay scoped to the screen
+/// that produced them. Only single-result auto-save / scenarios are routed
 /// through SmartHistory — comparison pairs (comparison_id) are left untouched.
 class MortgageUSDatabaseAdapter implements DatabaseAdapter {
   static const _appKey = 'mortgageus';
@@ -87,9 +89,11 @@ class MortgageUSDatabaseAdapter implements DatabaseAdapter {
   @override
   Future<Map<String, dynamic>?> getRowByHash({
     required String appKey,
+    required String screenId,
     required String resultHash,
   }) async {
-    final row = await DatabaseHelper.instance.getHistoryByHash(resultHash);
+    final row = await DatabaseHelper.instance
+        .getHistoryByHash(resultHash, screenId: screenId);
     return row == null ? null : _toAdapterRow(row);
   }
 

@@ -326,19 +326,24 @@ class _MainShellState extends State<_MainShell> {
                 ),
               ],
             ),
-            body: Stack(
-              fit: StackFit.expand,
-              children: List.generate(
-                  _screens.length,
-                  (i) => IgnorePointer(
-                        ignoring: _index != i,
-                        child: CalcwiseTabReveal(
-                          active: _index == i,
-                          child: _screens[i],
-                        ),
-                      )),
+            body: SafeArea(
+              bottom: false,
+              child: Stack(
+                fit: StackFit.expand,
+                children: List.generate(
+                    _screens.length,
+                    (i) => IgnorePointer(
+                          ignoring: _index != i,
+                          child: CalcwiseTabReveal(
+                            active: _index == i,
+                            child: _screens[i],
+                          ),
+                        )),
+              ),
             ),
-            bottomNavigationBar: NavigationBar(
+            bottomNavigationBar: SafeArea(
+              top: false,
+              child: NavigationBar(
               selectedIndex: _index,
               onDestinationSelected: (i) async {
                 FocusManager.instance.primaryFocus?.unfocus();
@@ -388,6 +393,7 @@ class _MainShellState extends State<_MainShell> {
                     selectedIcon: const Icon(Icons.history),
                     label: s.navHistory),
               ],
+              ),
             ),
           );
         },

@@ -884,7 +884,7 @@ class _BarChart extends StatelessWidget {
   final bool isEs;
 
   static const List<Color> _palette = [
-    Color(0xFF1B3A6B),
+    Color(0xFF0564E6),
     Color(0xFF0D9488),
     Color(0xFFEA580C),
     Color(0xFF9B59B6),

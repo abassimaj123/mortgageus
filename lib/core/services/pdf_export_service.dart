@@ -22,8 +22,8 @@ import '../freemium/freemium_service.dart' show freemiumService;
 import '../../presentation/widgets/paywall_hard.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 
-// App navy color in PDF space
-const _navy = PdfColor(0.106, 0.227, 0.420); // #1B3A6B
+// App brand color in PDF space
+const _navy = PdfColor(0.0196, 0.3922, 0.9020); // #0564E6
 const _gold = PdfColor(0.831, 0.627, 0.090); // #D4A017
 const _light = PdfColor(0.945, 0.957, 0.980); // light blue-grey row alt
 

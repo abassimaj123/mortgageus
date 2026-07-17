@@ -4,7 +4,7 @@ import 'package:calcwise_core/calcwise_core.dart';
 class AppTheme {
   AppTheme._();
 
-  static const Color primary = Color(0xFF1B3A6B); // navy blue
+  static const Color primary = Color(0xFF0564E6); // brand blue (matches app icon)
   static const Color accent = Color(0xFFF59E0B); // amber
   // Aliases and extra palette
   static const Color secondary = accent; // compat alias used in main.dart

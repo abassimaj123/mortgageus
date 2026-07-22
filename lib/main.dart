@@ -385,8 +385,8 @@ class _MainShellState extends State<_MainShell> {
                     selectedIcon: const Icon(Icons.compare),
                     label: s.navCompare),
                 NavigationDestination(
-                    icon: const Icon(Icons.build_rounded),
-                    selectedIcon: const Icon(Icons.build_rounded),
+                    icon: const Icon(Icons.grid_view_rounded),
+                    selectedIcon: const Icon(Icons.grid_view_rounded),
                     label: s.navTools),
                 NavigationDestination(
                     icon: const Icon(Icons.history_rounded),

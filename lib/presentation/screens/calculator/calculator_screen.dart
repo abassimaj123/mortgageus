@@ -1124,6 +1124,7 @@ class _HeroCard extends StatelessWidget {
     final piPayment = result != null
         ? AmountFormatter.ui(result!.monthly.piPayment, 'USD')
         : null;
+    final isEs = isSpanishNotifier.value;
     return Semantics(
       label: result != null
           ? 'Total monthly payment PITI: $pitiPayment. '
@@ -1131,28 +1132,45 @@ class _HeroCard extends StatelessWidget {
               'Total interest: ${AmountFormatter.ui(result!.totalInterest, 'USD')}. '
               'Total cost: ${AmountFormatter.ui(result!.totalCost, 'USD')}.'
           : 'Monthly payment: enter values above to calculate',
-      child: CalcwiseHeroCard(
-        label: s.monthlyPITI as String,
-        value: pitiPayment,
-        rawValue: result?.monthly.pitiPayment,
-        valueFormatter: (v) => AmountFormatter.ui(v, 'USD'),
-        secondary: result != null
-            ? '${s.monthlyPILabel}: $piPayment'
-            : null,
-        rawStats: result == null
-            ? null
-            : [
-                (
-                  label: s.totalInterest,
-                  value: result!.totalInterest,
-                  formatter: (v) => AmountFormatter.ui(v, 'USD'),
-                ),
-                (
-                  label: s.totalCost,
-                  value: result!.totalCost,
-                  formatter: (v) => AmountFormatter.ui(v, 'USD'),
-                ),
-              ],
+      child: Column(
+        children: [
+          CalcwiseHeroCard(
+            label: s.monthlyPITI as String,
+            value: pitiPayment,
+            rawValue: result?.monthly.pitiPayment,
+            valueFormatter: (v) => AmountFormatter.ui(v, 'USD'),
+            secondary: result != null
+                ? '${s.monthlyPILabel}: $piPayment'
+                : null,
+            rawStats: result == null
+                ? null
+                : [
+                    (
+                      label: s.totalInterest,
+                      value: result!.totalInterest,
+                      formatter: (v) => AmountFormatter.ui(v, 'USD'),
+                    ),
+                    (
+                      label: s.totalCost,
+                      value: result!.totalCost,
+                      formatter: (v) => AmountFormatter.ui(v, 'USD'),
+                    ),
+                  ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(
+              isEs
+                  ? 'PITI = Capital + Interés + Impuestos + Seguro'
+                  : 'PITI = Principal + Interest + Taxes + Insurance',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppTextSize.xs,
+                color: CalcwiseTheme.of(context).textSecondary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

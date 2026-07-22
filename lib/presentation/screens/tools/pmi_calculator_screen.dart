@@ -279,7 +279,9 @@ class _PmiCalculatorScreenState extends ConsumerState<PmiCalculatorScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(isEs ? 'PMI detallado' : 'PMI Detail'),
+            title: Text(isEs
+                ? 'PMI por puntaje crediticio y LTV'
+                : 'PMI by Credit Score & LTV'),
           ),
           body: Column(children: [
             Expanded(

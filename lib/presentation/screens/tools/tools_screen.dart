@@ -4,7 +4,6 @@ import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
 import '../extra_payments/extra_payments_screen.dart';
 import '../refinance/refinance_screen.dart';
-import '../history/history_screen.dart';
 import '../../../../main.dart';
 import 'arm_screen.dart';
 import 'investment_return_screen.dart';
@@ -40,8 +39,14 @@ class _ToolsScreenState extends State<ToolsScreen> {
       valueListenable: isSpanishNotifier,
       builder: (context, isEs, _) {
         final AppStrings s = isEs ? AppStringsES() : AppStringsEN();
+        final sectionMyDecision =
+            isEs ? 'Mi Decisión' : 'My Decision';
+        final sectionLoanTypes =
+            isEs ? 'Tipos de Préstamo' : 'Loan Types';
+        final sectionCosts = isEs ? 'Costos' : 'Costs';
         final tools = [
           _ToolItem(
+            section: sectionMyDecision,
             icon: Icons.home_work_rounded,
             iconSelected: Icons.home_work,
             color: AppTheme.primary,
@@ -59,6 +64,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionMyDecision,
             icon: Icons.add_circle_outline,
             iconSelected: Icons.add_circle,
             color: AppTheme.primary,
@@ -74,10 +80,13 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionMyDecision,
             icon: Icons.balance_rounded,
             iconSelected: Icons.balance,
             color: const Color(0xFF0891B2), // cyan-600
-            title: isEs ? 'Relación Deuda-Ingreso' : 'DTI Calculator',
+            title: isEs
+                ? 'Deuda-Ingreso (¿Califico?)'
+                : 'Debt-to-Income (Can I Qualify?)',
             subtitle: isEs
                 ? 'Verifica tu elegibilidad con prestamistas'
                 : 'Check lender eligibility & max payment',
@@ -91,6 +100,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionMyDecision,
             icon: Icons.refresh_rounded,
             iconSelected: Icons.refresh_rounded,
             color: AppTheme.toolRefi,
@@ -106,13 +116,14 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionCosts,
             icon: Icons.security_rounded,
             iconSelected: Icons.security,
             color: AppTheme.toolPmi,
-            title: isEs ? 'Calculadora PMI' : 'PMI Calculator',
+            title: isEs ? 'Estimado de PMI' : 'PMI Estimate',
             subtitle: isEs
-                ? 'Calcula tu seguro hipotecario'
-                : 'Calculate your mortgage insurance',
+                ? 'Estimación rápida: precio y pago inicial'
+                : 'Quick estimate from home price & down payment',
             onTap: () => Navigator.push(
                 context,
                 PageRouteBuilder<void>(
@@ -123,6 +134,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionLoanTypes,
             icon: Icons.swap_horiz_rounded,
             iconSelected: Icons.swap_horiz,
             color: AppTheme.toolRefi,
@@ -138,6 +150,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionMyDecision,
             icon: Icons.trending_up_rounded,
             iconSelected: Icons.trending_up,
             color: AppTheme.toolInvestment,
@@ -153,6 +166,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionLoanTypes,
             icon: Icons.home_rounded,
             iconSelected: Icons.home_rounded,
             color: AppTheme.toolFha,
@@ -171,6 +185,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
             ),
           ),
           _ToolItem(
+            section: sectionLoanTypes,
             icon: Icons.military_tech_rounded,
             iconSelected: Icons.military_tech,
             color: AppTheme.toolVa,
@@ -189,6 +204,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
             ),
           ),
           _ToolItem(
+            section: sectionLoanTypes,
             icon: Icons.agriculture_rounded,
             iconSelected: Icons.agriculture,
             color: AppTheme.toolUsda,
@@ -207,13 +223,16 @@ class _ToolsScreenState extends State<ToolsScreen> {
             ),
           ),
           _ToolItem(
+            section: sectionCosts,
             icon: Icons.shield_rounded,
             iconSelected: Icons.shield,
             color: AppTheme.toolPmiDetail,
-            title: isEs ? 'PMI detallado' : 'PMI Detail',
+            title: isEs
+                ? 'PMI por puntaje crediticio y LTV'
+                : 'PMI by Credit Score & LTV',
             subtitle: isEs
-                ? 'Tasa por puntaje crediticio y LTV'
-                : 'Rate by credit score and LTV',
+                ? 'Tasa exacta según tu puntaje crediticio y LTV'
+                : 'Exact rate based on your credit score and LTV',
             onTap: () => Navigator.push(
               context,
               PageRouteBuilder<void>(
@@ -225,6 +244,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
             ),
           ),
           _ToolItem(
+            section: sectionMyDecision,
             icon: Icons.percent_rounded,
             iconSelected: Icons.percent,
             color: AppTheme.toolPoints,
@@ -243,6 +263,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
             ),
           ),
           _ToolItem(
+            section: sectionCosts,
             icon: Icons.account_balance_rounded,
             iconSelected: Icons.account_balance,
             color: Color(0xFF0D9488), // teal
@@ -260,6 +281,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 )),
           ),
           _ToolItem(
+            section: sectionCosts,
             icon: Icons.receipt_long_rounded,
             iconSelected: Icons.receipt_long,
             color: Color(0xFFEA580C), // deep orange
@@ -276,26 +298,15 @@ class _ToolsScreenState extends State<ToolsScreen> {
                   transitionDuration: AppDuration.base,
                 )),
           ),
-          _ToolItem(
-            icon: Icons.history_rounded,
-            iconSelected: Icons.history,
-            color: AppTheme.toolHistory,
-            title: s.toolHistory,
-            subtitle: s.toolHistorySub,
-            onTap: () {
-              HistoryScreen.refreshNotifier.value++;
-              Navigator.push(
-                context,
-                PageRouteBuilder<void>(
-                  pageBuilder: (_, __, ___) => const HistoryScreen(showAppBar: true),
-                  transitionsBuilder: (_, anim, __, child) =>
-                      FadeTransition(opacity: anim, child: child),
-                  transitionDuration: AppDuration.base,
-                ),
-              );
-            },
-          ),
         ];
+
+        // Group tools by section, preserving the order sections first appear in.
+        final sections = <String>[];
+        final bySection = <String, List<_ToolItem>>{};
+        for (final t in tools) {
+          (bySection[t.section] ??= []).add(t);
+          if (!sections.contains(t.section)) sections.add(t.section);
+        }
 
         return Scaffold(
           bottomNavigationBar: const CalcwiseAdFooter(),
@@ -306,7 +317,10 @@ class _ToolsScreenState extends State<ToolsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: AppSpacing.sm),
-                ...tools.map((t) => _ToolCard(item: t)),
+                for (final section in sections) ...[
+                  _ToolSectionHeader(title: section),
+                  ...bySection[section]!.map((t) => _ToolCard(item: t)),
+                ],
               ],
             ),
           ),
@@ -316,13 +330,34 @@ class _ToolsScreenState extends State<ToolsScreen> {
   }
 }
 
+class _ToolSectionHeader extends StatelessWidget {
+  final String title;
+  const _ToolSectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+        child: Text(
+          title.toUpperCase(),
+          style: TextStyle(
+            fontSize: AppTextSize.xs,
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.primary,
+            letterSpacing: 1.0,
+          ),
+        ),
+      );
+}
+
 class _ToolItem {
+  final String section;
   final IconData icon, iconSelected;
   final Color color;
   final String title, subtitle;
   final VoidCallback onTap;
 
   const _ToolItem({
+    required this.section,
     required this.icon,
     required this.iconSelected,
     required this.color,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
@@ -12,16 +13,17 @@ import '../../../main.dart' show adService, paywallSession, isSpanishNotifier, s
 import 'package:calcwise_core/calcwise_core.dart' hide CurrencyInputFormatter;
 import '../../../l10n/strings_en.dart';
 import '../../../l10n/strings_es.dart';
+import '../../providers/mortgage_providers.dart';
 import '../../widgets/save_scenario_button.dart';
 import '../history/history_screen.dart' show HistoryScreen;
 
-class RefinanceScreen extends StatefulWidget {
+class RefinanceScreen extends ConsumerStatefulWidget {
   const RefinanceScreen({super.key});
   @override
-  State<RefinanceScreen> createState() => _RefinanceScreenState();
+  ConsumerState<RefinanceScreen> createState() => _RefinanceScreenState();
 }
 
-class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalcMixin {
+class _RefinanceScreenState extends ConsumerState<RefinanceScreen> with CalcwiseAutoCalcMixin {
   final _formKey = GlobalKey<FormState>();
   final _balanceCtrl = TextEditingController(text: '300000');
   final _curRateCtrl = TextEditingController(text: '7.0');
@@ -34,6 +36,7 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
   String? _balanceError;
 
   bool _interacted = false;
+  bool _seededFromCalc = false;
 
   double _roundTo(double v, double step) => (v / step).round() * step;
 
@@ -41,6 +44,24 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('refinance');
+    // Pre-fill current balance + rate from the main Calculator tab's inputs,
+    // so the user isn't re-typing numbers they already entered.
+    final input = ref.read(mortgageInputProvider);
+    if (input.homePrice > 0) {
+      final loanAmount = input.homePrice - input.downPaymentDollar;
+      if (loanAmount > 0) {
+        _balanceCtrl.text = loanAmount.toStringAsFixed(0);
+        _seededFromCalc = true;
+      }
+    }
+    if (input.annualRatePct > 0) {
+      _curRateCtrl.text = input.annualRatePct.toStringAsFixed(1);
+      _seededFromCalc = true;
+    }
+    if (input.termYears > 0) {
+      _curYearsCtrl.text = input.termYears.toString();
+      _seededFromCalc = true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _recalculate();
     });
@@ -241,6 +262,14 @@ class _RefinanceScreenState extends State<RefinanceScreen> with CalcwiseAutoCalc
           appBar: AppBar(title: Text(s.refiTitle)),
           body: Column(
             children: [
+              if (_seededFromCalc)
+                CalcSourceBanner(
+                  label: isEs ? 'De tu calculadora:' : 'From your calculator:',
+                  summary:
+                      '${AmountFormatter.ui(double.tryParse(_balanceCtrl.text.replaceAll(',', '')) ?? 0, 'USD')} '
+                      '· ${_curRateCtrl.text}% '
+                      '· ${_curYearsCtrl.text} ${isEs ? 'años' : 'yrs'}',
+                ),
               Expanded(
                   child: CalcwisePageEntrance(child: Center(
                       child: ConstrainedBox(

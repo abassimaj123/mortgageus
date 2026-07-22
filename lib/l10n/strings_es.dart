@@ -9,7 +9,7 @@ class AppStringsES implements AppStrings {
   @override
   final navCalculator = 'Calculadora';
   @override
-  final navSchedule = 'Tabla';
+  final navSchedule = 'Pagos';
   @override
   final navCompare = 'Comparar';
   @override
@@ -344,9 +344,9 @@ class AppStringsES implements AppStrings {
 
   // Tools hub
   @override
-  final navTools = 'Herramientas';
+  final navTools = 'Más cálculos';
   @override
-  final toolsTitle = 'Herramientas';
+  final toolsTitle = 'Más cálculos';
   @override
   final toolExtra = 'Pagos Extra';
   @override

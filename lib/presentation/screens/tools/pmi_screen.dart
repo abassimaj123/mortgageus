@@ -250,7 +250,7 @@ class _PmiScreenState extends ConsumerState<PmiScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(isEs ? 'Calculadora PMI' : 'PMI Calculator'),
+            title: Text(isEs ? 'Estimado de PMI' : 'PMI Estimate'),
           ),
           body: CalcwisePageEntrance(
               child: Column(children: [
